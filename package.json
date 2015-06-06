@@ -1,0 +1,13 @@
+{
+  "name": "moseamp",
+  "version": "0.1.0",
+  "main": "lib/moseamp.js",
+  "devDependencies": {
+    "babel": "^5.4.7",
+    "del": "^1.2.0",
+    "electron-prebuilt": "^0.27.1",
+    "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "gulp-shell": "^0.4.1"
+  }
+}
