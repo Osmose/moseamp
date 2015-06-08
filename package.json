@@ -1,13 +1,20 @@
 {
   "name": "moseamp",
   "version": "0.1.0",
-  "main": "lib/moseamp.js",
+  "main": "lib/app.js",
   "devDependencies": {
-    "babel": "^5.4.7",
     "del": "^1.2.0",
     "electron-prebuilt": "^0.27.1",
+    "glob": "^5.0.3",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
-    "gulp-shell": "^0.4.1"
+    "gulp-filter": "^2.0.2",
+    "gulp-myth": "^1.0.3",
+    "gulp-plumber": "^1.0.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-shell": "^0.4.1",
+    "gulp-util": "^3.0.4",
+    "mkdirp": "^0.5.1",
+    "yargs": "^3.10.0"
   }
 }
