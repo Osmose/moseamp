@@ -37,8 +37,14 @@ gulp.task('build.app', function() {
 
     return gulp.src(files, {base: '.'})
         .pipe(plumber())
+
         .pipe(es6Filter)
-        .pipe(babel({modules: 'common'}))
+        .pipe(babel({
+            modules: 'common',
+            optional: [
+                'es7.asyncFunctions',
+            ]
+        }))
         .pipe(es6Filter.restore())
 
         .pipe(cssFilter)

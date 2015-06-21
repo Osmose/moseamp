@@ -1,23 +1,33 @@
+import {EventEmitter} from 'events';
+
 /**
  * Audio playback tools.
  */
 
 
 export class AudioFile {
-    constructor(name, arrayBuffer, metadata) {
-        this.name = name;
+    constructor(path, arrayBuffer, duration, metadata) {
+        this.path = path;
         this.arrayBuffer = arrayBuffer;
-        this.metadata = metadata;
+        this.duration = duration;
+        this.plugin = null;
+        this.title = path;
+        this.album = 'Unknown';
+        this.artist = 'Unknown';
+
+        for (let key in metadata) {
+            this[key] = metadata[key];
+        }
+    }
+
+    createAudioNode(ctx) {
+        return this.plugin.createAudioNode(ctx, this);
     }
 }
 
 
 /**
  * Handles playback of AudioNodes.
- *
- * Specifically this expects customized AudioNodes that have a `paused`
- * property that can be read from, and will pause the audio streaming
- * from the node when set to true and un-pause it when set to false.
  */
 export class AudioPlayer {
     constructor() {
@@ -25,10 +35,14 @@ export class AudioPlayer {
         this._gainNode = this.ctx.createGain();
         this._gainNode.connect(this.ctx.destination);
 
-        this._currentSource = null;
-        this._paused = false;
-        this._buffer = null;
+        this.currentAudioFile = null;
+        this.currentSource = null;
+        this.startOffset = 0;
+        this.lastStart = null;
+        this._state = 'stopped';
 
+        this.emitter = new EventEmitter();
+        this.playbackInterval = null;
     }
 
     get volume() {
@@ -39,41 +53,101 @@ export class AudioPlayer {
         this._gainNode.gain.value = volume;
     }
 
-    get currentSource() {
-        return this._currentSource;
+    load(audioFile) {
+        this.currentAudioFile = audioFile;
     }
 
-    set currentSource(source) {
-        if (this._currentSource) {
-            this._currentSource.disconnect();
+    get state() {
+        return this._state;
+    }
+
+    set state(newState) {
+        this._state = newState;
+
+        if (newState == 'playing') {
+            this.startPlaybackInterval();
+        } else {
+            this.stopPlaybackInterval();
         }
-        this._currentSource = source;
-        this._currentSource.connect(this._gainNode);
-    }
 
-    get paused() {
-        return this._currentSource ? this._currentSource.paused : false;
-    }
-
-    set paused(paused) {
-        if (this._currentSource) {
-            this._currentSource.paused = paused;
-        }
+        this.emitter.emit('stateChanged', this);
     }
 
     get currentTime() {
-        return this._currentSource ? this._currentSource.currentTime : null;
+        if (this.state == 'paused') {
+            return this.startOffset;
+        } else if (this.state == 'playing') {
+            return this.ctx.currentTime - this.lastStart + this.startOffset;
+        } else {
+            return 0;
+        }
     }
 
-    get duration() {
-        return this._currentSource ? this._currentSource.duration : null;
+    set currentTime(time) {
+        this.startOffset = time;
+
+        if (this.currentSource) {
+            this.currentSource.onended = null;
+            this.currentSource.stop();
+            this.currentSource = null;
+
+            if (this.state == 'playing') {
+                this.play();
+            }
+        }
     }
 
-    load(source) {
-        this.currentSource = source;
+    async play() {
+        if (!this.currentSource) {
+            this.currentSource = await this.currentAudioFile.createAudioNode(this.ctx);
+            this.currentSource.connect(this._gainNode);
+            this.currentSource.onended = () => {
+                this.currentSource = null;
+                this.startOffset = 0;
+                this.state = 'stopped';
+            };
+        }
+
+        this.lastStart = this.ctx.currentTime;
+        this.currentSource.start(0, this.startOffset % this.currentAudioFile.duration);
+        this.state = 'playing';
     }
 
-    play() {
-        this.currentSource.start(0);
+    pause() {
+        this.currentSource.onended = null;
+        this.currentSource.stop();
+        this.currentSource = null;
+        this.startOffset += this.ctx.currentTime - this.lastStart;
+        this.state = 'paused';
+    }
+
+    stop() {
+        this.currentSource.onended = null;
+        this.currentSource.stop();
+        this.currentSource = null;
+        this.startOffset = 0;
+        this.state = 'stopped';
+    }
+
+    on(event, listener) {
+        this.emitter.on(event, listener);
+    }
+
+    playbackIntervalCallback() {
+        this.emitter.emit('playback', this);
+    }
+
+    startPlaybackInterval() {
+        if (!this.playbackInterval) {
+            let cb = this.playbackIntervalCallback.bind(this);
+            this.playbackInterval = setInterval(cb, 250);
+        }
+    }
+
+    stopPlaybackInterval() {
+        if (this.playbackInterval) {
+            clearTimeout(this.playbackInterval);
+            this.playbackInterval = null;
+        }
     }
 }
