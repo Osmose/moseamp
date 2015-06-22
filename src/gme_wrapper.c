@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "gme.h"
-
-const char* info_fmt = "{\"trackCount\": %d, \"length\": %d, \"system\": \"%s\", "
-                       "\"game\": \"%s\", \"song\": \"%s\", \"author\": \"%s\", "
-                       "\"copyright\": \"%s\", \"comment\": \"%s\", \"dumper\": \"%s\"}";
+#include "json.h"
 
 static Music_Emu* emu;
+static Music_Emu* infoEmu;
+static JsonNode* json_node;
 static track_info_t track_info;
 static char json_str[2048];
 static short audio_buffer[8192 * 2];
@@ -32,11 +31,19 @@ short* generate_sound_data() {
     return audio_buffer;
 }
 
-char* song_info(int track) {
-    handle_error(gme_track_info(emu, &track_info, track));
+char* song_info(char* filename, int track) {
+    json_node = json_mkobject();
+    handle_error(gme_open_file(filename, &infoEmu, 44100));
+    handle_error(gme_track_info(infoEmu, &track_info, track));
 
-    sprintf(json_str, info_fmt, track_info.track_count, track_info.length,
-            track_info.system, track_info.game, track_info.song, track_info.author,
-            track_info.copyright, track_info.comment, track_info.dumper);
-    return json_str;
+    json_append_member(json_node, "trackCount", json_mknumber(track_info.track_count));
+    json_append_member(json_node, "length", json_mknumber(track_info.length));
+    json_append_member(json_node, "system", json_mkstring(track_info.system));
+    json_append_member(json_node, "game", json_mkstring(track_info.game));
+    json_append_member(json_node, "song", json_mkstring(track_info.song));
+    json_append_member(json_node, "author", json_mkstring(track_info.author));
+    json_append_member(json_node, "copyright", json_mkstring(track_info.copyright));
+    json_append_member(json_node, "comment", json_mkstring(track_info.comment));
+    json_append_member(json_node, "dumper", json_mkstring(track_info.dumper));
+    return json_stringify(json_node, "\t");
 }

@@ -69,7 +69,9 @@ gulp.task('build.emscripten', function(done) {
 
     var gme_dir = path.join('src', 'game_music_emu', 'gme');
     var gme_files = glob.sync(gme_dir + '/*.cpp');
-    var source_files = ['src/gme_wrapper.c'].concat(gme_files);
+    var json_dir = path.join('src', 'json', 'ccan', 'json');
+    var json_files = glob.sync(json_dir + '/*.c');
+    var source_files = ['src/gme_wrapper.c'].concat(gme_files, json_files);
     var outfile = path.join('build', 'static', 'js', 'gme_wrapper.js');
 
     var flags = [
@@ -77,6 +79,7 @@ gulp.task('build.emscripten', function(done) {
         '-s', 'EXPORTED_FUNCTIONS=@src/exported_functions.json',
         '-O1',
         '-I' + gme_dir,
+        '-I' + json_dir,
         '-o',  outfile,
 
         // GCC/Clang arguments to shut up about warnings in code I didn't

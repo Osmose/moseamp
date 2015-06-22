@@ -6,18 +6,20 @@ let dialog = remote.require('dialog');
 import React from './js/lib/react.js';
 
 import * as basePlugin from './js/plugins/base.js';
+import * as gmePlugin from './js/plugins/gme.js';
 import {AudioPlayer, AudioFile} from './js/audio.js';
 import {PlayerComponent} from './js/components.js';
 
 
 // Required for Emscripten.
-window.Module = {
-    canvas: document.getElementById('emscripten')
-};
+if (!Module) {
+    window.Module = {};
+}
+Module.canvas = document.getElementById('emscripten');
 
 
 let currentAudioFile = null;
-let plugins = [basePlugin];
+let plugins = [basePlugin, gmePlugin];
 let audioPlayer = new AudioPlayer();
 audioPlayer.volume = 0.2;
 
@@ -33,7 +35,7 @@ for (let plugin of plugins) {
 
 
 function loadPath(path) {
-    let ext = extname(path).slice(1);
+    let ext = extname(path).slice(1).toLowerCase();
     let plugin = plugins.find((p) => p.supportedExtensions.indexOf(ext) !== -1);
     if (!plugin) {
         alert('Unsupported filetype');
@@ -48,14 +50,14 @@ function loadPath(path) {
 
 
 function openFile() {
-    let paths = dialog.showOpenDialog({
+    dialog.showOpenDialog({
         filters: openDialogFilters,
         properties: ['openFile'],
+    }, (paths) => {
+        if (paths && paths.length > 0) {
+            loadPath(paths[0]);
+        }
     });
-
-    if (paths && paths.length > 0) {
-        loadPath(paths[0]);
-    }
 }
 
 function play() {
@@ -72,7 +74,7 @@ function seek(percentage) {
 
 
 // Let's get some React goin'
-React.render(
+let playerUI = React.render(
     <PlayerComponent audioPlayer={audioPlayer}
                      onOpen={openFile}
                      onPause={pause}
@@ -80,3 +82,8 @@ React.render(
                      onSeek={seek} />,
     document.getElementById('app')
 );
+
+
+audioPlayer.on('load', (audioPlayer, audioFile) => {
+    playerUI.setState({currentPlugin: audioFile.plugin});
+});

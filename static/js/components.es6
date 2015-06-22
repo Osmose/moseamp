@@ -1,3 +1,5 @@
+import ipc from 'ipc';
+
 import $ from './lib/jquery.js';
 import moment from './lib/moment.js';
 import React from './lib/react.js';
@@ -14,6 +16,7 @@ export class PlayerComponent extends React.Component {
             audioFile: null,
             currentTime: 0,
             playerState: audioPlayer.paused,
+            currentPlugin: null,
         };
 
         audioPlayer.on('playback', (audioPlayer) => {
@@ -32,6 +35,22 @@ export class PlayerComponent extends React.Component {
     }
 
     render() {
+        let pluginUI = null;
+        if (this.state.currentPlugin) {
+            let PluginComponent = this.state.currentPlugin.PluginComponent;
+            if (PluginComponent) {
+                pluginUI = (
+                    <PluginComponent audioFile={this.state.audioFile}
+                                     plugin={this.state.currentPlugin} />
+                );
+                ipc.send('addPluginHeight', PluginComponent.height);
+            }
+        }
+
+        if (!pluginUI) {
+            ipc.send('removePluginHeight');
+        }
+
         return (
             <div className="player">
                 <div className="audiofile-info-controls">
@@ -43,6 +62,7 @@ export class PlayerComponent extends React.Component {
                               onPause={this.props.onPause}
                               onPlay={this.props.onPlay} />
                 </div>
+                {pluginUI}
             </div>
         );
     }
@@ -85,21 +105,28 @@ class ProgressBar extends React.Component {
     render() {
         let currentTime = this.props.currentTime;
         let duration = this.props.duration;
-        let barWidth = `${Math.round((currentTime / duration) * 100)}%`;
+        let disabled = duration === null;
+        let barWidth = disabled ? '100%' : `${Math.round((currentTime / duration) * 100)}%`;
 
         return (
-            <div className="progress-bar">
+            <div className={`progress-bar ${disabled ? 'disabled' : null}`}>
                 <span className="bar" ref="bar" onClick={this.handleSeek.bind(this)}>
                     <span className="filled" style={{width: barWidth}} />
                 </span>
                 <span className="time">
-                  {secondsToTime(currentTime)} / {secondsToTime(duration)}
+                  {disabled
+                      ? secondsToTime(currentTime)
+                      : `${secondsToTime(currentTime)} / ${secondsToTime(duration)}`}
                 </span>
             </div>
         );
     }
 
     handleSeek(event) {
+        if (this.props.duration === null) {
+            return;
+        }
+
         let $bar = $(React.findDOMNode(this.refs.bar));
         let relativeMouseX = event.pageX - $bar.offset().left;
         let percentage = relativeMouseX / $bar.width();
@@ -134,7 +161,7 @@ class Controls extends React.Component {
 }
 
 
-class FontAwesome extends React.Component {
+export class FontAwesome extends React.Component {
     render() {
         return (
             <span className={`fa fa-${this.props.name}`} />

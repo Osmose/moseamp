@@ -1,8 +1,11 @@
 let app = require('app');
 let BrowserWindow = require('browser-window');
+let ipc = require('ipc');
 let Menu = require('menu');
 
 let mainWindow = null;
+let baseHeight = 150;
+let baseWidth = 300;
 
 
 // Quit when all windows are closed.
@@ -11,6 +14,16 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+
+ipc.on('addPluginHeight', (event, height) => {
+  mainWindow.setSize(baseWidth, baseHeight + height);
+});
+
+ipc.on('removePluginHeight', (event) => {
+  mainWindow.setSize(baseWidth, baseHeight);
+});
+
 
 app.on('ready', function() {
   Menu.setApplicationMenu(Menu.buildFromTemplate([
@@ -35,7 +48,13 @@ app.on('ready', function() {
     }
   ]));
 
-  mainWindow = new BrowserWindow({width: 300, height: 150});
+  mainWindow = new BrowserWindow({
+    width: baseWidth,
+    height: baseHeight,
+    'use-content-size': true,
+    resizable: false,
+    'accept-first-mouse': true,
+  });
 
   mainWindow.loadUrl(`file://${__dirname}/../static/index.html`);
 

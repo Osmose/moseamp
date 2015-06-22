@@ -6,18 +6,19 @@ import {EventEmitter} from 'events';
 
 
 export class AudioFile {
-    constructor(path, arrayBuffer, duration, metadata) {
-        this.path = path;
+    constructor(filename, arrayBuffer, duration, metadata) {
+        this.filename = filename;
         this.arrayBuffer = arrayBuffer;
         this.duration = duration;
         this.plugin = null;
-        this.title = path;
-        this.album = 'Unknown';
-        this.artist = 'Unknown';
 
         for (let key in metadata) {
             this[key] = metadata[key];
         }
+
+        this.title = this.title || filename;
+        this.album = this.album || 'Unknown';
+        this.artist = this.artist || 'Unknown';
     }
 
     createAudioNode(ctx) {
@@ -55,6 +56,8 @@ export class AudioPlayer {
 
     load(audioFile) {
         this.currentAudioFile = audioFile;
+        this.stop();
+        this.emitter.emit('load', this, audioFile);
     }
 
     get state() {
@@ -114,17 +117,21 @@ export class AudioPlayer {
     }
 
     pause() {
-        this.currentSource.onended = null;
-        this.currentSource.stop();
-        this.currentSource = null;
+        if (this.currentSource) {
+            this.currentSource.onended = null;
+            this.currentSource.stop();
+            this.currentSource = null;
+        }
         this.startOffset += this.ctx.currentTime - this.lastStart;
         this.state = 'paused';
     }
 
     stop() {
-        this.currentSource.onended = null;
-        this.currentSource.stop();
-        this.currentSource = null;
+        if (this.currentSource) {
+            this.currentSource.onended = null;
+            this.currentSource.stop();
+            this.currentSource = null;
+        }
         this.startOffset = 0;
         this.state = 'stopped';
     }

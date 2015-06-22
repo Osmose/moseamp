@@ -46,7 +46,7 @@ body {
 -------------------------------------------------- */
 .player {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     height: 100vh;
     width: 100vw;
     padding: 10px;
@@ -54,8 +54,13 @@ body {
 
 .audiofile-info-controls {
     display: flex;
-    flex: 1;
+    flex: 0 108px;
     flex-direction: column;
+}
+
+.plugin-ui {
+    margin-top: 10px;
+    flex: 1;
 }
 
 .audiofile-info {
@@ -171,7 +176,7 @@ body {
     min-width: 3px;
 }
 
-.audiofile-info .progress-bar .bar .filled::after {
+.audiofile-info .progress-bar:not(.disabled) .bar .filled::after {
     content: '';
     border: 2px solid var(--progress-bar-handle-border-color);
     background: var(--progress-bar-handle-background);
@@ -222,4 +227,35 @@ body {
 .controls .button:focus {
     outline: none;
     background: color(var(--button-background) shade(10%));
+}
+
+
+/* @gme-plugin
+-------------------------------------------------- */
+.gme-plugin {
+    display: flex;
+    flex-direction: row;
+}
+
+.gme-info {
+    flex: 2;
+    padding: 5px;
+    border: 1px solid var(--info-border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 1px var(--info-outer-shadow-color),
+                inset 0 1px var(--info-inner-shadow-color);
+    background: var(--info-background);
+    margin-right: 10px;
+    display: flex;
+    direction: column;
+}
+
+.gme-info .current-track {
+    flex: 1;
+    line-height: 20px;
+}
+
+.gme-controls {
+    flex: 1;
 }
