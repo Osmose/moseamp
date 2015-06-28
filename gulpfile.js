@@ -33,6 +33,7 @@ gulp.task('build.app', function() {
     var files = [
         'lib/**/*',
         'static/**/*',
+        'dot-moseamp/**/*',
         'package.json',
     ];
 

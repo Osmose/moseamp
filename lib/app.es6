@@ -1,7 +1,10 @@
-let app = require('app');
-let BrowserWindow = require('browser-window');
-let ipc = require('ipc');
-let Menu = require('menu');
+import app from 'app';
+import BrowserWindow from 'browser-window';
+import ipc from 'ipc';
+import Menu from 'menu';
+
+import * as config from './config';
+
 
 let mainWindow = null;
 let baseHeight = 150;
@@ -26,6 +29,8 @@ ipc.on('removePluginHeight', (event) => {
 
 
 app.on('ready', function() {
+  config.load();
+
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
       label: 'MoseAmp',
