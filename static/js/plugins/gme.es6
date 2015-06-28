@@ -2,17 +2,20 @@ import {basename} from 'path';
 
 import React from '../lib/react.js';
 import {AudioFile} from '../audio.js';
-import {FontAwesome} from '../components.js';
+import {FontAwesome, PluginContainer} from '../components.js';
 import {toArrayBuffer} from '../util.js';
 
 
-let gmeOpenFile = Module.cwrap('open_file', null, ['string', 'number']);
-let gmeGenerateSoundData = Module.cwrap('generate_sound_data', 'number');
-let gmeSongInfo = Module.cwrap('song_info', 'string', ['string', 'number']);
-let gmeStartTrack = Module.cwrap('start_track', null, ['number']);
-
-
-let currentTrack = 0;
+let gme = {
+    openFile: Module.cwrap('open_file', null, ['string', 'number']),
+    generateSoundData: Module.cwrap('generate_sound_data', 'number'),
+    songInfo: Module.cwrap('song_info', 'string', ['string', 'number']),
+    startTrack: Module.cwrap('start_track', null, ['number']),
+    seek: Module.cwrap('seek', null, ['number']),
+    currentTime: Module.cwrap('current_time', 'number'),
+    trackHasEnded: Module.cwrap('track_has_ended', 'number'),
+    currentTrack: Module.cwrap('current_track', 'number'),
+}
 
 
 export let supportedExtensions = ['ay', 'gbs', 'gym', 'hes', 'kss', 'nsf',
@@ -38,7 +41,7 @@ export function createAudioFile(path) {
             encoding: 'binary'
         });
 
-        let songInfo = JSON.parse(gmeSongInfo(filename, 0));
+        let songInfo = JSON.parse(gme.songInfo(filename, 0));
         songInfo.title = songInfo.game;
         if (songInfo.author) {
             songInfo.artist = songInfo.author;
@@ -50,23 +53,37 @@ export function createAudioFile(path) {
         resolve(new AudioFile(
             basename(path),
             toArrayBuffer(buffer),
-            null,
+            songInfo.length / 1000,
             songInfo
         ));
     });
 }
 
 
+export function onLoad(audioFile) {
+    gme.openFile(audioFile.filename, 0);
+}
+
+
 class GMEAudioNode {
     constructor(ctx, audioFile) {
         this.audioFile = audioFile;
-        this.playing = false;
+        this.playing = true;
 
         this.scriptProcessor = ctx.createScriptProcessor(8192, 1, 2);
         this.scriptProcessor.onaudioprocess = (e) => {
-            var left = e.outputBuffer.getChannelData(0);
-            var right = e.outputBuffer.getChannelData(1);
-            this.synthCallback(left, right, 8192);
+            if (this.playing) {
+                if (gme.trackHasEnded()) {
+                    this.playing = false;
+                    if (this.onended) {
+                        this.onended();
+                    }
+                } else {
+                    let left = e.outputBuffer.getChannelData(0);
+                    let right = e.outputBuffer.getChannelData(1);
+                    this.synthCallback(left, right, 8192);
+                }
+            }
         };
 
         this.gainNode = ctx.createGain();
@@ -75,32 +92,31 @@ class GMEAudioNode {
     }
 
     synthCallback(left, right, bufferSize) {
-        if (this.playing) {
-            var ptr = gmeGenerateSoundData();
-            for (var i = 0; i < bufferSize; i++) {
-                left[i] = Module.getValue(ptr + (i * 4), 'i16');
-                right[i] = Module.getValue(ptr + (i * 4) + 2, 'i16');
-            }
-        } else {
-            for (var i = 0; i < bufferSize; i++) {
-                left[i] = 0;
-                right[i] = 0;
-            }
+        var ptr = gme.generateSoundData();
+        for (var i = 0; i < bufferSize; i++) {
+            left[i] = Module.getValue(ptr + (i * 4), 'i16');
+            right[i] = Module.getValue(ptr + (i * 4) + 2, 'i16');
         }
     }
 
-    start() {
-        gmeOpenFile(this.audioFile.filename, 0);
-        this.playing = true;
+    get currentTime() {
+        return gme.currentTime() / 1000;
+    }
+
+    start(delay, time) {
+        gme.seek(time * 1000);
     }
 
     stop() {
         this.playing = false;
-        this.gainNode.disconnect();
     }
 
     connect(destination) {
         this.gainNode.connect(destination);
+    }
+
+    disconnect() {
+        this.gainNode.disconnect();
     }
 }
 
@@ -110,7 +126,7 @@ export class PluginComponent extends React.Component {
         super(props);
 
         this.state = {
-            currentTrack: currentTrack
+            currentTrack: gme.currentTrack()
         };
     }
 
@@ -121,7 +137,7 @@ export class PluginComponent extends React.Component {
         }
 
         return (
-            <div className="plugin-ui gme-plugin">
+            <PluginContainer name="Game Music Emulator Controls" className="gme-plugin">
                 <div className="gme-info">
                     <div className="current-track">
                         Track: {this.state.currentTrack + 1} / {audioFile.trackCount}
@@ -137,24 +153,24 @@ export class PluginComponent extends React.Component {
                         <FontAwesome name="step-forward" />
                     </button>
                 </div>
-            </div>
+            </PluginContainer>
         );
     }
 
     handlePreviousTrack() {
+        let currentTrack = gme.currentTrack();
         if (currentTrack > 0) {
-            currentTrack--;
+            gme.startTrack(currentTrack + 1);
         }
-        gmeStartTrack(currentTrack);
-        this.setState({currentTrack: currentTrack});
+        this.setState({currentTrack: gme.currentTrack()});
     }
 
     handleNextTrack() {
+        let currentTrack = gme.currentTrack();
         if (currentTrack < this.props.audioFile.trackCount - 1) {
-            currentTrack++;
+            gme.startTrack(currentTrack + 1);
         }
-        gmeStartTrack(currentTrack);
-        this.setState({currentTrack: currentTrack});
+        this.setState({currentTrack: gme.currentTrack()});
     }
 }
-PluginComponent.height = 42;
+PluginComponent.height = 67;

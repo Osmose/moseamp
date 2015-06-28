@@ -65,13 +65,13 @@ gulp.task('build.babelPolyfill', function() {
  * Compile the C libraries with emscripten.
  */
 gulp.task('build.emscripten', function(done) {
-    var emcc = process.env.EMCC_BIN || argv.emcc || 'emcc';
+    var empp = process.env.EMPP_BIN || argv.empp || 'em++';
 
     var gme_dir = path.join('src', 'game_music_emu', 'gme');
     var gme_files = glob.sync(gme_dir + '/*.cpp');
     var json_dir = path.join('src', 'json', 'ccan', 'json');
     var json_files = glob.sync(json_dir + '/*.c');
-    var source_files = ['src/gme_wrapper.c'].concat(gme_files, json_files);
+    var source_files = ['src/gme_wrapper.cpp'].concat(gme_files, json_files);
     var outfile = path.join('build', 'static', 'js', 'gme_wrapper.js');
 
     var flags = [
@@ -81,6 +81,7 @@ gulp.task('build.emscripten', function(done) {
         '-I' + gme_dir,
         '-I' + json_dir,
         '-o',  outfile,
+        '-s', 'ASSERTIONS=1',
 
         // GCC/Clang arguments to shut up about warnings in code I didn't
         // write. :D
@@ -92,7 +93,7 @@ gulp.task('build.emscripten', function(done) {
 
     gutil.log('Compiling via emscripten to ' + outfile);
     mkdirp.sync(path.join('build', 'static', 'js'));
-    var build_proc = spawn(emcc, args, {stdio: 'inherit'});
+    var build_proc = spawn(empp, args, {stdio: 'inherit'});
     build_proc.on('exit', function() {
         done();
     });

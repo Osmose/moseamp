@@ -1,1 +1,10 @@
-["_open_file", "_generate_sound_data", "_song_info", "_start_track"]
+[
+    "_open_file",
+    "_generate_sound_data",
+    "_song_info",
+    "_start_track",
+    "_seek",
+    "_current_time",
+    "_track_has_ended",
+    "_current_track"
+]

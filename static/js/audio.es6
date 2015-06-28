@@ -46,6 +46,13 @@ export class AudioPlayer {
         this.playbackInterval = null;
     }
 
+    removeCurrentSource() {
+        this.currentSource.onended = null;
+        this.currentSource.stop();
+        this.currentSource.disconnect();
+        this.currentSource = null;
+    }
+
     get volume() {
         return this._gainNode.gain.value;
     }
@@ -57,7 +64,7 @@ export class AudioPlayer {
     load(audioFile) {
         this.currentAudioFile = audioFile;
         this.stop();
-        this.emitter.emit('load', this, audioFile);
+        this.emitter.emit('load', audioFile);
     }
 
     get state() {
@@ -90,9 +97,7 @@ export class AudioPlayer {
         this.startOffset = time;
 
         if (this.currentSource) {
-            this.currentSource.onended = null;
-            this.currentSource.stop();
-            this.currentSource = null;
+            this.removeCurrentSource();
 
             if (this.state == 'playing') {
                 this.play();
@@ -118,9 +123,7 @@ export class AudioPlayer {
 
     pause() {
         if (this.currentSource) {
-            this.currentSource.onended = null;
-            this.currentSource.stop();
-            this.currentSource = null;
+            this.removeCurrentSource();
         }
         this.startOffset += this.ctx.currentTime - this.lastStart;
         this.state = 'paused';
@@ -128,9 +131,7 @@ export class AudioPlayer {
 
     stop() {
         if (this.currentSource) {
-            this.currentSource.onended = null;
-            this.currentSource.stop();
-            this.currentSource = null;
+            this.removeCurrentSource();
         }
         this.startOffset = 0;
         this.state = 'stopped';

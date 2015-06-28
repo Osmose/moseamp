@@ -49,6 +49,13 @@ function loadPath(path) {
 }
 
 
+audioPlayer.on('load', (audioFile) => {
+    if (audioFile.plugin.onLoad) {
+        audioFile.plugin.onLoad(audioFile);
+    }
+})
+
+
 function openFile() {
     dialog.showOpenDialog({
         filters: openDialogFilters,
@@ -60,13 +67,16 @@ function openFile() {
     });
 }
 
+
 function play() {
     audioPlayer.play();
 }
 
+
 function pause() {
     audioPlayer.pause();
 }
+
 
 function seek(percentage) {
     audioPlayer.currentTime = audioPlayer.currentAudioFile.duration * percentage;
@@ -84,6 +94,6 @@ let playerUI = React.render(
 );
 
 
-audioPlayer.on('load', (audioPlayer, audioFile) => {
+audioPlayer.on('load', (audioFile) => {
     playerUI.setState({currentPlugin: audioFile.plugin});
 });

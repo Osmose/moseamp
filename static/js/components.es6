@@ -105,25 +105,31 @@ class ProgressBar extends React.Component {
     render() {
         let currentTime = this.props.currentTime;
         let duration = this.props.duration;
-        let disabled = duration === null;
-        let barWidth = disabled ? '100%' : `${Math.round((currentTime / duration) * 100)}%`;
+        let barWidth = (this.disabled
+            ? '100%'
+            : `${Math.round((currentTime / duration) * 100)}%`);
 
         return (
-            <div className={`progress-bar ${disabled ? 'disabled' : null}`}>
+            <div className={`progress-bar ${this.disabled ? 'disabled' : null}`}>
                 <span className="bar" ref="bar" onClick={this.handleSeek.bind(this)}>
                     <span className="filled" style={{width: barWidth}} />
                 </span>
                 <span className="time">
-                  {disabled
-                      ? secondsToTime(currentTime)
-                      : `${secondsToTime(currentTime)} / ${secondsToTime(duration)}`}
+                  {this.disabled
+                    ? secondsToTime(currentTime)
+                    : `${secondsToTime(currentTime)} / ${secondsToTime(duration)}`}
                 </span>
             </div>
         );
     }
 
+    get disabled() {
+        let duration = this.props.duration;
+        return duration === null || duration <= 0;
+    }
+
     handleSeek(event) {
-        if (this.props.duration === null) {
+        if (this.disabled) {
             return;
         }
 
@@ -165,6 +171,22 @@ export class FontAwesome extends React.Component {
     render() {
         return (
             <span className={`fa fa-${this.props.name}`} />
+        );
+    }
+}
+
+
+export class PluginContainer extends React.Component {
+    render() {
+        return (
+            <div className="plugin-container">
+                <div className="plugin-title-bar">
+                    <span className="plugin-title">{this.props.name}</span>
+                </div>
+                <div className={this.props.className}>
+                    {this.props.children}
+                </div>
+            </div>
         );
     }
 }

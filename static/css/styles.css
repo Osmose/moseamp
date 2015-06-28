@@ -58,7 +58,7 @@ body {
     flex-direction: column;
 }
 
-.plugin-ui {
+.plugin-container {
     margin-top: 10px;
     flex: 1;
 }
@@ -227,6 +227,25 @@ body {
 .controls .button:focus {
     outline: none;
     background: color(var(--button-background) shade(10%));
+}
+
+
+/* @plugins
+-------------------------------------------------- */
+.plugin-title-bar {
+    overflow: visible;
+    height: 1px;
+    border-top: 1px solid color(var(--player-background) shade(20%));
+    box-shadow: 0 1px color(var(--player-background) tint(20%));
+    text-align: center;
+    margin: 5px 0 16px;
+}
+
+.plugin-title {
+    background: var(--player-background);
+    padding: 4px;
+    position: relative;
+    top: -6px;
 }
 
 
