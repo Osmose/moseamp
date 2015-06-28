@@ -1,6 +1,7 @@
 var argv = require('yargs').argv;
 var babel = require('gulp-babel')
 var del = require('del');
+var electron = require('gulp-atom-electron');
 var glob = require('glob');
 var gulp = require('gulp');
 var gulpFilter = require('gulp-filter');
@@ -23,7 +24,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('clean', function(cb) {
-    del('build/**/*', cb);
+    del(['build/**/*', 'package/**/*'], cb);
 });
 
 gulp.task('build.app', function() {
@@ -100,3 +101,13 @@ gulp.task('build.emscripten', function(done) {
 });
 
 gulp.task('build', ['build.app', 'build.emscripten', 'build.babelPolyfill'])
+
+gulp.task('package.darwin', ['build'], function() {
+    return gulp.src('build/**')
+        .pipe(electron({
+            version: '0.27.1',
+            platform: 'darwin',
+            darwinIcon: 'resources/mac/icon.icns'
+        }))
+        .pipe(electron.zfsdest('package/darwin/Moseamp.zip'));
+});

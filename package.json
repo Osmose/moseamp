@@ -1,5 +1,5 @@
 {
-  "name": "moseamp",
+  "name": "Moseamp",
   "version": "0.1.0",
   "main": "lib/app.js",
   "repository": "https://github.com/osmose/moseamp",
@@ -8,6 +8,7 @@
     "electron-prebuilt": "^0.27.1",
     "glob": "^5.0.3",
     "gulp": "^3.8.11",
+    "gulp-atom-electron": "^0.12.0",
     "gulp-babel": "^5.1.0",
     "gulp-filter": "^2.0.2",
     "gulp-myth": "^1.0.3",
@@ -17,7 +18,9 @@
     "gulp-util": "^3.0.4",
     "lodash": "^3.9.3",
     "mkdirp": "^0.5.1",
-    "musicmetadata": "^1.0.1",
     "yargs": "^3.10.0"
+  },
+  "dependencies": {
+    "musicmetadata": "^1.0.1"
   }
 }
