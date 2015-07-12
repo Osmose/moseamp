@@ -8,6 +8,7 @@ import React from 'moseamp/lib/react';
 
 import {AudioPlayer} from 'moseamp/audio';
 import {PlayerComponent} from 'moseamp/components';
+import * as config from 'moseamp/config';
 import {getAudioFileForExtension, getOpenDialogFilters} from 'moseamp/formats';
 import * as packages from 'moseamp/packages';
 
@@ -58,17 +59,12 @@ function seek(percentage) {
  * Initialize the app itself. Should only ever be called once.
  */
 export function start() {
-    // Setup Module global for emscripten if necessary.
-    if (!Module) {
-        window.Module = {};
-    }
-    Module.canvas = document.getElementById('emscripten');
-
     // audioPlayer handles the Web Audio API.
     audioPlayer = new AudioPlayer();
     audioPlayer.volume = 0.2;
 
-    // Load default and user packages.
+    // Load configuration and packages.
+    config.load();
     packages.load();
 
     // Let's get some React goin'

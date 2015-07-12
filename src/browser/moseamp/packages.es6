@@ -1,11 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
-import remote from 'remote';
 
+import {CONFIG_DIR} from 'moseamp/config';
 import {absReaddirSync} from 'moseamp/util';
 
 
-const CONFIG_DIR = remote.require('./config').CONFIG_DIR;
 const PACKAGE_DIR = path.join(CONFIG_DIR, 'packages');
 const DEFAULT_PACKAGE_DIR = path.join(__dirname, 'packages');
 

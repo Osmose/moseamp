@@ -1,33 +1,29 @@
-import app from 'app';
-import BrowserWindow from 'browser-window';
-import ipc from 'ipc';
-import Menu from 'menu';
-
-import * as config from './config';
+var app = require('app');
+var BrowserWindow = require('browser-window');
+var ipc = require('ipc');
+var Menu = require('menu');
 
 
-let mainWindow = null;
-let baseHeight = 150 - 22;
-let baseWidth = 300;
+var mainWindow = null;
+var baseHeight = 150 - 22;
+var baseWidth = 300;
 
 
 // Quit when all windows are closed.
-app.on('window-all-closed', () => {
+app.on('window-all-closed', function() {
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
 
-ipc.on('resizeHeight', (event, height) => {
+ipc.on('resizeHeight', function(event, height) {
     // Accommodate titlebar.
     mainWindow.setSize(baseWidth, height + 22);
 });
 
 
 app.on('ready', function() {
-    config.load();
-
     Menu.setApplicationMenu(Menu.buildFromTemplate([
         {
             label: 'MoseAmp',
@@ -35,14 +31,14 @@ app.on('ready', function() {
                 {
                     label: 'Open DevTools',
                     accelerator: 'Command+K',
-                    click: () => {
+                    click: function() {
                       mainWindow.openDevTools({detach: true});
                     }
                 },
                 {
                     label: 'Quit',
                     accelerator: 'Command+Q',
-                    click: () => {
+                    click: function() {
                       app.quit();
                     }
                 }

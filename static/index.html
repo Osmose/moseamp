@@ -7,18 +7,33 @@
     <title>Moseamp</title>
 
     <link rel="stylesheet" type="text/css" href="css/reset.css">
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" type="text/css" href="css/font-awesome.css">
   </head>
   <body>
     <main id="app"></main>
 
-    <canvas id="emscripten"></canvas>
-
-    <script src="../src/browser/moseamp/lib/gme_wrapper.js"></script>
-    <script src="../src/browser/moseamp/lib/babel-browser-polyfill.js"></script>
     <script>
+      var fs = require('fs');
+      var myth = require('myth')
       var path = require('path');
+
+      require("babel/register")({
+        modules: 'common',
+        optional: [
+          'es7.asyncFunctions',
+        ],
+        ignore: [
+          /lib\/.*\.js$/
+        ]
+      });
+
+      // Support loading CSS files via require.
+      require.extensions['.css'] = function(module, filename) {
+        var styleNode = document.createElement('style');
+        styleNode.textContent = myth(fs.readFileSync(filename, 'utf8'));
+        document.head.appendChild(styleNode);
+      }
+      require('./css/styles.css');
 
       // Add src/browser to global paths so that we can import moseamp things
       // with paths like 'moseamp/audio'.

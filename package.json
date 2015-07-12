@@ -4,25 +4,16 @@
   "main": "src/app.js",
   "repository": "https://github.com/osmose/moseamp",
   "devDependencies": {
-    "del": "^1.2.0",
-    "electron-prebuilt": "^0.29.2",
-    "glob": "^5.0.3",
     "gulp": "^3.8.11",
     "gulp-atom-electron": "^0.12.0",
-    "gulp-babel": "^5.1.0",
-    "gulp-filter": "^2.0.2",
-    "gulp-myth": "^1.0.3",
-    "gulp-plumber": "^1.0.1",
-    "gulp-rename": "^1.2.2",
     "gulp-shell": "^0.4.1",
-    "gulp-util": "^3.0.4",
-    "lodash": "^3.9.3",
-    "mkdirp": "^0.5.1",
-    "yargs": "^3.10.0"
+    "electron-prebuilt": "^0.29.2"
   },
   "dependencies": {
+    "babel": "^5.6.14",
     "fs-extra": "^0.20.1",
     "musicmetadata": "^1.0.1",
+    "myth": "^1.5.0",
     "osenv": "^0.1.2",
     "season": "^5.3.0"
   }
