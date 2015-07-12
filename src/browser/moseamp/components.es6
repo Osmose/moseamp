@@ -1,10 +1,7 @@
-import ipc from 'ipc';
+import $ from 'moseamp/lib/jquery';
+import React from 'moseamp/lib/react';
 
-import $ from './lib/jquery.js';
-import moment from './lib/moment.js';
-import React from './lib/react.js';
-
-import {secondsToTime} from './util.js';
+import {secondsToTime} from 'moseamp/util';
 
 
 export class PlayerComponent extends React.Component {
@@ -16,17 +13,16 @@ export class PlayerComponent extends React.Component {
             audioFile: null,
             currentTime: 0,
             playerState: audioPlayer.paused,
-            currentPlugin: null,
         };
 
-        audioPlayer.on('playback', (audioPlayer) => {
+        audioPlayer.on('playback', () => {
             this.setState({
                 audioFile: audioPlayer.currentAudioFile,
                 currentTime: audioPlayer.currentTime
             });
         });
 
-        audioPlayer.on('stateChanged', (audioPlayer) => {
+        audioPlayer.on('stateChanged', () => {
             this.setState({
                 playerState: audioPlayer.state,
                 currentTime: audioPlayer.currentTime
@@ -35,22 +31,6 @@ export class PlayerComponent extends React.Component {
     }
 
     render() {
-        let pluginUI = null;
-        if (this.state.currentPlugin) {
-            let PluginComponent = this.state.currentPlugin.PluginComponent;
-            if (PluginComponent) {
-                pluginUI = (
-                    <PluginComponent audioFile={this.state.audioFile}
-                                     plugin={this.state.currentPlugin} />
-                );
-                ipc.send('addPluginHeight', PluginComponent.height);
-            }
-        }
-
-        if (!pluginUI) {
-            ipc.send('removePluginHeight');
-        }
-
         return (
             <div className="player">
                 <div className="audiofile-info-controls">
@@ -62,7 +42,9 @@ export class PlayerComponent extends React.Component {
                               onPause={this.props.onPause}
                               onPlay={this.props.onPlay} />
                 </div>
-                {pluginUI}
+                {this.state.audioFile
+                    ? this.state.audioFile.extraControls()
+                    : null}
             </div>
         );
     }
@@ -146,7 +128,7 @@ class Controls extends React.Component {
         return (
             <div className="controls">
                 <button className="button" onClick={this.handlePlayPause.bind(this)}>
-                    {this.props.playerState == 'playing'
+                    {this.props.playerState === 'playing'
                         ? <FontAwesome name="pause" />
                         : <FontAwesome name="play" />}
                 </button>
@@ -158,7 +140,7 @@ class Controls extends React.Component {
     }
 
     handlePlayPause() {
-        if (this.props.playerState == 'playing') {
+        if (this.props.playerState === 'playing') {
             this.props.onPause();
         } else {
             this.props.onPlay();

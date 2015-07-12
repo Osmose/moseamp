@@ -15,8 +15,17 @@
 
     <canvas id="emscripten"></canvas>
 
-    <script src="js/gme_wrapper.js"></script>
-    <script src="js/lib/babel-browser-polyfill.js"></script>
-    <script src="js/bootstrap.js"></script>
+    <script src="../src/browser/moseamp/lib/gme_wrapper.js"></script>
+    <script src="../src/browser/moseamp/lib/babel-browser-polyfill.js"></script>
+    <script>
+      var path = require('path');
+
+      // Add src/browser to global paths so that we can import moseamp things
+      // with paths like 'moseamp/audio'.
+      require('module').globalPaths.push(path.resolve(__dirname, '../src/browser'));
+
+      // Start function to bootstrap the audio player.
+      require('moseamp').start();
+    </script>
   </body>
 </html>

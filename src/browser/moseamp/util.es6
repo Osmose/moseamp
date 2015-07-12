@@ -1,4 +1,7 @@
-import moment from './lib/moment.js';
+import path from 'path';
+
+import fs from 'fs-extra';
+import moment from 'moseamp/lib/moment';
 
 
 /**
@@ -28,4 +31,11 @@ export function zpad(number, digits=2) {
     } else {
         return string;
     }
+}
+
+
+export function absReaddirSync(directory_path) {
+    return fs.readdirSync(directory_path).map((filename) => {
+        return path.join(directory_path, filename);
+    });
 }

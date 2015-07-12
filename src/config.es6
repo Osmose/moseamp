@@ -1,11 +1,11 @@
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 
 import cson from 'season';
 import osenv from 'osenv';
 
 
-const CONFIG_DIR = path.resolve(osenv.home(), '.moseamp');
+export const CONFIG_DIR = path.resolve(osenv.home(), '.moseamp');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.cson');
 const CONFIG_TEMPLATE = path.resolve(__dirname, '..', 'dot-moseamp');
 
@@ -16,13 +16,7 @@ let config = {};
 export function load() {
     // If config directory doesn't exist, create it from the template.
     if (!fs.existsSync(CONFIG_DIR)) {
-        fs.mkdirSync(CONFIG_DIR);
-        for (let filename of fs.readdirSync(CONFIG_TEMPLATE)) {
-            let templatePath = path.join(CONFIG_TEMPLATE, filename);
-            let destinationPath = path.join(CONFIG_DIR, filename);
-            fs.createReadStream(templatePath)
-                .pipe(fs.createWriteStream(destinationPath));
-        }
+        fs.copySync(CONFIG_TEMPLATE, CONFIG_DIR);
     }
 
     config = cson.readFileSync(CONFIG_PATH);

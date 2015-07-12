@@ -1,9 +1,11 @@
+import fs from 'fs';
 import {basename} from 'path';
 
-import React from '../lib/react.js';
-import {AudioFile} from '../audio.js';
-import {FontAwesome, PluginContainer} from '../components.js';
-import {toArrayBuffer} from '../util.js';
+import {AudioFile} from 'moseamp/audio';
+import {FontAwesome, PluginContainer} from 'moseamp/components';
+import * as formats from 'moseamp/formats';
+import React from 'moseamp/lib/react';
+import {toArrayBuffer} from 'moseamp/util';
 
 
 let gme = {
@@ -15,57 +17,54 @@ let gme = {
     currentTime: Module.cwrap('current_time', 'number'),
     trackHasEnded: Module.cwrap('track_has_ended', 'number'),
     currentTrack: Module.cwrap('current_track', 'number'),
+};
+
+
+export function activate() {
+    formats.register(
+        'Game Music files',
+        ['ay', 'gbs', 'gym', 'hes', 'kss', 'nsf', 'nsfe', 'sap', 'spc', 'vgm',
+         'vgz'],
+         GMEAudioFile
+    );
 }
 
 
-export let supportedExtensions = ['ay', 'gbs', 'gym', 'hes', 'kss', 'nsf',
-                                  'nsfe', 'sap', 'spc', 'vgm', 'vgz'];
-export let filetypeName = 'Game Music files';
+export class GMEAudioFile extends AudioFile {
+    constructor(path) {
+        super(path);
+        this.filename = basename(path);
+        this.arrayBuffer = toArrayBuffer(fs.readFileSync(path));
 
-
-export function createAudioNode(ctx, audioFile) {
-    return new Promise((resolve, reject) => {
-        resolve(new GMEAudioNode(ctx, audioFile));
-    });
-}
-
-
-export function createAudioFile(path) {
-    return new Promise((resolve, reject) => {
-        let buffer = fs.readFileSync(path);
-        let arrayBuffer = toArrayBuffer(buffer);
-        let filename = basename(path);
-
-        FS.writeFile(filename, new Int8Array(arrayBuffer), {
+        FS.writeFile(this.filename, new Int8Array(this.arrayBuffer), {
             flags: 'w',
             encoding: 'binary'
         });
 
-        let songInfo = JSON.parse(gme.songInfo(filename, 0));
-        songInfo.title = songInfo.game;
-        if (songInfo.author) {
-            songInfo.artist = songInfo.author;
-        }
-        if (songInfo.system) {
-            songInfo.album = songInfo.system;
-        }
+        this.metadata = JSON.parse(gme.songInfo(this.filename, 0));
+        this.title = this.metadata.game;
+        this.artist = this.metadata.author || this.artist;
+        this.album = this.metadata.system || this.album;
+        this.duration = this.metadata.length / 1000;
+    }
 
-        resolve(new AudioFile(
-            basename(path),
-            toArrayBuffer(buffer),
-            songInfo.length / 1000,
-            songInfo
-        ));
-    });
+    createAudioNode(ctx) {
+        return new Promise((resolve) => {
+            resolve(new GMEAudioNode(ctx, this));
+        });
+    }
+
+    load() {
+        gme.openFile(this.filename, 0);
+    }
+
+    extraControls() {
+        return <GMEExtraControls audioFile={this} />;
+    }
 }
 
 
-export function onLoad(audioFile) {
-    gme.openFile(audioFile.filename, 0);
-}
-
-
-class GMEAudioNode {
+export class GMEAudioNode {
     constructor(ctx, audioFile) {
         this.audioFile = audioFile;
         this.playing = true;
@@ -120,8 +119,7 @@ class GMEAudioNode {
     }
 }
 
-
-export class PluginComponent extends React.Component {
+export class GMEExtraControls extends React.Component {
     constructor(props) {
         super(props);
 
@@ -140,7 +138,7 @@ export class PluginComponent extends React.Component {
             <PluginContainer name="Game Music Emulator Controls" className="gme-plugin">
                 <div className="gme-info">
                     <div className="current-track">
-                        Track: {this.state.currentTrack + 1} / {audioFile.trackCount}
+                        Track: {this.state.currentTrack + 1} / {audioFile.metadata.trackCount}
                     </div>
                 </div>
                 <div className="controls gme-controls">
@@ -160,17 +158,16 @@ export class PluginComponent extends React.Component {
     handlePreviousTrack() {
         let currentTrack = gme.currentTrack();
         if (currentTrack > 0) {
-            gme.startTrack(currentTrack + 1);
+            gme.startTrack(currentTrack - 1);
         }
         this.setState({currentTrack: gme.currentTrack()});
     }
 
     handleNextTrack() {
         let currentTrack = gme.currentTrack();
-        if (currentTrack < this.props.audioFile.trackCount - 1) {
+        if (currentTrack < this.props.audioFile.metadata.trackCount - 1) {
             gme.startTrack(currentTrack + 1);
         }
         this.setState({currentTrack: gme.currentTrack()});
     }
 }
-PluginComponent.height = 67;

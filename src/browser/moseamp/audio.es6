@@ -1,35 +1,32 @@
 import {EventEmitter} from 'events';
-
-/**
- * Audio playback tools.
- */
+import {basename} from 'path';
 
 
 export class AudioFile {
-    constructor(filename, arrayBuffer, duration, metadata) {
-        this.filename = filename;
-        this.arrayBuffer = arrayBuffer;
-        this.duration = duration;
-        this.plugin = null;
+    constructor(path) {
+        this.path = path;
+        this.filename = basename(path);
 
-        for (let key in metadata) {
-            this[key] = metadata[key];
-        }
-
-        this.title = this.title || filename;
-        this.album = this.album || 'Unknown';
-        this.artist = this.artist || 'Unknown';
+        this.title = this.filename;
+        this.album = 'Unknown';
+        this.artist = 'Unknown';
     }
 
-    createAudioNode(ctx) {
-        return this.plugin.createAudioNode(ctx, this);
+    createAudioNode(ctx) { // eslint-disable-line no-unused-vars
+        throw Error('AudioFile subclasses must implement createAudioNode.');
+    }
+
+    load() {
+        // Overridable by plugins that need to do something when loading a
+        // specific audio file.
+    }
+
+    extraControls() {
+        return null;
     }
 }
 
 
-/**
- * Handles playback of AudioNodes.
- */
 export class AudioPlayer {
     constructor() {
         this.ctx = new AudioContext();
@@ -64,6 +61,7 @@ export class AudioPlayer {
     load(audioFile) {
         this.currentAudioFile = audioFile;
         this.stop();
+        audioFile.load();
         this.emitter.emit('load', audioFile);
     }
 
@@ -74,19 +72,19 @@ export class AudioPlayer {
     set state(newState) {
         this._state = newState;
 
-        if (newState == 'playing') {
+        if (newState === 'playing') {
             this.startPlaybackInterval();
         } else {
             this.stopPlaybackInterval();
         }
 
-        this.emitter.emit('stateChanged', this);
+        this.emitter.emit('stateChanged');
     }
 
     get currentTime() {
-        if (this.state == 'paused') {
+        if (this.state === 'paused') {
             return this.startOffset;
-        } else if (this.state == 'playing') {
+        } else if (this.state === 'playing') {
             return this.ctx.currentTime - this.lastStart + this.startOffset;
         } else {
             return 0;
@@ -99,7 +97,7 @@ export class AudioPlayer {
         if (this.currentSource) {
             this.removeCurrentSource();
 
-            if (this.state == 'playing') {
+            if (this.state === 'playing') {
                 this.play();
             }
         }
@@ -142,7 +140,7 @@ export class AudioPlayer {
     }
 
     playbackIntervalCallback() {
-        this.emitter.emit('playback', this);
+        this.emitter.emit('playback');
     }
 
     startPlaybackInterval() {
