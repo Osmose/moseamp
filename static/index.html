@@ -18,6 +18,7 @@
       var path = require('path');
 
       require("babel/register")({
+        only: /.es6$/,
         modules: 'common',
         optional: [
           'es7.asyncFunctions',
