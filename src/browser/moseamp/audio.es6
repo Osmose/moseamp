@@ -1,5 +1,12 @@
 import {EventEmitter} from 'events';
+import fs from 'fs';
 import {basename} from 'path';
+
+import musicmetadata from 'musicmetadata';
+
+import * as formats from 'moseamp/formats';
+import {toArrayBuffer} from 'moseamp/util';
+
 
 
 export class AudioFile {
@@ -25,6 +32,37 @@ export class AudioFile {
         return null;
     }
 }
+
+
+/**
+ * AudioFile for formats that are supported natively by Chromium.
+ */
+export class NativeAudioFile extends AudioFile {
+    constructor(path) {
+        super(path);
+        this.arrayBuffer = toArrayBuffer(fs.readFileSync(path));
+
+        musicmetadata(fs.createReadStream(path), {duration: true}, (err, metadata) => {
+            this.metadata = metadata;
+            this.title = metadata.title;
+            this.album = metadata.album || this.album;
+            this.artist = metadata.artist || this.artist;
+            this.duration = metadata.duration;
+        });
+    }
+
+    createAudioNode(ctx) {
+        return new Promise((resolve) => {
+            ctx.decodeAudioData(this.arrayBuffer, (audioBuffer) => {
+                let sourceNode = ctx.createBufferSource();
+                sourceNode.buffer = audioBuffer;
+                resolve(sourceNode);
+            });
+        });
+    }
+}
+
+formats.register('Audio files', ['opus', 'weba', 'ogg', 'wav', 'mp3'], NativeAudioFile);
 
 
 export class AudioPlayer {

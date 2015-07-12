@@ -6,15 +6,12 @@ import {absReaddirSync} from 'moseamp/util';
 
 
 const PACKAGE_DIR = path.join(CONFIG_DIR, 'packages');
-const DEFAULT_PACKAGE_DIR = path.join(__dirname, 'packages');
 
 export let loadedPackages = [];
 
 
 export function load() {
-    let packageDirectories = (absReaddirSync(DEFAULT_PACKAGE_DIR)
-                              .concat(absReaddirSync(PACKAGE_DIR)));
-    for (let packageDirectory of packageDirectories) {
+    for (let packageDirectory of absReaddirSync(PACKAGE_DIR)) {
         let pack = new Package(packageDirectory);
         loadedPackages.push(pack);
         pack.activate();
