@@ -5,7 +5,7 @@ var Menu = require('menu');
 
 
 var mainWindow = null;
-var baseHeight = 150 - 22;
+var baseHeight = 128;
 var baseWidth = 300;
 
 
@@ -19,7 +19,7 @@ app.on('window-all-closed', function() {
 
 ipc.on('resizeHeight', function(event, height) {
     // Accommodate titlebar.
-    mainWindow.setSize(baseWidth, height + 22);
+    mainWindow.setContentSize(baseWidth, height);
 });
 
 
