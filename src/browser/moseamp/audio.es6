@@ -17,6 +17,7 @@ export class AudioFile {
         this.title = this.filename;
         this.album = 'Unknown';
         this.artist = 'Unknown';
+        this.duration = 0;
     }
 
     createAudioNode(ctx) { // eslint-disable-line no-unused-vars
