@@ -55,6 +55,11 @@ function seek(percentage) {
 }
 
 
+ipc.on('play_pause', () => {
+    audioPlayer.play_pause();
+});
+
+
 /**
  * Initialize the app itself. Should only ever be called once.
  */

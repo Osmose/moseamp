@@ -166,6 +166,14 @@ export class AudioPlayer {
         this.state = 'paused';
     }
 
+    play_pause() {
+        if (this.state === 'playing') {
+            this.pause();
+        } else if (this.state === 'paused') {
+            this.play();
+        }
+    }
+
     stop() {
         if (this.currentSource) {
             this.removeCurrentSource();

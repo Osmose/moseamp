@@ -1,5 +1,6 @@
 var app = require('app');
 var BrowserWindow = require('browser-window');
+var globalShortcut = require('global-shortcut');
 var ipc = require('ipc');
 var Menu = require('menu');
 
@@ -24,6 +25,12 @@ ipc.on('resizeHeight', function(event, height) {
 
 
 app.on('ready', function() {
+    globalShortcut.register('MediaPlayPause', function() {
+        if (mainWindow) {
+            mainWindow.send('play_pause');
+        }
+    });
+
     Menu.setApplicationMenu(Menu.buildFromTemplate([
         {
             label: 'MoseAmp',
