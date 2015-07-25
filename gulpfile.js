@@ -17,7 +17,7 @@ gulp.task('package.darwin', function() {
 
     return gulp.src(files, {base: '.'})
         .pipe(electron({
-            version: '0.27.1',
+            version: '0.30.1',
             platform: 'darwin',
             darwinIcon: 'resources/mac/icon.icns'
         }))
