@@ -1,0 +1,272 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: Fira sans, system-ui, sans-serif;
+  font-size: 14px;
+}
+
+#app-container, .app {
+  width: 100%;
+  height: 100%;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.title-bar, .player-bar {
+  background: linear-gradient(180deg, #3f3f3f, #272727);
+  border-top: 1px solid #5f5f5f;
+  border-bottom: 1px solid #171717;
+  color: #d4d4d4;
+  text-shadow: 0 1px 2px #000;
+}
+
+.title-bar {
+  height: 37px;
+  text-align: center;
+  line-height: 37px;
+  -webkit-app-region: drag;
+  flex: 0 0 auto;
+}
+
+.library {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.category-sidebar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: #555555;
+  border-right: 1px solid #333333;
+  padding: 15px;
+  -webkit-user-select: none;
+  color: #e7e6e6;
+}
+
+.add-to-library {
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.category-list-heading {
+  color: #a9a9a9;
+  font-size: 1rem;
+  margin-top: 0;
+  font-weight: normal;
+  flex: 0 0 auto;
+}
+
+.category-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 0;
+  flex: 1;
+}
+
+.category-list-item {
+  margin: 0 -15px;
+  padding: 5px 15px 5px;
+  cursor: pointer;
+}
+
+.category-list-item .console-icon {
+  margin-right: 5px;
+}
+
+.category-list-item.selected {
+  background: #4a81d7;
+  color: #FFF;
+}
+
+.library-entry-list {
+  flex: 1;
+  position: relative;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.library-table {
+  width: 100%;
+  height: 100%;
+  border: none;
+  color: #FFF;
+}
+
+.rt-th {
+  background: linear-gradient(180deg, #4a4a4a, #282828);
+  border-left: 1px solid #151515;
+  border-right: 1px solid #151515 !important;
+  border-top: 1px solid #5f5f5f;
+  border-bottom: 1px solid #171717;
+  color: #d4d4d4;
+  text-shadow: 0 1px 2px #000;
+  font-weight: normal;
+  font-size: .9rem;
+  box-shadow: none !important;
+}
+
+.rt-th.-sort-asc:after,
+.rt-th.-sort-desc:after {
+  position: absolute;
+  font-size: 1.3rem;
+  top: 4px;
+  right: 0;
+}
+
+.rt-tr.selected {
+  background: #4a81d7 !important;
+  color: #FFF !important;
+}
+
+.rt-tr.-odd:not(.selected) {
+  background: #0f0f0f !important;
+}
+
+.rt-tr.-even:not(.selected) {
+  background: #1d1d1d !important;
+}
+
+.rt-noData {
+  background: #0f0f0f !important;
+  color: #FFF !important;
+}
+
+.rt-tr-group {
+  border: none !important;
+}
+
+.console-icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: 2px;
+  vertical-align: text-bottom;
+}
+
+.player-bar {
+  flex: 0 0 auto;
+  padding: 5px 15px;
+  min-height: 70px;
+  -webkit-user-select: none;
+  display: flex;
+  flex-direction: row;
+}
+
+.player-info {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.player-info-title,
+.player-info-artist {
+  height: 30px;
+  line-height: 30px;
+}
+
+.player-controls {
+  text-align: center;
+  flex: 2;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.control-button {
+  color: #e2e2e2;
+  font-size: 2rem;
+  border: none;
+  background: none;
+  font-weight: bold;
+  text-shadow: 0 1px 1px #000;
+  cursor: pointer;
+  flex: 1;
+}
+
+.control-button.disabled {
+  color: #4a4a4a;
+  cursor: pointer;
+}
+
+.player-volume-container {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.player-volume-container .volume-icon {
+  display: block;
+  flex: 0 0 auto;
+  margin-right: 5px;
+  font-size: 1.3rem;
+}
+
+.player-volume-container .slider {
+  flex: 1;
+}
+
+.slider {
+  background: #303030;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px rgba(255, 255, 255, 0.3);
+  height: 8px;
+  border-radius: 4px;
+  border: 1px solid #141414;
+}
+
+.slider .handle {
+  background: #FFF;
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #3f3f3f, #2f2f2f);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  border: 1px solid #000;
+  cursor: pointer;
+  margin-top: -4px;
+}
+
+.slider.disabled .handle {
+  display: none;
+}
+
+.slider .bar-0 {
+  background: #4a81d7;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.seek-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 0 20px;
+}
+
+.seek-bar .current-time,
+.seek-bar .duration {
+  flex: 0 0 50px;
+}
+
+.seek-bar .current-time {
+  text-align: right;
+}
+
+.seek-bar .duration {
+  text-align: left;
+}
+
+.seek-bar .slider {
+  flex: 1;
+  margin: 0 15px;
+}
