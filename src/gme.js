@@ -4,6 +4,32 @@ import StructType from 'ref-struct';
 import ArrayType from 'ref-array';
 import path from 'path';
 
+import {
+  CATEGORY_SPECTRUM_ZX,
+  CATEGORY_GB,
+  CATEGORY_GENESIS,
+  CATEGORY_NEC_PC_ENGINE,
+  CATEGORY_TURBOGRAFX_16,
+  CATEGORY_MSX,
+  CATEGORY_NES,
+  CATEGORY_SNES,
+  CATEGORY_MASTER_SYSTEM,
+  CATEGORY_GAMEGEAR,
+} from './categories';
+
+const EXT_CATEGORIES = {
+  'ay': CATEGORY_SPECTRUM_ZX,
+  'gbs': CATEGORY_GB,
+  'gym': CATEGORY_GENESIS,
+  'hes': CATEGORY_NEC_PC_ENGINE,
+  'kss': CATEGORY_TURBOGRAFX_16,
+  'nsf': CATEGORY_NES,
+  'nsfe': CATEGORY_NES,
+  'spc': CATEGORY_SNES,
+  'vgm': CATEGORY_MASTER_SYSTEM,
+  // TODO: vgm is three consoles in one
+}
+
 const MusicEmu = ref.types.void;
 const MusicEmuPtr = ref.refType(MusicEmu);
 const MusicEmuPtrPtr = ref.refType(MusicEmuPtr);
@@ -47,6 +73,15 @@ const InfoType = StructType({
     s15: 'string',
 });
 const InfoTypePtr = ref.refType(ArrayType(ref.types.char, 192));
+const GmeType = StructType({
+  system: 'string',
+  track_count: ref.types.int,
+  new_emu: 'pointer',
+  new_info: 'pointer',
+  extension: 'string',
+  flags: ref.types.int,
+});
+const GmeTypeList = ArrayType(GmeType);
 
 const gme = ffi.Library(path.resolve(__dirname, 'libgme.dylib'), {
   gme_open_file: ['string', ['string', MusicEmuPtrPtr, 'long']],
@@ -59,37 +94,52 @@ const gme = ffi.Library(path.resolve(__dirname, 'libgme.dylib'), {
   gme_track_count: ['int', [MusicEmuPtr]],
   gme_track_info: ['string', [MusicEmuPtr, InfoTypePtr, 'int']],
   gme_free_info: ['void', [InfoTypePtr]],
+  gme_type_list: [GmeTypeList, []],
 });
 
 const infoEmu = ref.alloc(MusicEmuPtrPtr);
 const infoType = ref.alloc(InfoTypePtr);
 const musicEmu = ref.alloc(MusicEmuPtrPtr);
 const audioBuffer = new AudioBufferArray(8192 * 2);
+const gmeTypes = Array.from(gme.gme_type_list());
 
-export function gmeEntry(filename) {
-  gme.gme_open_file(filename, infoEmu, -1);
-  const trackCount = gme.gme_track_count(infoEmu.deref());
-  const trackEntries = [];
-  for (let k = 0; k < trackCount; k++) {
-    gme.gme_track_info(infoEmu.deref(), infoType, k);
-    const info = new InfoType(ref.reinterpret(infoType.deref(), 192, 0));
+function getCategory(filename) {
+  const ext = path.extname(filename).slice(1).toLowerCase();
+  return EXT_CATEGORIES[ext] || null;
+}
 
-    const game = info.game || path.basename(filename, path.extname(filename));
-    const song = info.song || `Track ${k}`;
-    const author = info.author || info.dumper;
+export const entryBuilder = {
+  canHandle(filename) {
+    return getCategory(filename) !== null;
+  },
 
-    trackEntries.push({
-      id: `${filename}:${k}`,
-      track: k,
-      name: song,
-      filename,
-      artist: author ? `${author} - ${game}` : game,
-    });
+  build(filename) {
+    gme.gme_open_file(filename, infoEmu, -1);
+    const trackCount = gme.gme_track_count(infoEmu.deref());
+    const trackEntries = [];
+    for (let k = 0; k < trackCount; k++) {
+      gme.gme_track_info(infoEmu.deref(), infoType, k);
+      const info = new InfoType(ref.reinterpret(infoType.deref(), 192, 0));
 
-    gme.gme_free_info(infoType.deref());
+      const game = info.game || path.basename(filename, path.extname(filename));
+      const song = info.song || `Track ${k}`;
+      const author = info.author || info.dumper;
+
+      trackEntries.push({
+        id: `${filename}:${k}`,
+        track: k,
+        name: song,
+        filename,
+        category: getCategory(filename),
+        soundDriver: 'gme',
+        artist: author ? `${author} - ${game}` : game,
+      });
+
+      gme.gme_free_info(infoType.deref());
+    }
+
+    return trackEntries;
   }
-
-  return trackEntries;
 }
 
 export class GMESound {

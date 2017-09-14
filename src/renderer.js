@@ -9,15 +9,13 @@ import ReactSlider from 'react-slider';
 
 import store from './store';
 import {
-  CATEGORY_AUDIO,
-  CATEGORY_NES,
-  CATEGORY_PS1,
   setSelectedCategory,
   getFilteredEntries,
   createLibraryEntry,
   getSelectedCategory,
   getSelectedEntry,
   setSelectedEntry,
+  getAvailableCategories,
 } from './library';
 import {
   openEntry,
@@ -31,6 +29,7 @@ import {
   getDuration,
   seek,
 } from './player';
+import * as categories from './categories';
 
 const {
   dialog
@@ -237,15 +236,19 @@ class VolumeControls extends React.Component {
   }
 }
 
+@connect(state => ({
+  availableCategories: getAvailableCategories(state),
+}))
 class CategorySidebar extends React.Component {
   render() {
+    const { availableCategories } = this.props;
     return (
       <div className="category-sidebar">
         <h2 className="category-list-heading">Categories</h2>
         <ul className="category-list">
-          <CategoryItem name="Audio" code={CATEGORY_AUDIO} />
-          <CategoryItem name="Nintendo (NES)" code={CATEGORY_NES} />
-          <CategoryItem name="Playstation" code={CATEGORY_PS1} />
+          {availableCategories.map(category => (
+            <CategoryItem code={category} key={category} />
+          ))}
         </ul>
         <div className="sidebar-controls">
           <AddToLibraryButton />
@@ -288,6 +291,18 @@ class AddToLibraryButton extends React.Component {
   }
 }
 
+const CATEGORY_DISPLAY_NAMES = {
+  [categories.CATEGORY_AUDIO]: "Audio",
+  [categories.CATEGORY_SPECTRUM_ZX]: "Spectrum ZX",
+  [categories.CATEGORY_GB]: "Gameboy",
+  [categories.CATEGORY_GENESIS]: "Sega Genesis",
+  [categories.CATEGORY_NEC_PC_ENGINE]: "NEC PC Engine",
+  [categories.CATEGORY_TURBOGRAFX_16]: "Turbografx 16",
+  [categories.CATEGORY_NES]: "Nintendo (NES)",
+  [categories.CATEGORY_SNES]: "Super Nintendo",
+  [categories.CATEGORY_MASTER_SYSTEM]: "Sega Master System",
+};
+
 @connect(
   (state, props) => ({
     selected: getSelectedCategory(state) === props.code,
@@ -310,7 +325,7 @@ class CategoryItem extends React.Component {
     return (
       <li className={className} onClick={this.handleClick}>
         <ConsoleIcon code={code} />
-        {name}
+        {CATEGORY_DISPLAY_NAMES[code]}
       </li>
     );
   }

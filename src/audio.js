@@ -1,13 +1,26 @@
 import { basename } from 'path';
+import mime from 'mime';
 
-export function digitalAudioEntry(filename) {
-  return {
-    id: filename,
-    name: basename(filename),
-    filename,
-    artist: 'Unknown',
-  };
-}
+import { CATEGORY_AUDIO } from './categories';
+
+export const entryBuilder = {
+  audio: new Audio(),
+  canHandle(filename) {
+    const mimetype = mime.lookup(filename);
+    return this.audio.canPlayType(mimetype) === 'probably';
+  },
+
+  build(filename) {
+    return {
+      id: filename,
+      filename,
+      category: CATEGORY_AUDIO,
+      name: basename(filename),
+      artist: 'Unknown',
+      soundDriver: 'audio',
+    };
+  }
+};
 
 export class DigitalAudioSound {
   constructor(entry, ctx) {

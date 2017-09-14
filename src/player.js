@@ -2,18 +2,12 @@ import { List, Map } from 'immutable';
 import { ipcRenderer } from 'electron';
 
 import store from './store';
-import {
-  CATEGORY_AUDIO,
-  CATEGORY_NES,
-  CATEGORY_PS1,
-  getCategory,
-} from './library';
 import { GMESound } from './gme';
 import { DigitalAudioSound } from './audio';
 
-const SOUNDS = {
-  [CATEGORY_AUDIO]: DigitalAudioSound,
-  [CATEGORY_NES]: GMESound,
+const SOUND_DRIVERS = {
+  'audio': DigitalAudioSound,
+  'gme': GMESound,
 };
 const DEFAULT_GAIN = 1.0;
 
@@ -43,7 +37,7 @@ class Player {
       }
     }
 
-    const Sound = SOUNDS[entry.category];
+    const Sound = SOUND_DRIVERS[entry.soundDriver];
     this.currentSound = new Sound(entry, this.ctx);
     await this.currentSound.promiseLoaded;
 

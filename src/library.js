@@ -1,31 +1,22 @@
+import { remote } from 'electron';
 import { basename, extname } from 'path';
 import { List, Map } from 'immutable';
 
-import { digitalAudioEntry } from './audio';
-import { gmeEntry } from './gme';
+import * as audio from './audio';
+import * as gme from './gme';
+import { CATEGORY_AUDIO } from './categories';
 
-export const CATEGORY_AUDIO = 'audio';
-export const CATEGORY_NES = 'nes';
-export const CATEGORY_PS1 = 'ps1';
+const { dialog } = remote;
 
-const EXTENSION_CATEGORIES = {
-  '.mp3': CATEGORY_AUDIO,
-  '.psf': CATEGORY_PS1,
-  '.nsf': CATEGORY_NES,
-};
-const ENTRY_BUILDERS = {
-  [CATEGORY_AUDIO]: digitalAudioEntry,
-  [CATEGORY_NES]: gmeEntry,
-};
+const ENTRY_BUILDERS = [
+  audio.entryBuilder,
+  gme.entryBuilder,
+];
 
 const CREATE_ENTRY = 'library/CREATE_ENTRY';
 const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
 const SET_SELECTED_ENTRY = 'library/SET_SELECTED_ENTRY';
-
-export function getCategory(filename) {
-  return EXTENSION_CATEGORIES[extname(filename)] || null;
-}
 
 function defaultState() {
   return new Map({
@@ -57,18 +48,28 @@ export default function reducer(state = defaultState(), action = {}) {
 }
 
 export function createLibraryEntry(filename) {
-  const category = getCategory(filename);
-  const entry = ENTRY_BUILDERS[category](filename);
-  if (Array.isArray(entry)) {
-    for (const e of entry) {
-      e.category = category;
+  let entry;
+  for (const builder of ENTRY_BUILDERS) {
+    if (builder.canHandle(filename)) {
+      entry = builder.build(filename);
+      break;
     }
+  }
+
+  if (!entry) {
+    dialog.showMessageBox({
+      type: 'error',
+      message: 'Could not open: format not supported.',
+    });
+    return;
+  }
+
+  if (Array.isArray(entry)) {
     return {
       type: CREATE_ENTRIES,
       entries: entry,
     };
   } else {
-    entry.category = category;
     return {
       type: CREATE_ENTRY,
       entry,
@@ -116,4 +117,10 @@ export function getFilteredEntries(state) {
   }
 
   return entries.toJS();
+}
+
+export function getAvailableCategories(state) {
+  const entries = state.getIn(['library', 'entries']).valueSeq();
+  const categories = entries.map(entry => entry.get('category')).toSet();
+  return categories.add(CATEGORY_AUDIO).sort().toJS();
 }

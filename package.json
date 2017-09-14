@@ -19,6 +19,7 @@
     "electron": "^1.7.5",
     "ffi": "^2.2.0",
     "immutable": "^3.8.1",
+    "mime": "^1.4.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-redux": "^5.0.6",
