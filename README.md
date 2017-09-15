@@ -2,6 +2,8 @@
 
 MoseAmp is a cross-platform audio player built on [Electron][].
 
+![Screenshot of app](http://osmose.github.io/moseamp/screenshot.png)
+
 [Electron]: http://electron.atom.io/
 
 ## License & Copyright
