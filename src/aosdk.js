@@ -8,12 +8,14 @@ import fs from 'fs';
 import { createResamplerNode } from './resampler';
 
 import {
-  CATEGORY_PS1
+  CATEGORY_PS1,
+  CATEGORY_PS2,
 } from './categories';
 
 const EXT_CATEGORIES = {
   'psf': CATEGORY_PS1,
   'minipsf': CATEGORY_PS1,
+  'psf2': CATEGORY_PS2,
 }
 
 const AODisplayInfo = StructType({
@@ -32,6 +34,11 @@ const aosdk = ffi.Library(path.resolve(__dirname, 'libaosdk.dylib'), {
   psf_sample: [ref.types.int32, [StereoSamplePtr]],
   psf_stop: [ref.types.int32, []],
   psf_fill_info: [ref.types.int32, [AODisplayInfoPtr]],
+
+  psf2_start: [ref.types.int32, ['pointer', ref.types.uint32]],
+  psf2_sample: [ref.types.int32, [StereoSamplePtr]],
+  psf2_stop: [ref.types.int32, []],
+  psf2_fill_info: [ref.types.int32, [AODisplayInfoPtr]],
 });
 
 const sample = new StereoSample();
@@ -48,6 +55,12 @@ const aosdkDrivers = {
     sample: aosdk.psf_sample,
     stop: aosdk.psf_stop,
     fill_info: aosdk.psf_fill_info,
+  },
+  [CATEGORY_PS2]: {
+    start: aosdk.psf2_start,
+    sample: aosdk.psf2_sample,
+    stop: aosdk.psf2_stop,
+    fill_info: aosdk.psf2_fill_info,
   },
 };
 

@@ -10,3 +10,4 @@ export const CATEGORY_SNES = 'snes';
 export const CATEGORY_MASTER_SYSTEM = 'master_system';
 export const CATEGORY_GAMEGEAR = 'gamegear';
 export const CATEGORY_PS1 = 'ps1';
+export const CATEGORY_PS2 = 'ps2';
