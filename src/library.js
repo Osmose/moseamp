@@ -3,6 +3,7 @@ import { basename, extname } from 'path';
 import { List, Map } from 'immutable';
 
 import * as audio from './audio';
+import * as aosdk from './aosdk';
 import * as gme from './gme';
 import { CATEGORY_AUDIO } from './categories';
 
@@ -11,6 +12,7 @@ const { dialog } = remote;
 const ENTRY_BUILDERS = [
   audio.entryBuilder,
   gme.entryBuilder,
+  aosdk.entryBuilder,
 ];
 
 const CREATE_ENTRY = 'library/CREATE_ENTRY';

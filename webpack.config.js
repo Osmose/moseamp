@@ -21,6 +21,7 @@ module.exports = {
       {from: './node_modules/react-table/react-table.css', to: 'css/react-table.css'},
       //{from: './Game_Music_Emu-0.5.2/build/gme.dylib', to: 'gme.dylib'},
       {from: './libs/libgme.dylib', to: 'libgme.dylib'},
+      {from: './libs/libaosdk.dylib', to: 'libaosdk.dylib'},
     ]),
   ],
   node: {

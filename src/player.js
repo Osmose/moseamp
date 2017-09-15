@@ -4,10 +4,12 @@ import { ipcRenderer } from 'electron';
 import store from './store';
 import { GMESound } from './gme';
 import { DigitalAudioSound } from './audio';
+import { AosdkSound } from './aosdk';
 
 const SOUND_DRIVERS = {
   'audio': DigitalAudioSound,
   'gme': GMESound,
+  'aosdk': AosdkSound,
 };
 const DEFAULT_GAIN = 1.0;
 

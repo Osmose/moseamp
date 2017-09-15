@@ -301,6 +301,7 @@ const CATEGORY_DISPLAY_NAMES = {
   [categories.CATEGORY_NES]: "Nintendo (NES)",
   [categories.CATEGORY_SNES]: "Super Nintendo",
   [categories.CATEGORY_MASTER_SYSTEM]: "Sega Master System",
+  [categories.CATEGORY_PS1]: "Playstation",
 };
 
 @connect(
