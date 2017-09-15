@@ -19,6 +19,7 @@ const CREATE_ENTRY = 'library/CREATE_ENTRY';
 const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
 const SET_SELECTED_ENTRY = 'library/SET_SELECTED_ENTRY';
+const SKIP = 'library/SKIP';
 
 function defaultState() {
   return new Map({
@@ -59,11 +60,7 @@ export function createLibraryEntry(filename) {
   }
 
   if (!entry) {
-    dialog.showMessageBox({
-      type: 'error',
-      message: 'Could not open: format not supported.',
-    });
-    return;
+    return { type: SKIP };
   }
 
   if (Array.isArray(entry)) {

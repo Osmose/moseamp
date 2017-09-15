@@ -6,6 +6,8 @@ import { Map, List, Record } from 'immutable';
 import { remote } from 'electron';
 import ReactTable from 'react-table';
 import ReactSlider from 'react-slider';
+import glob from 'glob';
+import fs from 'fs';
 
 import store from './store';
 import {
@@ -271,14 +273,19 @@ class Icon extends React.Component {
 @autobind
 class AddToLibraryButton extends React.Component {
   handleClick() {
-    const filenames = dialog.showOpenDialog({
+    dialog.showOpenDialog({
       title: 'Add to Library',
       buttonLabel: 'Add',
-      properties: ['openFile'],
+      properties: ['openFile', 'multiSelections', 'openDirectory'],
+    }, filenames => {
+      for (const filename of filenames) {
+        if (fs.statSync(filename).isDirectory()) {
+          glob.sync(`${filename}/**/*`).forEach(this.props.createLibraryEntry);
+        } else {
+          this.props.createLibraryEntry(filename);
+        }
+      }
     });
-    for (const filename of filenames) {
-      this.props.createLibraryEntry(filename);
-    }
   }
 
   render() {
