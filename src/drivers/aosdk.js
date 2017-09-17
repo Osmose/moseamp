@@ -1,26 +1,28 @@
 import ffi from 'ffi';
 import ref from 'ref';
 import StructType from 'ref-struct';
-import ArrayType from 'ref-array';
 import path from 'path';
 import fs from 'fs';
+import { Map } from 'immutable';
 
-import { createResamplerNode } from './resampler';
+import { createResamplerNode } from 'moseamp/vendor/resampler';
 
 import {
   CATEGORY_PS1,
   CATEGORY_PS2,
-} from './categories';
+} from 'moseamp/categories';
+
+export const driverId = 'aosdk';
 
 const EXT_CATEGORIES = {
-  'psf': CATEGORY_PS1,
-  'minipsf': CATEGORY_PS1,
-  'psf2': CATEGORY_PS2,
-}
+  psf: CATEGORY_PS1,
+  minipsf: CATEGORY_PS1,
+  psf2: CATEGORY_PS2,
+};
 
 const AODisplayInfo = StructType({
-    title: 'string',
-    info: 'string',
+  title: 'string',
+  info: 'string',
 });
 const AODisplayInfoPtr = ref.refType(AODisplayInfo);
 const StereoSample = StructType({
@@ -42,7 +44,6 @@ const aosdk = ffi.Library(path.resolve(__dirname, 'libaosdk.dylib'), {
 });
 
 const sample = new StereoSample();
-const info = new AODisplayInfo();
 
 function getCategory(filename) {
   const ext = path.extname(filename).slice(1).toLowerCase();
@@ -64,34 +65,34 @@ const aosdkDrivers = {
   },
 };
 
-export const entryBuilder = {
-  canHandle(filename) {
-    return getCategory(filename) !== null;
-  },
+export function supports(filename) {
+  return getCategory(filename) !== null;
+}
 
-  build(filename) {
-    const category = getCategory(filename);
-    const game = path.basename(filename, path.extname(filename));
-    return {
+export function createEntries(filename) {
+  const category = getCategory(filename);
+  const game = path.basename(filename, path.extname(filename));
+  return [
+    new Map({
       id: filename,
       name: game,
       filename,
       category,
-      soundDriver: 'aosdk',
+      driverId,
       artist: game,
-    };
-  }
+    }),
+  ];
 }
 
-export class AosdkSound {
+export class Sound {
   constructor(entry, ctx) {
     this.entry = entry;
-    this.driver = aosdkDrivers[entry.category];
+    this.driver = aosdkDrivers[entry.get('category')];
     this.promiseLoaded = new Promise(resolve => {
-      this.fileBuffer = fs.readFileSync(entry.filename);
+      this.fileBuffer = fs.readFileSync(entry.get('filename'));
       // Change current directory during load so that psflib files are resolved
       // correctly.
-      process.chdir(path.dirname(entry.filename));
+      process.chdir(path.dirname(entry.get('filename')));
       this.driver.start(this.fileBuffer, this.fileBuffer.length);
       resolve();
     });

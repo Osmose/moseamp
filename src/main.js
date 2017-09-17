@@ -1,14 +1,18 @@
-const {app, BrowserWindow, globalShortcut} = require('electron');
+/* eslint-disable global-require import/no-extraneous-dependencies */
+const { app, BrowserWindow, globalShortcut } = require('electron');
 const path = require('path');
 const url = require('url');
 
 let browserWindow = null;
 
-function createWindow () {
+function createWindow() {
   browserWindow = new BrowserWindow({
     width: 900,
     height: 700,
     titleBarStyle: 'hiddenInset',
+    webPreferences: {
+      experimentalFeatures: true,
+    },
   });
   browserWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
@@ -39,13 +43,15 @@ app.on('ready', async () => {
     browserWindow.webContents.send('mediaplaypause');
   });
 });
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
+
 app.on('activate', () => {
-  if (win === null) {
+  if (browserWindow === null) {
     createWindow();
   }
 });

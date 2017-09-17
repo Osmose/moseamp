@@ -1,3 +1,4 @@
+/* eslint-disable */
 export function createResamplerNode(ctx, from, to, sampleCount) {
   // NOTE: Assumes stereo input/output.
   const resampleCount = Math.ceil(sampleCount * (from / to));

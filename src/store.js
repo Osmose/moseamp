@@ -1,11 +1,8 @@
 import { createStore } from 'redux';
 import { combineReducers } from 'redux-immutable';
-import { Map } from 'immutable';
 
-import library from './library';
-import player from './player';
-
-const initialState = new Map();
+import library from 'moseamp/ducks/library';
+import player from 'moseamp/ducks/player';
 
 export default createStore(
   combineReducers({

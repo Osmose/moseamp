@@ -1,21 +1,8 @@
-import { remote } from 'electron';
-import { basename, extname } from 'path';
-import { List, Map } from 'immutable';
+import { Map } from 'immutable';
 
-import * as audio from './audio';
-import * as aosdk from './aosdk';
-import * as gme from './gme';
-import { CATEGORY_AUDIO } from './categories';
+import { CATEGORY_AUDIO } from 'moseamp/categories';
+import { createEntries } from 'moseamp/drivers';
 
-const { dialog } = remote;
-
-const ENTRY_BUILDERS = [
-  audio.entryBuilder,
-  gme.entryBuilder,
-  aosdk.entryBuilder,
-];
-
-const CREATE_ENTRY = 'library/CREATE_ENTRY';
 const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
 const SET_SELECTED_ENTRY = 'library/SET_SELECTED_ENTRY';
@@ -31,19 +18,16 @@ function defaultState() {
 
 export default function reducer(state = defaultState(), action = {}) {
   switch (action.type) {
-    case CREATE_ENTRY:
-      const entry = action.entry;
-      return state.setIn(['entries', entry.id], new Map(entry));
     case CREATE_ENTRIES:
       return state.withMutations(ctx => {
         for (const entry of action.entries) {
-          ctx.setIn(['entries', entry.id], new Map(entry));
+          ctx.setIn(['entries', entry.get('id')], entry);
         }
       });
     case SET_SELECTED_CATEGORY:
       return state.set('selectedCategory', action.category);
     case SET_SELECTED_ENTRY:
-      const id = action.entry && action.entry.id;
+      const id = action.entry && action.entry.get('id');
       return state.set('selectedEntryId', id);
     default:
       return state;
@@ -51,29 +35,15 @@ export default function reducer(state = defaultState(), action = {}) {
 }
 
 export function createLibraryEntry(filename) {
-  let entry;
-  for (const builder of ENTRY_BUILDERS) {
-    if (builder.canHandle(filename)) {
-      entry = builder.build(filename);
-      break;
-    }
-  }
-
-  if (!entry) {
+  const entries = createEntries(filename);
+  if (!entries) {
     return { type: SKIP };
   }
 
-  if (Array.isArray(entry)) {
-    return {
-      type: CREATE_ENTRIES,
-      entries: entry,
-    };
-  } else {
-    return {
-      type: CREATE_ENTRY,
-      entry,
-    };
-  }
+  return {
+    type: CREATE_ENTRIES,
+    entries,
+  };
 }
 
 export function setSelectedCategory(category) {
@@ -86,7 +56,7 @@ export function setSelectedCategory(category) {
 export function setSelectedEntry(entry) {
   return {
     type: SET_SELECTED_ENTRY,
-    entry: entry,
+    entry,
   };
 }
 
@@ -100,11 +70,11 @@ export function getSelectedEntry(state) {
   if (id) {
     entry = state.getIn(['library', 'entries', id]);
   }
-  return entry ? entry.toJS() : null;
+  return entry || null;
 }
 
 export function getAllEntries(state) {
-  return state.getIn(['library', 'entries']).valueSeq().toJS();
+  return state.getIn(['library', 'entries']).valueSeq();
 }
 
 export function getFilteredEntries(state) {
@@ -115,11 +85,11 @@ export function getFilteredEntries(state) {
     entries = entries.filter(entry => entry.get('category') === category);
   }
 
-  return entries.toJS();
+  return entries;
 }
 
 export function getAvailableCategories(state) {
   const entries = state.getIn(['library', 'entries']).valueSeq();
   const categories = entries.map(entry => entry.get('category')).toSet();
-  return categories.add(CATEGORY_AUDIO).sort().toJS();
+  return categories.add(CATEGORY_AUDIO).sort();
 }
