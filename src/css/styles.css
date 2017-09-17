@@ -141,6 +141,28 @@ html, body {
   border: none;
 }
 
+.public_Scrollbar_main.public_Scrollbar_mainActive,
+.public_Scrollbar_main {
+  background-color: #0f0f0f;
+  border-left: 1px solid #1d1d1d;
+}
+
+.public_Scrollbar_mainOpaque,
+.public_Scrollbar_mainOpaque.public_Scrollbar_mainActive,
+.public_Scrollbar_mainOpaque:hover {
+  background-color: #0f0f0f;
+}
+
+.public_Scrollbar_face:after {
+  background-color: #a9a9a9;
+}
+
+.public_Scrollbar_main:hover .public_Scrollbar_face:after,
+.public_Scrollbar_mainActive .public_Scrollbar_face:after,
+.public_Scrollbar_faceActive:after {
+  background-color: #999999;
+}
+
 .console-icon {
   width: 16px;
   height: 16px;
