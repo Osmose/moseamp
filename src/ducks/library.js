@@ -3,6 +3,7 @@ import glob from 'glob-promise';
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
+import { createSelector } from 'reselect';
 
 import { createEntries, getCategoryInfo } from 'moseamp/drivers';
 
@@ -93,30 +94,35 @@ export function getSelectedCategory(state) {
   return state.getIn(['library', 'selectedCategory']);
 }
 
-export function getSelectedEntry(state) {
-  let entry = null;
-  const id = state.getIn(['library', 'selectedEntryId']);
-  if (id) {
-    entry = state.getIn(['library', 'entries', id]);
-  }
-  return entry || null;
-}
-
-export function getAllEntries(state) {
-  return state.getIn(['library', 'entries']).valueSeq();
+export function getSelectedEntryId(state) {
+  return state.getIn(['library', 'selectedEntryId']);
 }
 
 export function getEntryMap(state) {
   return state.getIn(['library', 'entries']);
 }
 
-export function getFilteredEntries(state) {
-  let entries = state.getIn(['library', 'entries']).valueSeq();
+export const getSelectedEntry = createSelector(
+  getSelectedEntryId,
+  getEntryMap,
+  (id, entries) => {
+    return entries.get(id, null);
+  },
+);
 
-  const category = state.getIn(['library', 'selectedCategory']);
-  if (category) {
+export const getAllEntries = createSelector(
+  getEntryMap,
+  entries => {
+    return entries.valueSeq();
+  },
+);
+
+export const getFilteredEntries = createSelector(
+  getAllEntries,
+  getSelectedCategory,
+  (entries, category) => {
     const info = getCategoryInfo(category);
-    entries = entries.filter(entry => entry.get('category') === category).sort((a, b) => {
+    return entries.filter(entry => entry.get('category') === category).sort((a, b) => {
       for (const attr of info.sort) {
         if (a.get(attr) > b.get(attr)) {
           return 1;
@@ -127,10 +133,8 @@ export function getFilteredEntries(state) {
 
       return 0;
     });
-  }
-
-  return entries;
-}
+  },
+);
 
 export function getAvailableCategories(state) {
   const entries = state.getIn(['library', 'entries']).valueSeq();
