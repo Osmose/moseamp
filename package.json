@@ -7,10 +7,11 @@
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack.config.js",
-    "watch": "webpack --watch --config webpack.config.js",
+    "build": "webpack --config webpack.common.js",
+    "build:prod": "webpack --config webpack.prod.js",
+    "watch": "webpack --watch --config webpack.common.js",
     "start": "MOSEAMP_DEVTOOLS=1 electron .",
-    "package-macos": "electron-packager . MoseAmp --platform=darwin --icon=resources/mac/icon.icns --out=dist --overwrite"
+    "package:macos": "electron-packager . MoseAmp --platform=darwin --icon=resources/mac/icon.icns --out=dist --overwrite"
   },
   "author": "Michael Kelly",
   "license": "MIT",
@@ -54,6 +55,7 @@
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.3.0",
     "webpack": "^3.5.5",
+    "webpack-merge": "^4.1.0",
     "webpack-node-externals": "^1.6.0"
   }
 }
