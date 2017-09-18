@@ -2,12 +2,10 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
-import glob from 'glob';
-import fs from 'fs';
 
 import {
   setSelectedCategory,
-  createLibraryEntry,
+  createLibraryEntries,
   getSelectedCategory,
   getAvailableCategories,
 } from 'moseamp/ducks/library';
@@ -40,7 +38,7 @@ export default class Sidebar extends React.Component {
   }
 }
 
-@connect(null, { createLibraryEntry })
+@connect(null, { createLibraryEntries })
 @autobind
 class AddToLibraryButton extends React.Component {
   handleClick() {
@@ -48,15 +46,7 @@ class AddToLibraryButton extends React.Component {
       title: 'Add to Library',
       buttonLabel: 'Add',
       properties: ['openFile', 'multiSelections', 'openDirectory'],
-    }, filenames => {
-      for (const filename of filenames) {
-        if (fs.statSync(filename).isDirectory()) {
-          glob.sync(`${filename}/**/*`).forEach(this.props.createLibraryEntry);
-        } else {
-          this.props.createLibraryEntry(filename);
-        }
-      }
-    });
+    }, this.props.createLibraryEntries);
   }
 
   render() {

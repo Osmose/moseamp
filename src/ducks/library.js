@@ -1,4 +1,6 @@
 import { Map } from 'immutable';
+import glob from 'glob';
+import fs from 'fs';
 
 import { createEntries, getCategoryInfo } from 'moseamp/drivers';
 
@@ -6,6 +8,30 @@ const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
 const SET_SELECTED_ENTRY = 'library/SET_SELECTED_ENTRY';
 const SKIP = 'library/SKIP';
+
+function promiseGlob(pattern) {
+  return new Promise((resolve, reject) => {
+    glob(pattern, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function promiseStat(filename) {
+  return new Promise((resolve, reject) => {
+    fs.stat(filename, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
 
 function defaultState() {
   return new Map({
@@ -33,15 +59,38 @@ export default function reducer(state = defaultState(), action = {}) {
   }
 }
 
-export function createLibraryEntry(filename) {
-  const entries = createEntries(filename);
-  if (!entries) {
-    return { type: SKIP };
-  }
+export function createLibraryEntries(filenames) {
+  return async dispatch => {
+    const files = [];
+    const directories = [];
+    const stats = await Promise.all(filenames.map(promiseStat));
+    for (let k = 0; k < filenames.length; k++) {
+      if (stats[k].isDirectory()) {
+        directories.push(filenames[k]);
+      } else {
+        files.push(filenames[k]);
+      }
+    }
 
-  return {
-    type: CREATE_ENTRIES,
-    entries,
+    // I dunno, this sucks, but is super async? Whatever.
+    const globs = await Promise.all(directories.map(dirname => promiseGlob(`${dirname}/**/*`)));
+    const expandedFilenames = globs.reduce(
+      (acc, globFilenames) => acc.concat(globFilenames),
+      files,
+    );
+
+    const entries = expandedFilenames.reduce(
+      (acc, filename) => acc.concat(createEntries(filename)),
+      [],
+    ).filter(e => e);
+    if (!entries) {
+      dispatch({ type: SKIP });
+    }
+
+    dispatch({
+      type: CREATE_ENTRIES,
+      entries,
+    });
   };
 }
 
