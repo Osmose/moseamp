@@ -2,14 +2,26 @@ import { basename } from 'path';
 import mime from 'mime';
 import { Map } from 'immutable';
 
-import { CATEGORY_AUDIO } from 'moseamp/categories';
-
 export const driverId = 'audio';
 
 const _audio = new Audio();
-export function supports(filename) {
+export function supportsFile(filename) {
   const mimetype = mime.lookup(filename);
   return _audio.canPlayType(mimetype) === 'probably';
+}
+
+export function getCategoryInfo(category) {
+  if (category === 'audio') {
+    return {
+      name: 'Audio',
+      sort: ['name'],
+      columns: [
+        { attr: 'name', name: 'Name', flex: 2 },
+        { attr: 'filename', name: 'Filename', flex: 1 },
+      ],
+    };
+  }
+  return undefined;
 }
 
 export function createEntries(filename) {
@@ -17,7 +29,7 @@ export function createEntries(filename) {
     new Map({
       id: filename,
       filename,
-      category: CATEGORY_AUDIO,
+      category: 'audio',
       name: basename(filename),
       artist: 'Unknown',
       driverId,

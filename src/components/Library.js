@@ -7,17 +7,20 @@ import {
   getFilteredEntries,
   getSelectedEntry,
   setSelectedEntry,
+  getSelectedCategory,
 } from 'moseamp/ducks/library';
 import {
   openEntry,
   play,
 } from 'moseamp/ducks/player';
+import { getCategoryInfo } from 'moseamp/drivers';
 
 
 @connect(
   state => ({
     entries: getFilteredEntries(state),
     selectedEntry: getSelectedEntry(state),
+    categoryInfo: getCategoryInfo(getSelectedCategory(state)),
   }),
   { openEntry, play, setSelectedEntry },
 )
@@ -74,7 +77,9 @@ export default class Library extends React.Component {
   }
 
   render() {
-    const { entries } = this.props;
+    const { entries, categoryInfo } = this.props;
+    const totalFlex = categoryInfo.columns.map(c => c.flex).reduce((a, b) => a + b);
+    const availableWidth = this.width - 18;
 
     return (
       <div className="library-entry-list" onClick={this.handleClick} ref={this.refEntryList}>
@@ -90,18 +95,14 @@ export default class Library extends React.Component {
           onRowClick={this.handleClickRow}
           onRowDoubleClick={this.handleDoubleClickRow}
         >
-          <Column
-            header={<Cell className="library-header">Name</Cell>}
-            cell={<AttrCell attr="name" />}
-            width={50}
-            flexGrow={1}
-          />
-          <Column
-            header={<Cell className="library-header">Filename</Cell>}
-            cell={<AttrCell attr="filename" />}
-            width={50}
-            flexGrow={1}
-          />
+          {categoryInfo.columns.map(column => (
+            <Column
+              key={column.attr}
+              header={<Cell className="library-header">{column.name}</Cell>}
+              cell={<AttrCell attr={column.attr} />}
+              width={availableWidth * (column.flex / totalFlex)}
+            />
+          ))}
         </Table>
       </div>
     );

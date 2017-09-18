@@ -7,19 +7,6 @@ import { Map } from 'immutable';
 
 import { createResamplerNode } from 'moseamp/vendor/resampler';
 
-import {
-  CATEGORY_PS1,
-  CATEGORY_PS2,
-} from 'moseamp/categories';
-
-export const driverId = 'aosdk';
-
-const EXT_CATEGORIES = {
-  psf: CATEGORY_PS1,
-  minipsf: CATEGORY_PS1,
-  psf2: CATEGORY_PS2,
-};
-
 const AODisplayInfo = StructType({
   title: 'string',
   info: 'string',
@@ -45,19 +32,42 @@ const aosdk = ffi.Library(path.resolve(__dirname, 'libaosdk.dylib'), {
 
 const sample = new StereoSample();
 
+export const driverId = 'aosdk';
+
+const CATEGORIES = {
+  ps1: {
+    name: 'Playstation',
+    extensions: ['psf', 'minipsf'],
+  },
+  ps2: {
+    name: 'Playstation 2',
+    extensions: ['psf2', 'minipsf2'],
+  },
+};
+
+export function getDisplayName(category) {
+  return CATEGORIES[category].name;
+}
+
 function getCategory(filename) {
   const ext = path.extname(filename).slice(1).toLowerCase();
-  return EXT_CATEGORIES[ext] || null;
+  for (const [category, { extensions }] of Object.entries(CATEGORIES)) {
+    if (extensions.includes(ext)) {
+      return category;
+    }
+  }
+
+  return null;
 }
 
 const aosdkDrivers = {
-  [CATEGORY_PS1]: {
+  ps1: {
     start: aosdk.psf_start,
     sample: aosdk.psf_sample,
     stop: aosdk.psf_stop,
     fill_info: aosdk.psf_fill_info,
   },
-  [CATEGORY_PS2]: {
+  ps2: {
     start: aosdk.psf2_start,
     sample: aosdk.psf2_sample,
     stop: aosdk.psf2_stop,
@@ -65,8 +75,23 @@ const aosdkDrivers = {
   },
 };
 
-export function supports(filename) {
+export function supportsFile(filename) {
   return getCategory(filename) !== null;
+}
+
+export function getCategoryInfo(category) {
+  const info = CATEGORIES[category];
+  if (info) {
+    return Object.assign({
+      sort: ['filename', 'name'],
+      columns: [
+        { attr: 'name', name: 'Name', flex: 2 },
+        { attr: 'filename', name: 'Filename', flex: 1 },
+      ],
+    }, info);
+  }
+
+  return undefined;
 }
 
 export function createEntries(filename) {

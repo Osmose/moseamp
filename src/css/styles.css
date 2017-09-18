@@ -94,6 +94,7 @@ html, body {
   position: relative;
   -webkit-user-select: none;
   cursor: default;
+  overflow: hidden;
 }
 
 .library-table {

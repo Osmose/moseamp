@@ -1,7 +1,6 @@
 import { Map } from 'immutable';
 
-import { CATEGORY_AUDIO } from 'moseamp/categories';
-import { createEntries } from 'moseamp/drivers';
+import { createEntries, getCategoryInfo } from 'moseamp/drivers';
 
 const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
@@ -10,7 +9,7 @@ const SKIP = 'library/SKIP';
 
 function defaultState() {
   return new Map({
-    selectedCategory: CATEGORY_AUDIO,
+    selectedCategory: 'audio',
     selectedEntryId: null,
     entries: new Map(),
   });
@@ -82,7 +81,18 @@ export function getFilteredEntries(state) {
 
   const category = state.getIn(['library', 'selectedCategory']);
   if (category) {
-    entries = entries.filter(entry => entry.get('category') === category);
+    const info = getCategoryInfo(category);
+    entries = entries.filter(entry => entry.get('category') === category).sort((a, b) => {
+      for (const attr of info.sort) {
+        if (a.get(attr) > b.get(attr)) {
+          return 1;
+        } else if (b.get(attr) > a.get(attr)) {
+          return -1;
+        }
+      }
+
+      return 0;
+    });
   }
 
   return entries;
@@ -91,5 +101,5 @@ export function getFilteredEntries(state) {
 export function getAvailableCategories(state) {
   const entries = state.getIn(['library', 'entries']).valueSeq();
   const categories = entries.map(entry => entry.get('category')).toSet();
-  return categories.add(CATEGORY_AUDIO).sort();
+  return categories.add('audio').sort();
 }

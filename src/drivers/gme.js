@@ -5,32 +5,6 @@ import ArrayType from 'ref-array';
 import path from 'path';
 import { Map } from 'immutable';
 
-import {
-  CATEGORY_SPECTRUM_ZX,
-  CATEGORY_GB,
-  CATEGORY_GENESIS,
-  CATEGORY_NEC_PC_ENGINE,
-  CATEGORY_TURBOGRAFX_16,
-  CATEGORY_NES,
-  CATEGORY_SNES,
-  CATEGORY_MASTER_SYSTEM,
-} from 'moseamp/categories';
-
-export const driverId = 'gme';
-
-const EXT_CATEGORIES = {
-  ay: CATEGORY_SPECTRUM_ZX,
-  gbs: CATEGORY_GB,
-  gym: CATEGORY_GENESIS,
-  hes: CATEGORY_NEC_PC_ENGINE,
-  kss: CATEGORY_TURBOGRAFX_16,
-  nsf: CATEGORY_NES,
-  nsfe: CATEGORY_NES,
-  spc: CATEGORY_SNES,
-  vgm: CATEGORY_MASTER_SYSTEM,
-  // TODO: vgm is three consoles in one
-};
-
 const MusicEmu = ref.types.void;
 const MusicEmuPtr = ref.refType(MusicEmu);
 const MusicEmuPtrPtr = ref.refType(MusicEmuPtr);
@@ -102,13 +76,76 @@ const infoType = ref.alloc(InfoTypePtr);
 const musicEmu = ref.alloc(MusicEmuPtrPtr);
 const audioBuffer = new AudioBufferArray(8192 * 2);
 
-function getCategory(filename) {
-  const ext = path.extname(filename).slice(1).toLowerCase();
-  return EXT_CATEGORIES[ext] || null;
+export const driverId = 'gme';
+
+const CATEGORIES = {
+  spectrum_zx: {
+    name: 'Spectrum ZX',
+    extensions: ['ay'],
+  },
+  gb: {
+    name: 'Gameboy',
+    extensions: ['gbs'],
+  },
+  genesis: {
+    name: 'Genesis',
+    extensions: ['gym'],
+  },
+  nec_pc_engine: {
+    name: 'NEC PC Engine',
+    extensions: ['hes'],
+  },
+  turbografx_16: {
+    name: '',
+    extensions: ['kss'], // TODO: kss is used by other sega stuff
+  },
+  nes: {
+    name: 'Nintendo (NES)',
+    extensions: ['nsf', 'nsfe'],
+  },
+  snes: {
+    name: 'Super Nintendo',
+    extensions: ['spc'],
+  },
+  master_system: {
+    name: 'Sega Master System',
+    extensions: ['vgm'], // TODO: vgm is three consoles in one
+  },
+};
+
+export function getDisplayName(category) {
+  return CATEGORIES[category].name;
 }
 
-export function supports(filename) {
+function getCategory(filename) {
+  const ext = path.extname(filename).slice(1).toLowerCase();
+  for (const [category, { extensions }] of Object.entries(CATEGORIES)) {
+    if (extensions.includes(ext)) {
+      return category;
+    }
+  }
+
+  return null;
+}
+
+export function supportsFile(filename) {
   return getCategory(filename) !== null;
+}
+
+export function getCategoryInfo(category) {
+  const info = CATEGORIES[category];
+  if (info) {
+    return Object.assign({
+      sort: ['game', 'track'],
+      columns: [
+        { attr: 'name', name: 'Name', flex: 4 },
+        { attr: 'track', name: 'Track', flex: 1 },
+        { attr: 'game', name: 'Game', flex: 2 },
+      ],
+    }, info);
+  }
+
+  return undefined;
 }
 
 export function createEntries(filename) {
@@ -120,13 +157,14 @@ export function createEntries(filename) {
     const info = new InfoType(ref.reinterpret(infoType.deref(), 192, 0));
 
     const game = info.game || path.basename(filename, path.extname(filename));
-    const song = info.song || `Track ${k}`;
+    const song = info.song || game;
     const author = info.author || info.dumper;
 
     trackEntries.push(new Map({
       id: `${filename}:${k}`,
       track: k,
       name: song,
+      game,
       filename,
       category: getCategory(filename),
       driverId,

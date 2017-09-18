@@ -9,25 +9,27 @@ for (const moduleName of context.keys()) {
   }
 }
 
-function getDriver(filename) {
-  for (const driver of Object.values(drivers)) {
-    if (driver.supports(filename)) {
-      return driver;
-    }
-  }
-
-  return null;
-}
-
 export function createSound(entry, ctx) {
   const driver = drivers[entry.get('driverId')];
   return new driver.Sound(entry, ctx);
 }
 
 export function createEntries(filename) {
-  const driver = getDriver(filename);
-  if (driver) {
-    return driver.createEntries(filename);
+  for (const driver of Object.values(drivers)) {
+    if (driver.supportsFile(filename)) {
+      return driver.createEntries(filename);
+    }
+  }
+
+  return null;
+}
+
+export function getCategoryInfo(category) {
+  for (const driver of Object.values(drivers)) {
+    const info = driver.getCategoryInfo(category);
+    if (info) {
+      return info;
+    }
   }
 
   return null;

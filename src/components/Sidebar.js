@@ -11,7 +11,7 @@ import {
   getSelectedCategory,
   getAvailableCategories,
 } from 'moseamp/ducks/library';
-import { getCategoryDisplayName } from 'moseamp/categories';
+import { getCategoryInfo } from 'moseamp/drivers';
 import Icon from 'moseamp/components/Icon';
 
 const {
@@ -83,6 +83,7 @@ class CategoryItem extends React.Component {
 
   render() {
     const { selected, code } = this.props;
+    const categoryInfo = getCategoryInfo(code);
     let className = 'category-list-item';
     if (selected) {
       className += ' selected';
@@ -91,7 +92,7 @@ class CategoryItem extends React.Component {
     return (
       <li className={className} onClick={this.handleClick}>
         <ConsoleIcon code={code} />
-        {getCategoryDisplayName(code)}
+        {categoryInfo.name}
       </li>
     );
   }
