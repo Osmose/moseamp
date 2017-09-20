@@ -85,6 +85,21 @@ function moveEntry(mod, wrap = true) {
 Mousetrap.bind('up', () => moveEntry(-1));
 Mousetrap.bind('down', () => moveEntry(1));
 
+ipcRenderer.on('next-track', () => {
+  moveEntry(1);
+  const state = store.getState();
+  const selectedEntry = getSelectedEntry(state);
+  store.dispatch(openEntry(selectedEntry));
+  store.dispatch(play());
+});
+ipcRenderer.on('previous-track', () => {
+  moveEntry(-1);
+  const state = store.getState();
+  const selectedEntry = getSelectedEntry(state);
+  store.dispatch(openEntry(selectedEntry));
+  store.dispatch(play());
+});
+
 Mousetrap.bind('enter', () => {
   const state = store.getState();
   const selectedEntry = getSelectedEntry(state);
