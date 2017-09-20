@@ -84,6 +84,7 @@ export function getCategoryInfo(category) {
   if (info) {
     return Object.assign({
       sort: ['filename', 'name'],
+      searchFields: ['name', 'filename'],
       columns: [
         { attr: 'name', name: 'Name', flex: 2 },
         { attr: 'filename', name: 'Filename', flex: 1 },

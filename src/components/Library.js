@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Table, Column, Cell } from 'fixed-data-table-2';
 
 import {
-  getFilteredEntries,
+  getFilteredSearchResults,
   getSelectedEntry,
   setSelectedEntry,
   getSelectedCategory,
@@ -18,7 +18,7 @@ import { getCategoryInfo } from 'moseamp/drivers';
 
 @connect(
   state => ({
-    entries: getFilteredEntries(state),
+    entries: getFilteredSearchResults(state),
     selectedEntry: getSelectedEntry(state),
     categoryInfo: getCategoryInfo(getSelectedCategory(state)),
   }),
@@ -110,7 +110,7 @@ export default class Library extends React.Component {
 }
 
 @connect(state => ({
-  entries: getFilteredEntries(state),
+  entries: getFilteredSearchResults(state),
 }))
 class AttrCell extends React.Component {
   render() {

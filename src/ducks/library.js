@@ -11,10 +11,12 @@ const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
 const SET_SELECTED_ENTRY = 'library/SET_SELECTED_ENTRY';
 const SET_ALL_ENTRIES = 'library/SET_ALL_ENTRIES';
+const SET_SEARCH_QUERY = 'library/SET_SEARCH_QUERY';
 const SKIP = 'library/SKIP';
 
 function defaultState() {
   return new Map({
+    searchQuery: '',
     selectedCategory: 'audio',
     selectedEntryId: null,
     entries: new Map(),
@@ -36,6 +38,8 @@ export default function reducer(state = defaultState(), action = {}) {
       return state.set('selectedEntryId', id);
     case SET_ALL_ENTRIES:
       return state.set('entries', action.entries);
+    case SET_SEARCH_QUERY:
+      return state.set('searchQuery', action.query);
     default:
       return state;
   }
@@ -90,6 +94,13 @@ export function setSelectedEntry(entry) {
   };
 }
 
+export function setSearchQuery(query) {
+  return {
+    type: SET_SEARCH_QUERY,
+    query,
+  };
+}
+
 export function getSelectedCategory(state) {
   return state.getIn(['library', 'selectedCategory']);
 }
@@ -100,6 +111,10 @@ export function getSelectedEntryId(state) {
 
 export function getEntryMap(state) {
   return state.getIn(['library', 'entries']);
+}
+
+export function getSearchQuery(state) {
+  return state.getIn(['library', 'searchQuery']);
 }
 
 export const getSelectedEntry = createSelector(
@@ -133,6 +148,25 @@ export const getFilteredEntries = createSelector(
 
       return 0;
     });
+  },
+);
+
+export const getFilteredSearchResults = createSelector(
+  getFilteredEntries,
+  getSearchQuery,
+  getSelectedCategory,
+  (entries, query, category) => {
+    const info = getCategoryInfo(category);
+    const transformedQuery = query.toLowerCase();
+    if (query) {
+      return entries.filter(
+        entry => info.searchFields.some(
+          field => entry.get(field).toLowerCase().includes(transformedQuery),
+        ),
+      );
+    }
+
+    return entries;
   },
 );
 

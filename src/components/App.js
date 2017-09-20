@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import Sidebar from 'moseamp/components/Sidebar';
 import Library from 'moseamp/components/Library';
 import Player from 'moseamp/components/Player';
+import SearchField from 'moseamp/components/SearchField';
 import { loadEntries } from 'moseamp/ducks/library';
 
 @connect(null, { loadEntries })
@@ -32,7 +33,10 @@ class TitleBar extends React.Component {
   render() {
     return (
       <div className="title-bar">
-        MoseAmp
+        <div className="title">
+          MoseAmp
+        </div>
+        <SearchField />
       </div>
     );
   }

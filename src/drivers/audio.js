@@ -15,6 +15,7 @@ export function getCategoryInfo(category) {
     return {
       name: 'Audio',
       sort: ['name'],
+      searchFields: ['name', 'filename'],
       columns: [
         { attr: 'name', name: 'Name', flex: 2 },
         { attr: 'filename', name: 'Filename', flex: 1 },

@@ -137,6 +137,7 @@ export function getCategoryInfo(category) {
   if (info) {
     return Object.assign({
       sort: ['game', 'track'],
+      searchFields: ['name', 'game', 'filename'],
       columns: [
         { attr: 'name', name: 'Name', flex: 4 },
         { attr: 'track', name: 'Track', flex: 1 },
