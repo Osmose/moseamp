@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
+import 'moseamp/shortcuts';
 import store from 'moseamp/store';
 import App from 'moseamp/components/App';
 

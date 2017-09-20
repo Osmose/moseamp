@@ -183,7 +183,7 @@ export class Sound {
     this.entry = entry;
     this.promiseLoaded = new Promise(resolve => {
       gme.gme_open_file(entry.get('filename'), musicEmu, ctx.sampleRate);
-      gme.gme_start_track(musicEmu.deref(), entry.track);
+      gme.gme_start_track(musicEmu.deref(), entry.get('track'));
       resolve();
     });
 

@@ -30,11 +30,13 @@ export default class Library extends React.Component {
     super(props);
     this.width = 757;
     this.height = 591;
+    window.libraryHeight = Math.floor(this.height / 34);
     this.resizeObserver = new ResizeObserver(entries => {
       if (entries.length > 0) {
         const entry = entries[0];
         this.width = entry.contentRect.width;
         this.height = entry.contentRect.height;
+        window.libraryHeight = Math.floor(this.height / 34);
         this.forceUpdate();
       }
     });
@@ -77,9 +79,13 @@ export default class Library extends React.Component {
   }
 
   render() {
-    const { entries, categoryInfo } = this.props;
+    const { entries, categoryInfo, selectedEntry } = this.props;
     const totalFlex = categoryInfo.columns.map(c => c.flex).reduce((a, b) => a + b);
     const availableWidth = this.width - 18;
+    let selectedEntryIndex;
+    if (selectedEntry) {
+      selectedEntryIndex = entries.findIndex(e => e.get('id') === selectedEntry.get('id'));
+    }
 
     return (
       <div className="library-entry-list" onClick={this.handleClick} ref={this.refEntryList}>
@@ -94,6 +100,7 @@ export default class Library extends React.Component {
           data={entries}
           onRowClick={this.handleClickRow}
           onRowDoubleClick={this.handleDoubleClickRow}
+          scrollToRow={selectedEntryIndex}
         >
           {categoryInfo.columns.map(column => (
             <Column

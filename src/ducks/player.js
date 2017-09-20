@@ -1,8 +1,6 @@
 import { Map } from 'immutable';
-import { ipcRenderer } from 'electron';
 
 import player, { DEFAULT_GAIN } from 'moseamp/player';
-import store from 'moseamp/store';
 
 const SET_CURRENT_ENTRY_ID = 'player/SET_CURRENT_ENTRY_ID';
 const SET_PLAYING = 'player/SET_PLAYING';
@@ -23,7 +21,7 @@ function defaultState() {
 export default function reducer(state = defaultState(), action = {}) {
   switch (action.type) {
     case SET_CURRENT_ENTRY_ID:
-      return state.set('currentEntryId', action.entryId);
+      return state.set('currentEntryId', action.entryId).set('playing', false);
     case SET_PLAYING:
       return state.set('playing', action.playing);
     case SET_VOLUME:
@@ -119,16 +117,3 @@ export function getCurrentTime(state) {
 export function getDuration(state) {
   return state.getIn(['player', 'duration']);
 }
-
-ipcRenderer.on('mediaplaypause', () => {
-  const state = store.getState();
-  if (!getPlayingEntry(state)) {
-    return;
-  }
-
-  if (getPlaying(state)) {
-    store.dispatch(pause());
-  } else {
-    store.dispatch(play());
-  }
-});
