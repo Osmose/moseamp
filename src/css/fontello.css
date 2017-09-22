@@ -76,5 +76,6 @@
 .icon-volume-off:before { content: '\e811'; } /* '' */
 .icon-volume-down:before { content: '\e812'; } /* '' */
 .icon-volume-up:before { content: '\e813'; } /* '' */
+.icon-arrows-cw:before { content: '\e814'; } /* '' */
 .icon-folder-open-empty:before { content: '\f115'; } /* '' */
 .icon-eraser:before { content: '\f12d'; } /* '' */

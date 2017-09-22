@@ -86,9 +86,15 @@ html, body {
   color: #e7e6e6;
 }
 
-.add-to-library {
+.sidebar-link {
   cursor: pointer;
   flex: 0 0 auto;
+  padding: 5px 0;
+  text-align: left;
+}
+
+.sidebar-link:hover {
+  color: #a9a9a9;
 }
 
 .category-list-heading {
@@ -110,6 +116,10 @@ html, body {
   margin: 0 -15px;
   padding: 5px 15px 5px;
   cursor: pointer;
+}
+
+.category-list-item:hover {
+  color: #a9a9a9;
 }
 
 .category-list-item .console-icon {
@@ -241,6 +251,14 @@ html, body {
   text-shadow: 0 1px 1px #000;
   cursor: pointer;
   flex: 1;
+}
+
+.control-button:hover {
+  color: #a9a9a9;
+}
+
+.control-button:active {
+  outline: none;
 }
 
 .control-button.disabled {

@@ -8,6 +8,7 @@ import {
   createLibraryEntries,
   getSelectedCategory,
   getAvailableCategories,
+  rescanLibrary,
 } from 'moseamp/ducks/library';
 import { getCategoryInfo } from 'moseamp/drivers';
 import Icon from 'moseamp/components/Icon';
@@ -30,9 +31,8 @@ export default class Sidebar extends React.Component {
             <CategoryItem code={category} key={category} />
           ))}
         </ul>
-        <div className="sidebar-controls">
-          <AddToLibraryButton />
-        </div>
+        <AddToLibraryButton />
+        <RescanLibraryButton />
       </div>
     );
   }
@@ -51,9 +51,26 @@ class AddToLibraryButton extends React.Component {
 
   render() {
     return (
-      <a onClick={this.handleClick} className="add-to-library">
+      <a onClick={this.handleClick} className="sidebar-link">
         <Icon name="plus" />
         Add to Library
+      </a>
+    );
+  }
+}
+
+@connect(null, { rescanLibrary })
+@autobind
+class RescanLibraryButton extends React.Component {
+  handleClick() {
+    this.props.rescanLibrary();
+  }
+
+  render() {
+    return (
+      <a onClick={this.handleClick} className="sidebar-link">
+        <Icon name="arrows-cw" />
+        Rescan Library
       </a>
     );
   }

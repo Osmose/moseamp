@@ -42,6 +42,14 @@ export async function readPsfTags(filename) {
     }
   }
 
+  // Final tag
+  if (tagBuf.length > 5 && mid) {
+    lines.push([
+      tagBuf.toString('ascii', start, mid),
+      tagBuf.toString('utf8', mid + 1),
+    ]);
+  }
+
   const tags = {};
   for (const [lineKey, lineValue] of lines) {
     const key = lineKey.trim();

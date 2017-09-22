@@ -1,6 +1,7 @@
-import { basename } from 'path';
 import mime from 'mime';
 import { Map } from 'immutable';
+import id3 from 'id3js';
+import path from 'path';
 
 export const driverId = 'audio';
 
@@ -14,25 +15,49 @@ export function getCategoryInfo(category) {
   if (category === 'audio') {
     return {
       name: 'Audio',
-      sort: ['name'],
-      searchFields: ['name', 'filename'],
+      sort: ['artist', 'album', 'track', 'name'],
+      searchFields: ['name', 'filename', 'artist', 'album'],
       columns: [
-        { attr: 'name', name: 'Name', flex: 2 },
-        { attr: 'filename', name: 'Filename', flex: 1 },
+        { attr: 'name', name: 'Name', flex: 4 },
+        { attr: 'artist', name: 'Artist', flex: 3 },
+        { attr: 'track', name: 'Track', flex: 1 },
+        { attr: 'album', name: 'Album', flex: 2 },
       ],
     };
   }
   return undefined;
 }
 
-export function createEntries(filename) {
+export async function createEntries(filename) {
+  let metadata = {};
+  if (path.extname(filename) === '.mp3') {
+    metadata = await new Promise(resolve => {
+      id3({ file: filename, type: id3.OPEN_LOCAL }, (err, tags) => {
+        if (err) {
+          console.error(err);
+          resolve({});
+        } else {
+          resolve({
+            title: tags.title || '',
+            artist: tags.artist || '',
+            track: tags.v2.track || tags.v1.track,
+            album: tags.album || '',
+          });
+        }
+      });
+    });
+  }
+
   return [
     new Map({
       id: filename,
       filename,
       category: 'audio',
-      name: basename(filename),
-      artist: 'Unknown',
+      name: metadata.title.trim() || path.basename(filename),
+      basename: path.basename(filename),
+      artist: metadata.artist.trim() || 'Unknown',
+      track: Number.parseInt(metadata.track, 10) || null,
+      album: metadata.album.trim() || path.basename(path.dirname(filename)),
       driverId,
     }),
   ];

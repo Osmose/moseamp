@@ -136,7 +136,7 @@ export function getCategoryInfo(category) {
   const info = CATEGORIES[category];
   if (info) {
     return Object.assign({
-      sort: ['game', 'track'],
+      sort: ['game', 'track', 'filename'],
       searchFields: ['name', 'game', 'filename'],
       columns: [
         { attr: 'name', name: 'Name', flex: 4 },
@@ -157,14 +157,14 @@ export function createEntries(filename) {
     gme.gme_track_info(infoEmu.deref(), infoType, k);
     const info = new InfoType(ref.reinterpret(infoType.deref(), 192, 0));
 
-    const game = info.game || path.basename(filename, path.extname(filename));
-    const song = info.song || path.basename(path.dirname(filename));
+    const name = info.song || path.basename(filename, path.extname(filename));
+    const game = info.game || path.basename(path.dirname(filename));
     const author = info.author || info.dumper;
 
     trackEntries.push(new Map({
       id: `${filename}:${k}`,
       track: k,
-      name: song,
+      name,
       game,
       filename,
       category: getCategory(filename),

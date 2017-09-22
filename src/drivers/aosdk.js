@@ -81,7 +81,7 @@ export function getCategoryInfo(category) {
   if (info) {
     return Object.assign({
       sort: ['filename', 'name'],
-      searchFields: ['name', 'filename'],
+      searchFields: ['name', 'artist', 'game', 'filename'],
       columns: [
         { attr: 'name', name: 'Name', flex: 2 },
         { attr: 'artist', name: 'Artist', flex: 1 },
@@ -95,7 +95,14 @@ export function getCategoryInfo(category) {
 
 export async function createEntries(filename) {
   const category = getCategory(filename);
-  const tags = await readPsfTags(filename);
+  let tags;
+  try {
+    tags = await readPsfTags(filename);
+  } catch (err) {
+    console.error(err);
+    tags = {};
+  }
+
   const title = tags.title || path.basename(filename, path.extname(filename));
   const game = tags.game || path.basename(path.dirname(filename));
   return [

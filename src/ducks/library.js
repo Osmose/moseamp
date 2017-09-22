@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 import { createEntries, getCategoryInfo } from 'moseamp/drivers';
 
-const CREATE_ENTRIES = 'library/CREATE_ENTRIES';
+const SET_ENTRIES = 'library/SET_ENTRIES';
 const SET_SELECTED_CATEGORY = 'library/SET_SELECTED_CATEGORY';
 const SET_SELECTED_ENTRY = 'library/SET_SELECTED_ENTRY';
 const SET_ALL_ENTRIES = 'library/SET_ALL_ENTRIES';
@@ -26,7 +26,7 @@ function defaultState() {
 
 export default function reducer(state = defaultState(), action = {}) {
   switch (action.type) {
-    case CREATE_ENTRIES:
+    case SET_ENTRIES:
       return state.withMutations(ctx => {
         for (const entry of action.entries) {
           ctx.setIn(['entries', entry.get('id')], entry);
@@ -46,35 +46,61 @@ export default function reducer(state = defaultState(), action = {}) {
   }
 }
 
+async function _createEntries(filenames) {
+  const files = [];
+  const directories = [];
+  const stats = await Promise.all(filenames.map(fn => fs.stat(fn)));
+  for (let k = 0; k < filenames.length; k++) {
+    if (stats[k].isDirectory()) {
+      directories.push(filenames[k]);
+    } else {
+      files.push(filenames[k]);
+    }
+  }
+
+  // I dunno, this sucks, but is super async? Whatever.
+  const globs = await Promise.all(directories.map(dirname => glob(`${dirname}/**/*`)));
+  const expandedFilenames = globs.reduce(
+    (acc, globFilenames) => acc.concat(globFilenames),
+    files,
+  );
+
+  const entryPromises = expandedFilenames.map(fn => {
+    return createEntries(fn).catch(err => {
+      console.error(err);
+      return [];
+    });
+  });
+  const entries = _.flatten(await Promise.all(entryPromises));
+  return entries.filter(e => e);
+}
+
 export function createLibraryEntries(filenames) {
   return async dispatch => {
-    const files = [];
-    const directories = [];
-    const stats = await Promise.all(filenames.map(fn => fs.stat(fn)));
-    for (let k = 0; k < filenames.length; k++) {
-      if (stats[k].isDirectory()) {
-        directories.push(filenames[k]);
-      } else {
-        files.push(filenames[k]);
-      }
-    }
-
-    // I dunno, this sucks, but is super async? Whatever.
-    const globs = await Promise.all(directories.map(dirname => glob(`${dirname}/**/*`)));
-    const expandedFilenames = globs.reduce(
-      (acc, globFilenames) => acc.concat(globFilenames),
-      files,
-    );
-
-    let entries = _.flatten(await Promise.all(expandedFilenames.map(createEntries)));
-    entries = entries.filter(e => e);
+    const entries = await _createEntries(filenames);
     if (!entries) {
       dispatch({ type: SKIP });
     }
 
     dispatch({
-      type: CREATE_ENTRIES,
+      type: SET_ENTRIES,
       entries,
+    });
+  };
+}
+
+export function rescanLibrary() {
+  return async (dispatch, getState) => {
+    const oldEntries = getState().getIn(['library', 'entries']).valueSeq();
+    const filenames = oldEntries.map(e => e.get('filename')).toSet();
+    const newEntries = await _createEntries(filenames.toJS());
+    if (!newEntries) {
+      dispatch({ type: SKIP });
+    }
+
+    dispatch({
+      type: SET_ENTRIES,
+      entries: newEntries,
     });
   };
 }
@@ -193,7 +219,7 @@ export function loadEntries() {
 
 export const saveEntriesMiddleware = store => next => action => {
   const result = next(action);
-  if (action.type === CREATE_ENTRIES) {
+  if (action.type === SET_ENTRIES) {
     const data = getEntryMap(store.getState()).toJS();
     (async () => {
       const filename = path.resolve(os.homedir(), '.moseamp', 'library.json');

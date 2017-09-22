@@ -27,5 +27,6 @@ module.exports = {
     'jsx-a11y/no-noninteractive-element-interactions': 'off',
     'jsx-a11y/alt-text': 'off',
     "arrow-body-style": "off",
+    "no-console": "off",
   },
 };
