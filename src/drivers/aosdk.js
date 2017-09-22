@@ -6,28 +6,25 @@ import fs from 'fs';
 import { Map } from 'immutable';
 
 import { createResamplerNode } from 'moseamp/vendor/resampler';
+import { readPsfTags } from 'moseamp/utils';
 
-const AODisplayInfo = StructType({
-  title: 'string',
-  info: 'string',
-});
-const AODisplayInfoPtr = ref.refType(AODisplayInfo);
 const StereoSample = StructType({
   l: ref.types.int16,
   r: ref.types.int16,
 });
 const StereoSamplePtr = ref.refType(StereoSample);
 
+// Tag info: https://web.archive.org/web/20140125155137/http://wiki.neillcorlett.com:80/PSFFormat
+// https://web.archive.org/web/20110902100659/http://wiki.neillcorlett.com/PSFTagFormat
+// https://web.archive.org/web/20110907045633/http://wiki.neillcorlett.com:80/MiniPSF
 const aosdk = ffi.Library(path.resolve(__dirname, 'libaosdk.dylib'), {
   psf_start: [ref.types.int32, ['pointer', ref.types.uint32]],
   psf_sample: [ref.types.int32, [StereoSamplePtr]],
   psf_stop: [ref.types.int32, []],
-  psf_fill_info: [ref.types.int32, [AODisplayInfoPtr]],
 
   psf2_start: [ref.types.int32, ['pointer', ref.types.uint32]],
   psf2_sample: [ref.types.int32, [StereoSamplePtr]],
   psf2_stop: [ref.types.int32, []],
-  psf2_fill_info: [ref.types.int32, [AODisplayInfoPtr]],
 });
 
 const sample = new StereoSample();
@@ -87,7 +84,8 @@ export function getCategoryInfo(category) {
       searchFields: ['name', 'filename'],
       columns: [
         { attr: 'name', name: 'Name', flex: 2 },
-        { attr: 'filename', name: 'Filename', flex: 1 },
+        { attr: 'artist', name: 'Artist', flex: 1 },
+        { attr: 'game', name: 'Game', flex: 1 },
       ],
     }, info);
   }
@@ -95,17 +93,20 @@ export function getCategoryInfo(category) {
   return undefined;
 }
 
-export function createEntries(filename) {
+export async function createEntries(filename) {
   const category = getCategory(filename);
-  const game = path.basename(filename, path.extname(filename));
+  const tags = await readPsfTags(filename);
+  const title = tags.title || path.basename(filename, path.extname(filename));
+  const game = tags.game || path.basename(path.dirname(filename));
   return [
     new Map({
       id: filename,
-      name: game,
+      name: title,
+      game,
       filename,
       category,
       driverId,
-      artist: game,
+      artist: tags.artist || game,
     }),
   ];
 }

@@ -14,7 +14,7 @@ export function createSound(entry, ctx) {
   return new driver.Sound(entry, ctx);
 }
 
-export function createEntries(filename) {
+export async function createEntries(filename) {
   for (const driver of Object.values(drivers)) {
     if (driver.supportsFile(filename)) {
       return driver.createEntries(filename);

@@ -158,7 +158,7 @@ export function createEntries(filename) {
     const info = new InfoType(ref.reinterpret(infoType.deref(), 192, 0));
 
     const game = info.game || path.basename(filename, path.extname(filename));
-    const song = info.song || game;
+    const song = info.song || path.basename(path.dirname(filename));
     const author = info.author || info.dumper;
 
     trackEntries.push(new Map({

@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { createSelector } from 'reselect';
+import _ from 'lodash';
 
 import { createEntries, getCategoryInfo } from 'moseamp/drivers';
 
@@ -65,10 +66,8 @@ export function createLibraryEntries(filenames) {
       files,
     );
 
-    const entries = expandedFilenames.reduce(
-      (acc, filename) => acc.concat(createEntries(filename)),
-      [],
-    ).filter(e => e);
+    let entries = _.flatten(await Promise.all(expandedFilenames.map(createEntries)));
+    entries = entries.filter(e => e);
     if (!entries) {
       dispatch({ type: SKIP });
     }

@@ -1,3 +1,5 @@
+import fs from 'fs-extra';
+
 export function formatDuration(duration) {
   const seconds = Math.floor(duration % 60);
   const minutes = Math.floor(duration / 60);
@@ -9,4 +11,47 @@ export function formatDuration(duration) {
     string = `${minutes}:${string}`;
   }
   return string;
+}
+
+export async function readPsfTags(filename) {
+  const buf = await fs.readFile(filename);
+  if (buf.toString('ascii', 0, 3) !== 'PSF') {
+    throw new Error(`${filename} is not a valid PSF file.`);
+  }
+
+  const reservedSize = buf.readUInt32LE(4);
+  const programSize = buf.readUInt32LE(8);
+  const tagBuf = buf.slice(16 + reservedSize + programSize);
+  if (tagBuf.length < 5 || tagBuf.toString('ascii', 0, 5) !== '[TAG]') {
+    return {};
+  }
+
+  const lines = [];
+  let start = 5;
+  let mid = null;
+  for (let k = 5; k < tagBuf.length; k++) {
+    const char = tagBuf.readUInt8(k);
+    if (char === 0x0A) { // Newline
+      lines.push([
+        tagBuf.toString('ascii', start, mid),
+        tagBuf.toString('utf8', mid + 1, k),
+      ]);
+      start = k + 1;
+    } else if (char === 0x3D) { // =
+      mid = k;
+    }
+  }
+
+  const tags = {};
+  for (const [lineKey, lineValue] of lines) {
+    const key = lineKey.trim();
+    const value = lineValue.trim();
+    if (key in tags) {
+      tags[key] += `\n${value}`;
+    } else {
+      tags[key] = value;
+    }
+  }
+
+  return tags;
 }
