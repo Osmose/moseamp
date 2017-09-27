@@ -1,3 +1,5 @@
+import zlib from 'zlib';
+
 import fs from 'fs-extra';
 
 export function formatDuration(duration) {
@@ -13,15 +15,20 @@ export function formatDuration(duration) {
   return string;
 }
 
-export async function readPsfTags(filename) {
-  const buf = await fs.readFile(filename);
-  if (buf.toString('ascii', 0, 3) !== 'PSF') {
-    throw new Error(`${filename} is not a valid PSF file.`);
-  }
+export async function decompress(buffer) {
+  return new Promise((resolve, reject) => {
+    zlib.unzip(buffer, (err, unzippedBuffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(unzippedBuffer);
+      }
+    });
+  });
+}
 
-  const reservedSize = buf.readUInt32LE(4);
-  const programSize = buf.readUInt32LE(8);
-  const tagBuf = buf.slice(16 + reservedSize + programSize);
+export function parseTags(buffer, reservedSize, programSize) {
+  const tagBuf = buffer.slice(16 + reservedSize + programSize);
   if (tagBuf.length < 5 || tagBuf.toString('ascii', 0, 5) !== '[TAG]') {
     return {};
   }
@@ -62,4 +69,15 @@ export async function readPsfTags(filename) {
   }
 
   return tags;
+}
+
+export async function readPsfTags(filename) {
+  const buf = await fs.readFile(filename);
+  if (buf.toString('ascii', 0, 3) !== 'PSF') {
+    throw new Error(`${filename} is not a valid PSF file.`);
+  }
+
+  const reservedSize = buf.readUInt32LE(4);
+  const programSize = buf.readUInt32LE(8);
+  return parseTags(buf, reservedSize, programSize);
 }

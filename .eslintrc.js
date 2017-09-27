@@ -28,5 +28,7 @@ module.exports = {
     'jsx-a11y/alt-text': 'off',
     "arrow-body-style": "off",
     "no-console": "off",
+    "no-use-before-define": "off",
+    "no-param-reassign": "off",
   },
 };

@@ -24,6 +24,7 @@ module.exports = {
       },
       { from: './libs/libgme.dylib', to: 'libgme.dylib' },
       { from: './libs/libaosdk.dylib', to: 'libaosdk.dylib' },
+      { from: './libs/mgba_libretro.dylib', to: 'mgba_libretro.dylib' },
     ]),
   ],
   node: {
