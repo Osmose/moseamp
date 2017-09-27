@@ -96,6 +96,10 @@ class CategoryItem extends React.Component {
       className += ' selected';
     }
 
+    if (!categoryInfo) {
+      return null;
+    }
+
     return (
       <li className={className} onClick={this.handleClick}>
         <ConsoleIcon code={code} />
