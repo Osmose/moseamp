@@ -8,16 +8,36 @@ import crc32 from 'buffer-crc32';
 
 import { readPsfTags, parseTags, decompress } from 'moseamp/utils';
 
-const audioBuffer = Buffer.alloc(8192 * 2);
+let audioBuffer = Buffer.alloc(8192 * 4);
 let bufferWriteIndex = 0;
+
+const IOSpecType = StructType({
+  itype: 'int',
+  otype: 'int',
+  scale: 'double',
+  e: 'pointer',
+  flags: 'ulong',
+});
+
+const soxr = ffi.Library(path.resolve(__dirname, 'libsoxr.dylib'), {
+  soxr_io_spec: [IOSpecType, ['int', 'int']],
+  soxr_create: ['pointer', ['double', 'double', 'uint', 'pointer', 'pointer', 'pointer', 'pointer']],
+  soxr_process: ['pointer', ['pointer', 'pointer', 'size_t', 'pointer', 'pointer', 'size_t', 'pointer']],
+});
+
+const soxrError = Buffer.alloc(256);
+const idone = ref.alloc('size_t');
+const odone = ref.alloc('size_t');
+let resampler = null;
+let resampleOutputRate = null;
 
 const AVInfo = StructType({});
 const AVInfoPtr = ref.refType(AVInfo);
 const GameInfo = StructType({
-  path: 'string',
+  path: 'pointer',
   data: 'pointer',
   size: 'size_t',
-  meta: 'string',
+  meta: 'pointer',
 });
 const GameInfoPtr = ref.refType(GameInfo);
 
@@ -32,10 +52,19 @@ const videoCallback = ffi.Callback('void', ['pointer', 'uint', 'uint', 'size_t']
   },
 );
 const audioSampleBatchCallback = ffi.Callback('void', ['pointer', 'size_t'],
-  (dataPtr, frames) => {
-    const data = dataPtr.deref();
-    data.copy(audioBuffer, bufferWriteIndex, 0, frames);
-    bufferWriteIndex += frames;
+  (data, frames) => {
+    const audioData = ref.reinterpret(data, frames * 4);
+    const resampledLength = Math.ceil(
+      frames * (32768 / resampleOutputRate),
+    );
+    const resampledData = Buffer.alloc(resampledLength * 4);
+    soxr.soxr_process(
+      resampler,
+      audioData.ref(), frames, idone.ref(),
+      resampledData.ref(), resampledLength, odone.ref(),
+    );
+    bufferWriteIndex += resampledData.copy(audioBuffer, bufferWriteIndex, 0);
+    console.log(bufferWriteIndex);
   },
 );
 const inputPollCallback = ffi.Callback('void', [],
@@ -148,10 +177,10 @@ export class Sound {
       loadGsfRom(entry.get('filename')).then(gsfRom => {
         const data = Buffer.from(gsfRom);
         data.type = ref.types.char;
-        gameInfo.path = '';
-        gameInfo.data = data.ref();
+        gameInfo.path = null;
+        gameInfo.data = data;
         gameInfo.size = data.length;
-        gameInfo.meta = '';
+        gameInfo.meta = null;
         mgba.retro_load_game(gameInfo.ref());
         resolve();
       }).catch(reject);
@@ -163,6 +192,12 @@ export class Sound {
     this.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
     this.scriptNode.connect(this.sourceNode);
 
+    resampleOutputRate = ctx.sampleRate;
+    const iospec = soxr.soxr_io_spec(3, 3);
+    resampler = soxr.soxr_create(
+      32768, ctx.sampleRate, 2, soxrError.ref(), iospec.ref(), null, null,
+    );
+
     this.playing = false;
     this.supportsTime = false;
   }
@@ -171,7 +206,7 @@ export class Sound {
     const left = event.outputBuffer.getChannelData(0);
     const right = event.outputBuffer.getChannelData(1);
     if (this.playing) {
-      while (bufferWriteIndex < 16384) {
+      while (bufferWriteIndex < 8192 * 4) {
         mgba.retro_run();
       }
 
@@ -180,7 +215,10 @@ export class Sound {
         right[k] = audioBuffer.readInt16LE((k * 4) + 2);
       }
 
-      bufferWriteIndex = 0;
+      const newBuffer = Buffer.alloc(8192 * 4);
+      audioBuffer.copy(newBuffer, 0, 8192 * 4);
+      audioBuffer = newBuffer;
+      bufferWriteIndex -= 8192 * 4;
     } else {
       for (let k = 0; k < 8192; k++) {
         left[k] = 0;
