@@ -20,7 +20,7 @@
     "autobind-decorator": "^2.1.0",
     "buffer-crc32": "^0.2.13",
     "electron": "^1.7.5",
-    "ffi": "^2.2.0",
+    "ffi": "Osmose/node-ffi",
     "fixed-data-table-2": "^0.8.0",
     "fs-extra": "^4.0.2",
     "glob-promise": "^3.1.0",

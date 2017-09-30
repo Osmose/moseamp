@@ -25,12 +25,6 @@ const soxr = ffi.Library(path.resolve(__dirname, 'libsoxr.dylib'), {
   soxr_process: ['pointer', ['pointer', 'pointer', 'size_t', 'pointer', 'pointer', 'size_t', 'pointer']],
 });
 
-const soxrError = Buffer.alloc(256);
-const idone = ref.alloc('size_t');
-const odone = ref.alloc('size_t');
-let resampler = null;
-let resampleOutputRate = null;
-
 const AVInfo = StructType({});
 const AVInfoPtr = ref.refType(AVInfo);
 const GameInfo = StructType({
@@ -40,6 +34,38 @@ const GameInfo = StructType({
   meta: 'pointer',
 });
 const GameInfoPtr = ref.refType(GameInfo);
+
+class Resampler {
+  constructor(inputRate, outputRate, outputSamples) {
+    this.outputRate = outputRate;
+    this.inputRate = inputRate;
+    this.idone = ref.alloc('size_t');
+    this.odone = ref.alloc('size_t');
+
+    const iospec = soxr.soxr_io_spec(3, 3);
+    const soxrError = Buffer.alloc(256);
+    this.resampler = soxr.soxr_create(
+      this.inputRate, this.outputRate, 2, soxrError.ref(), iospec.ref(), null, null,
+    );
+
+    this.outputSamples = outputSamples;
+    this.inputSamples = Math.floor(((outputSamples - 0.5) * this.inputRate) / this.outputRate);
+    this.resampledData = Buffer.alloc(outputSamples * 4);
+  }
+
+  resample(inputData) {
+    const err = soxr.soxr_process(
+      this.resampler,
+      inputData, this.inputSamples, this.idone.ref(),
+      this.resampledData, this.outputSamples, this.odone.ref(),
+    );
+    if (!err.isNull()) {
+      throw new Error(err.readCString());
+    }
+
+    return this.resampledData;
+  }
+}
 
 const envCallback = ffi.Callback('bool', ['uint', 'pointer'],
   () => {
@@ -54,17 +80,7 @@ const videoCallback = ffi.Callback('void', ['pointer', 'uint', 'uint', 'size_t']
 const audioSampleBatchCallback = ffi.Callback('void', ['pointer', 'size_t'],
   (data, frames) => {
     const audioData = ref.reinterpret(data, frames * 4);
-    const resampledLength = Math.ceil(
-      frames * (32768 / resampleOutputRate),
-    );
-    const resampledData = Buffer.alloc(resampledLength * 4);
-    soxr.soxr_process(
-      resampler,
-      audioData.ref(), frames, idone.ref(),
-      resampledData.ref(), resampledLength, odone.ref(),
-    );
-    bufferWriteIndex += resampledData.copy(audioBuffer, bufferWriteIndex, 0);
-    console.log(bufferWriteIndex);
+    bufferWriteIndex += audioData.copy(audioBuffer, bufferWriteIndex, 0);
   },
 );
 const inputPollCallback = ffi.Callback('void', [],
@@ -104,7 +120,7 @@ export const driverId = 'mgba';
 
 const CATEGORIES = {
   gba: {
-    name: 'Gameboy Advanced',
+    name: 'Gameboy Advance',
     extensions: ['gsf', 'minigsf'],
   },
 };
@@ -191,12 +207,8 @@ export class Sound {
     this.scriptNode = ctx.createScriptProcessor(8192, 1, 2);
     this.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
     this.scriptNode.connect(this.sourceNode);
+    this.resampler = new Resampler(32768, ctx.sampleRate, 8192);
 
-    resampleOutputRate = ctx.sampleRate;
-    const iospec = soxr.soxr_io_spec(3, 3);
-    resampler = soxr.soxr_create(
-      32768, ctx.sampleRate, 2, soxrError.ref(), iospec.ref(), null, null,
-    );
 
     this.playing = false;
     this.supportsTime = false;
@@ -206,19 +218,23 @@ export class Sound {
     const left = event.outputBuffer.getChannelData(0);
     const right = event.outputBuffer.getChannelData(1);
     if (this.playing) {
-      while (bufferWriteIndex < 8192 * 4) {
+      const inputLength = this.resampler.inputSamples * 4;
+      while (bufferWriteIndex < inputLength) {
         mgba.retro_run();
       }
 
+      const resampledBuffer = this.resampler.resample(
+        audioBuffer.slice(0, inputLength),
+      );
       for (let k = 0; k < 8192; k++) {
-        left[k] = audioBuffer.readInt16LE(k * 4);
-        right[k] = audioBuffer.readInt16LE((k * 4) + 2);
+        left[k] = resampledBuffer.readInt16LE(k * 4);
+        right[k] = resampledBuffer.readInt16LE((k * 4) + 2);
       }
 
-      const newBuffer = Buffer.alloc(8192 * 4);
-      audioBuffer.copy(newBuffer, 0, 8192 * 4);
+      const newBuffer = Buffer.alloc(audioBuffer.length);
+      audioBuffer.copy(newBuffer, 0, inputLength);
       audioBuffer = newBuffer;
-      bufferWriteIndex -= 8192 * 4;
+      bufferWriteIndex -= inputLength;
     } else {
       for (let k = 0; k < 8192; k++) {
         left[k] = 0;
