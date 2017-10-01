@@ -83,9 +83,8 @@ export function getCategoryInfo(category) {
       sort: ['filename', 'name'],
       searchFields: ['name', 'artist', 'game', 'filename'],
       columns: [
-        { attr: 'name', name: 'Name', flex: 2 },
-        { attr: 'artist', name: 'Artist', flex: 1 },
         { attr: 'game', name: 'Game', flex: 1 },
+        { attr: 'name', name: 'Name', flex: 2 },
       ],
     }, info);
   }

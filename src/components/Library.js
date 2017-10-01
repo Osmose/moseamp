@@ -108,6 +108,7 @@ export default class Library extends React.Component {
               header={<Cell className="library-header">{column.name}</Cell>}
               cell={<AttrCell attr={column.attr} />}
               width={availableWidth * (column.flex / totalFlex)}
+              align={column.align || 'left'}
             />
           ))}
         </Table>

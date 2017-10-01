@@ -106,6 +106,10 @@ const CATEGORIES = {
   snes: {
     name: 'Super Nintendo',
     extensions: ['spc'],
+    columns: [
+      { attr: 'name', name: 'Name', flex: 4 },
+      { attr: 'game', name: 'Game', flex: 3 },
+    ],
   },
   master_system: {
     name: 'Sega Master System',
@@ -139,9 +143,8 @@ export function getCategoryInfo(category) {
       sort: ['game', 'track', 'filename'],
       searchFields: ['name', 'game', 'filename'],
       columns: [
-        { attr: 'name', name: 'Name', flex: 4 },
-        { attr: 'track', name: 'Track', flex: 1 },
-        { attr: 'game', name: 'Game', flex: 2 },
+        { attr: 'track', name: 'Track', flex: 1, align: 'right' },
+        { attr: 'game', name: 'Game', flex: 6 },
       ],
     }, info);
   }
