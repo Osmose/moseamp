@@ -7,12 +7,14 @@ import Library from 'moseamp/components/Library';
 import Player from 'moseamp/components/Player';
 import SearchField from 'moseamp/components/SearchField';
 import { loadEntries } from 'moseamp/ducks/library';
+import { loadPlayerInfo } from 'moseamp/ducks/player';
 
-@connect(null, { loadEntries })
+@connect(null, { loadEntries, loadPlayerInfo })
 @autobind
 export default class App extends React.Component {
   componentDidMount() {
     this.props.loadEntries();
+    this.props.loadPlayerInfo();
   }
 
   render() {

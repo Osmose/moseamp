@@ -3,7 +3,7 @@ import thunk from 'redux-thunk';
 import { combineReducers } from 'redux-immutable';
 
 import library, { saveEntriesMiddleware } from 'moseamp/ducks/library';
-import player from 'moseamp/ducks/player';
+import player, { savePlayerInfoMiddleware } from 'moseamp/ducks/player';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -16,6 +16,7 @@ export default createStore(
     applyMiddleware(
       thunk,
       saveEntriesMiddleware,
+      savePlayerInfoMiddleware,
     ),
   ),
 );

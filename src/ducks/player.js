@@ -1,4 +1,7 @@
 import { Map } from 'immutable';
+import fs from 'fs-extra';
+import os from 'os';
+import path from 'path';
 
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 
@@ -117,3 +120,40 @@ export function getCurrentTime(state) {
 export function getDuration(state) {
   return state.getIn(['player', 'duration']);
 }
+
+export function loadPlayerInfo() {
+  return async dispatch => {
+    const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
+    try {
+      const data = JSON.parse(await fs.readFile(filename));
+      dispatch({
+        type: SET_VOLUME,
+        volume: data.volume,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+}
+
+export const savePlayerInfoMiddleware = store => next => action => {
+  const result = next(action);
+  if (action.type === SET_VOLUME) {
+    const data = {
+      volume: getVolume(store.getState()),
+    };
+    (async () => {
+      const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
+      await fs.ensureDir(path.dirname(filename));
+
+      try {
+        await fs.writeFile(filename, JSON.stringify(data));
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
+    })();
+  }
+  return result;
+};
