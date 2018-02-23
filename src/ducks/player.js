@@ -126,10 +126,7 @@ export function loadPlayerInfo() {
     const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
     try {
       const data = JSON.parse(await fs.readFile(filename));
-      dispatch({
-        type: SET_VOLUME,
-        volume: data.volume,
-      });
+      dispatch(setVolume(data.volume));
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
