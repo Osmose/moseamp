@@ -96,8 +96,13 @@ const CATEGORIES = {
     extensions: ['hes'],
   },
   turbografx_16: {
-    name: '',
+    name: 'TurboGrafx-16',
     extensions: ['kss'], // TODO: kss is used by other sega stuff
+    columns: [
+      { attr: 'track', name: 'Name', flex: 1, align: 'right' },
+      { attr: 'name', name: 'Name', flex: 4 },
+      { attr: 'game', name: 'Game', flex: 3 },
+    ],
   },
   nes: {
     name: 'Nintendo (NES)',
