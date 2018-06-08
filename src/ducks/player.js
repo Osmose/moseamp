@@ -39,10 +39,17 @@ export default function reducer(state = defaultState(), action = {}) {
 }
 
 export function openEntry(entry) {
-  player.loadSound(entry);
-  return {
-    type: SET_CURRENT_ENTRY_ID,
-    entryId: entry.get('id'),
+  return async dispatch => {
+    try {
+      await player.loadSound(entry);
+      dispatch({
+        type: SET_CURRENT_ENTRY_ID,
+        entryId: entry.get('id'),
+      });
+      dispatch(play());
+    } catch (err) {
+      console.log(err);
+    }
   };
 }
 

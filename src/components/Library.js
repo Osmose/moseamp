@@ -60,7 +60,6 @@ export default class Library extends React.Component {
   handleDoubleClickRow(event, rowIndex) {
     const { entries } = this.props;
     this.props.openEntry(entries.get(rowIndex));
-    this.props.play();
   }
 
   rowClassNameGetter(rowIndex) {

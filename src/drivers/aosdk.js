@@ -32,14 +32,14 @@ const sample = new StereoSample();
 export const driverId = 'aosdk';
 
 const CATEGORIES = {
-  ps1: {
-    name: 'Playstation',
-    extensions: ['psf', 'minipsf'],
-  },
-  ps2: {
-    name: 'Playstation 2',
-    extensions: ['psf2', 'minipsf2'],
-  },
+  // ps1: {
+  //   name: 'Playstation',
+  //   extensions: ['psf', 'minipsf'],
+  // },
+  // ps2: {
+  //   name: 'Playstation 2',
+  //   extensions: ['psf2', 'minipsf2'],
+  // },
 };
 
 export function getDisplayName(category) {

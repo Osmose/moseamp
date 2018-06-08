@@ -26,6 +26,7 @@ module.exports = {
       { from: './libs/libaosdk.dylib', to: 'libaosdk.dylib' },
       { from: './libs/mgba_libretro.dylib', to: 'mgba_libretro.dylib' },
       { from: './libs/libsoxr.dylib', to: 'libsoxr.dylib' },
+      { from: './libs/libmusicplayer.dylib', to: 'libmusicplayer.dylib' },
     ]),
   ],
   node: {

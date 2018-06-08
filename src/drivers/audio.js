@@ -31,11 +31,10 @@ export function getCategoryInfo(category) {
 export async function createEntries(filename) {
   let metadata = {};
   if (path.extname(filename) === '.mp3') {
-    metadata = await new Promise(resolve => {
+    metadata = await new Promise((resolve, reject) => {
       id3({ file: filename, type: id3.OPEN_LOCAL }, (err, tags) => {
         if (err) {
-          console.error(err);
-          resolve({});
+          reject(err);
         } else {
           resolve({
             title: tags.title || '',

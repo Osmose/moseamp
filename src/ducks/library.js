@@ -49,9 +49,9 @@ export default function reducer(state = defaultState(), action = {}) {
 async function _createEntries(filenames) {
   const files = [];
   const directories = [];
-  const stats = await Promise.all(filenames.map(fn => fs.stat(fn)));
+  const stats = await Promise.all(filenames.map(fn => fs.stat(fn).catch(() => null)));
   for (let k = 0; k < filenames.length; k++) {
-    if (stats[k].isDirectory()) {
+    if (stats[k] && stats[k].isDirectory()) {
       directories.push(filenames[k]);
     } else {
       files.push(filenames[k]);

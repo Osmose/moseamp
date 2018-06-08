@@ -22,10 +22,12 @@ class Player {
       if (this.currentSound.supportsTime) {
         this.currentSound.removeListener(this);
       }
+      if (this.currentSound.onDelete) {
+        this.currentSound.onDelete();
+      }
     }
 
-    this.currentSound = createSound(entry, this.ctx);
-    await this.currentSound.promiseLoaded;
+    this.currentSound = await createSound(entry, this.ctx);
 
     this.currentSound.sourceNode.connect(this.gainNode);
     if (this.currentSound.supportsTime) {
