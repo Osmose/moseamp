@@ -2,10 +2,26 @@ import ffi from 'ffi';
 import ref from 'ref';
 import path from 'path';
 import ArrayType from 'ref-array';
+import StructType from 'ref-struct';
 import { Map } from 'immutable';
+
+const IOSpecType = StructType({
+  itype: 'int',
+  otype: 'int',
+  scale: 'double',
+  e: 'pointer',
+  flags: 'ulong',
+});
+
+const soxr = ffi.Library(path.resolve(__dirname, 'libsoxr.dylib'), {
+  soxr_io_spec: [IOSpecType, ['int', 'int']],
+  soxr_create: ['pointer', ['double', 'double', 'uint', 'pointer', 'pointer', 'pointer', 'pointer']],
+  soxr_process: ['pointer', ['pointer', 'pointer', 'size_t', 'pointer', 'pointer', 'size_t', 'pointer']],
+});
 
 const AudioBufferArray = ArrayType(ref.types.short);
 
+console.log(path.resolve(__dirname, 'libmusicplayer.dylib'));
 const musicplayer = ffi.Library(path.resolve(__dirname, 'libmusicplayer.dylib'), {
   init: ['void', ['string']],
   playerFor: ['pointer', ['string']],
@@ -15,7 +31,39 @@ const musicplayer = ffi.Library(path.resolve(__dirname, 'libmusicplayer.dylib'),
   freePlayer: ['void', ['pointer']],
 });
 
-musicplayer.init('/Users/mkelly/Projects/musicplayer/data');
+musicplayer.init('/Users/osmose/Projects/musicplayer/data');
+
+class Resampler {
+  constructor(inputRate, outputRate, outputSamples) {
+    this.outputRate = outputRate;
+    this.inputRate = inputRate;
+    this.idone = ref.alloc('size_t');
+    this.odone = ref.alloc('size_t');
+
+    const iospec = soxr.soxr_io_spec(3, 3);
+    const soxrError = Buffer.alloc(256);
+    this.resampler = soxr.soxr_create(
+      this.inputRate, this.outputRate, 2, soxrError.ref(), iospec.ref(), null, null,
+    );
+
+    this.outputSamples = outputSamples;
+    this.inputSamples = Math.floor(((outputSamples - 0.5) * this.inputRate) / this.outputRate);
+    this.resampledData = Buffer.alloc(outputSamples * 4);
+  }
+
+  resample(inputData) {
+    const err = soxr.soxr_process(
+      this.resampler,
+      inputData, this.inputSamples, this.idone.ref(),
+      this.resampledData, this.outputSamples, this.odone.ref(),
+    );
+    if (!err.isNull()) {
+      throw new Error(err.readCString());
+    }
+
+    return this.resampledData;
+  }
+}
 
 export const driverId = 'musicplayer';
 
@@ -111,6 +159,9 @@ export class Sound {
     this.scriptNode = ctx.createScriptProcessor(8192, 1, 2);
     this.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
     this.scriptNode.connect(this.sourceNode);
+    // if (entry.get('category') === 'ps2') {
+    //   this.resampler = new Resampler(48000, ctx.sampleRate, 8192);
+    // }
 
     this.playing = false;
     this.supportsTime = false;
@@ -121,9 +172,18 @@ export class Sound {
     const right = event.outputBuffer.getChannelData(1);
     if (this.playing && this.player) {
       musicplayer.play(this.player, this.buffer, 8192 * 2);
-      for (let k = 0; k < 8192; k++) {
-        left[k] = this.buffer[k * 2];
-        right[k] = this.buffer[(k * 2) + 1];
+
+      if (this.resampler) {
+        const resampledBuffer = this.resampler.resample(this.buffer.buffer);
+        for (let k = 0; k < 8192; k++) {
+          left[k] = resampledBuffer.readInt16LE(k * 4);
+          right[k] = resampledBuffer.readInt16LE((k * 4) + 2);
+        }
+      } else {
+        for (let k = 0; k < 8192; k++) {
+          left[k] = this.buffer[k * 2];
+          right[k] = this.buffer[(k * 2) + 1];
+        }
       }
     } else {
       for (let k = 0; k < 8192; k++) {

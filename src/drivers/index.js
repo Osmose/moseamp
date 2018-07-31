@@ -10,20 +10,9 @@ for (const moduleName of context.keys()) {
 }
 
 export async function createSound(entry, ctx) {
-  let sound = null;
-  for (const driver of Object.values(drivers)) {
-    if (driver.supportsFile(entry.get('filename'))) {
-      sound = new driver.Sound(entry, ctx);
-      break;
-    }
-  }
-
-  if (sound) {
-    await sound.promiseLoaded;
-    return sound;
-  }
-
-  return null;
+  const sound = new drivers.musicplayer.Sound(entry, ctx);
+  await sound.promiseLoaded;
+  return sound;
 }
 
 export async function createEntries(filename) {
