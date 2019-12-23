@@ -22,11 +22,8 @@ module.exports = {
         from: './node_modules/fixed-data-table-2/dist/fixed-data-table-base.css',
         to: 'css/fixed-data-table-base.css',
       },
-      { from: './libs/libgme.dylib', to: 'libgme.dylib' },
-      { from: './libs/libaosdk.dylib', to: 'libaosdk.dylib' },
-      { from: './libs/mgba_libretro.dylib', to: 'mgba_libretro.dylib' },
-      { from: './libs/libsoxr.dylib', to: 'libsoxr.dylib' },
       { from: './libs/libmusicplayer.dylib', to: 'libmusicplayer.dylib' },
+      { from: './libs/musicplayer_data', to: 'musicplayer_data' },
     ]),
   ],
   node: {

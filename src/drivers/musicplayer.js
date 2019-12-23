@@ -5,23 +5,8 @@ import ArrayType from 'ref-array';
 import StructType from 'ref-struct';
 import { Map } from 'immutable';
 
-const IOSpecType = StructType({
-  itype: 'int',
-  otype: 'int',
-  scale: 'double',
-  e: 'pointer',
-  flags: 'ulong',
-});
-
-const soxr = ffi.Library(path.resolve(__dirname, 'libsoxr.dylib'), {
-  soxr_io_spec: [IOSpecType, ['int', 'int']],
-  soxr_create: ['pointer', ['double', 'double', 'uint', 'pointer', 'pointer', 'pointer', 'pointer']],
-  soxr_process: ['pointer', ['pointer', 'pointer', 'size_t', 'pointer', 'pointer', 'size_t', 'pointer']],
-});
-
 const AudioBufferArray = ArrayType(ref.types.short);
 
-console.log(path.resolve(__dirname, 'libmusicplayer.dylib'));
 const musicplayer = ffi.Library(path.resolve(__dirname, 'libmusicplayer.dylib'), {
   init: ['void', ['string']],
   playerFor: ['pointer', ['string']],
@@ -29,41 +14,8 @@ const musicplayer = ffi.Library(path.resolve(__dirname, 'libmusicplayer.dylib'),
   getMetaInt: [ref.types.int, ['pointer', 'string']],
   play: ['void', ['pointer', AudioBufferArray, ref.types.int]],
   freePlayer: ['void', ['pointer']],
+  seek: ['void', ['pointer', ref.types.int]],
 });
-
-musicplayer.init('/Users/osmose/Projects/musicplayer/data');
-
-class Resampler {
-  constructor(inputRate, outputRate, outputSamples) {
-    this.outputRate = outputRate;
-    this.inputRate = inputRate;
-    this.idone = ref.alloc('size_t');
-    this.odone = ref.alloc('size_t');
-
-    const iospec = soxr.soxr_io_spec(3, 3);
-    const soxrError = Buffer.alloc(256);
-    this.resampler = soxr.soxr_create(
-      this.inputRate, this.outputRate, 2, soxrError.ref(), iospec.ref(), null, null,
-    );
-
-    this.outputSamples = outputSamples;
-    this.inputSamples = Math.floor(((outputSamples - 0.5) * this.inputRate) / this.outputRate);
-    this.resampledData = Buffer.alloc(outputSamples * 4);
-  }
-
-  resample(inputData) {
-    const err = soxr.soxr_process(
-      this.resampler,
-      inputData, this.inputSamples, this.idone.ref(),
-      this.resampledData, this.outputSamples, this.odone.ref(),
-    );
-    if (!err.isNull()) {
-      throw new Error(err.readCString());
-    }
-
-    return this.resampledData;
-  }
-}
 
 export const driverId = 'musicplayer';
 
@@ -85,6 +37,8 @@ const CATEGORIES = {
 export function getDisplayName(category) {
   return CATEGORIES[category].name;
 }
+
+musicplayer.init(path.resolve(__dirname, 'musicplayer_data'));
 
 function getCategory(filename) {
   const ext = path.extname(filename).slice(1).toLowerCase();
@@ -150,6 +104,10 @@ export class Sound {
         this.player = null;
         reject(new Error('No plugin could handle file.'));
       } else {
+        console.log(entry);
+        if (entry.get('track')) {
+          musicplayer.seek(this.player, entry.get('track'));
+        }
         resolve();
       }
     });
@@ -159,9 +117,6 @@ export class Sound {
     this.scriptNode = ctx.createScriptProcessor(8192, 1, 2);
     this.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
     this.scriptNode.connect(this.sourceNode);
-    // if (entry.get('category') === 'ps2') {
-    //   this.resampler = new Resampler(48000, ctx.sampleRate, 8192);
-    // }
 
     this.playing = false;
     this.supportsTime = false;
@@ -173,17 +128,9 @@ export class Sound {
     if (this.playing && this.player) {
       musicplayer.play(this.player, this.buffer, 8192 * 2);
 
-      if (this.resampler) {
-        const resampledBuffer = this.resampler.resample(this.buffer.buffer);
-        for (let k = 0; k < 8192; k++) {
-          left[k] = resampledBuffer.readInt16LE(k * 4);
-          right[k] = resampledBuffer.readInt16LE((k * 4) + 2);
-        }
-      } else {
-        for (let k = 0; k < 8192; k++) {
-          left[k] = this.buffer[k * 2];
-          right[k] = this.buffer[(k * 2) + 1];
-        }
+      for (let k = 0; k < 8192; k++) {
+        left[k] = this.buffer[k * 2];
+        right[k] = this.buffer[(k * 2) + 1];
       }
     } else {
       for (let k = 0; k < 8192; k++) {
@@ -195,7 +142,7 @@ export class Sound {
 
   onDelete() {
     if (this.player) {
-      //musicplayer.freePlayer(this.player);
+      musicplayer.freePlayer(this.player);
       this.player = null;
     }
   }

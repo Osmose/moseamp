@@ -6,10 +6,15 @@ export const DEFAULT_GAIN = 0.7;
 
 class Player {
   constructor() {
-    this.ctx = new AudioContext();
-    this.gainNode = this.ctx.createGain();
-    this.gainNode.gain.value = DEFAULT_GAIN;
-    this.gainNode.connect(this.ctx.destination);
+    this.ctx44100 = new AudioContext({sampleRate: 44100});
+    this.ctx48000 = new AudioContext({sampleRate: 48000});
+    this.ctx = this.ctx44100;
+
+    for (const ctx of [this.ctx44100, this.ctx48000]) {
+      ctx.gainNode = ctx.createGain();
+      ctx.gainNode.gain.value = DEFAULT_GAIN;
+      ctx.gainNode.connect(ctx.destination);
+    }
   }
 
   async loadSound(entry) {
@@ -27,9 +32,14 @@ class Player {
       }
     }
 
+    if (entry.get('category') === 'ps2') {
+      this.ctx = this.ctx48000;
+    } else {
+      this.ctx = this.ctx44100;
+    }
     this.currentSound = await createSound(entry, this.ctx);
 
-    this.currentSound.sourceNode.connect(this.gainNode);
+    this.currentSound.sourceNode.connect(this.ctx.gainNode);
     if (this.currentSound.supportsTime) {
       store.dispatch(setDuration(this.currentSound.duration));
       this.currentSound.addListener(this);
@@ -40,7 +50,7 @@ class Player {
   }
 
   setVolume(volume) {
-    this.gainNode.gain.value = volume;
+    this.ctx.gainNode.gain.value = volume;
   }
 
   seek(time) {

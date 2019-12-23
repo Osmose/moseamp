@@ -12,6 +12,7 @@ function createWindow() {
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       experimentalFeatures: true,
+      nodeIntegration: true,
     },
   });
   browserWindow.loadURL(url.format({
@@ -108,14 +109,19 @@ app.on('ready', async () => {
       REDUX_DEVTOOLS,
     } = require('electron-devtools-installer');
 
-    await installExtension(REACT_DEVELOPER_TOOLS);
-    await installExtension(REDUX_DEVTOOLS);
+    try {
+      await installExtension(REACT_DEVELOPER_TOOLS);
+      await installExtension(REDUX_DEVTOOLS);
+    } catch (err) {
+      console.error('Failed to start devtools');
+      console.error(err);
+    }
   }
 
   createWindow();
 
   const shortcutEvents = {
-    mediaplaypause: 'play-pause',
+    'Cmd+Alt+Space': 'play-pause',
     medianexttrack: 'next-track',
     mediaprevioustrack: 'previous-track',
   };

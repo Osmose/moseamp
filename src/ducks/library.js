@@ -75,9 +75,9 @@ async function _createEntries(filenames) {
   return entries.filter(e => e);
 }
 
-export function createLibraryEntries(filenames) {
+export function createLibraryEntries({filePaths}) {
   return async dispatch => {
-    const entries = await _createEntries(filenames);
+    const entries = await _createEntries(filePaths);
     if (!entries) {
       dispatch({ type: SKIP });
     }
