@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/renderer.js',
+  mode: 'development',
   devtool: 'source-map',
   output: {
     filename: 'renderer.bundle.js',

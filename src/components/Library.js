@@ -16,6 +16,7 @@ import {
 import { getCategoryInfo } from 'moseamp/drivers';
 
 
+export default
 @connect(
   state => ({
     entries: getFilteredSearchResults(state),
@@ -25,7 +26,7 @@ import { getCategoryInfo } from 'moseamp/drivers';
   { openEntry, play, setSelectedEntry },
 )
 @autobind
-export default class Library extends React.Component {
+class Library extends React.Component {
   constructor(props) {
     super(props);
     this.width = 757;

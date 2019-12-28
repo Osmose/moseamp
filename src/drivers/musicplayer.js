@@ -3,6 +3,7 @@ import { Map } from 'immutable';
 import bindings from 'bindings';
 
 const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
+loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 export const driverId = 'musicplayer';
 
@@ -64,13 +65,22 @@ const CATEGORIES = {
     name: 'Gameboy Advance',
     extensions: ['gsf', 'minigsf'],
   },
+  audio: {
+    name: 'Audio',
+    sort: ['artist', 'album', 'track', 'name'],
+    searchFields: ['name', 'filename', 'artist', 'album'],
+    columns: [
+      { attr: 'name', name: 'Name', flex: 4 },
+      { attr: 'artist', name: 'Artist', flex: 3 },
+      { attr: 'track', name: 'Track', flex: 1 },
+      { attr: 'album', name: 'Album', flex: 2 },
+    ],
+  },
 };
 
 export function getDisplayName(category) {
   return CATEGORIES[category].name;
 }
-
-loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 function getCategory(filename) {
   const ext = path.extname(filename).slice(1).toLowerCase();
@@ -90,14 +100,15 @@ export function supportsFile(filename) {
 export function getCategoryInfo(category) {
   const info = CATEGORIES[category];
   if (info) {
-    return Object.assign({
+    return {
       sort: ['filename', 'name'],
       searchFields: ['name', 'artist', 'game', 'filename'],
       columns: [
         { attr: 'game', name: 'Game', flex: 1 },
         { attr: 'name', name: 'Name', flex: 2 },
       ],
-    }, info);
+      ...info,
+    };
   }
 
   return undefined;
@@ -105,15 +116,17 @@ export function getCategoryInfo(category) {
 
 export async function createEntries(filename) {
   const category = getCategory(filename);
-  // const player = musicplayer.playerFor(filename);
-  // console.log(player.isNull());
-  // if (player.isNull()) {
-  //   return [];
-  // }
 
-  const title = path.basename(filename, path.extname(filename));
-  const game = path.basename(path.dirname(filename));
-  // musicplayer.freePlayer(player);
+  let title = path.basename(filename, path.extname(filename));
+  let game = path.basename(path.dirname(filename));
+
+  try {
+    const player = new MusicPlayer(filename);
+    title = player.getMeta('sub_title');
+    game = player.getMeta('game');
+    player.freePlayer();
+  } catch (err) {}
+
   return [
     new Map({
       id: filename,
@@ -133,6 +146,12 @@ export class Sound {
       try {
         this.player = new MusicPlayer(entry.get('filename'));
         console.log(`Title: ${this.player.getMeta('title')}`);
+        console.log(`SubTitle: ${this.player.getMeta('sub_title')}`);
+        console.log(`Length: ${this.player.getMeta('length')}`);
+        console.log(`Game: ${this.player.getMeta('game')}`);
+        console.log(`Composer: ${this.player.getMeta('composer')}`);
+        console.log(`Format: ${this.player.getMeta('format')}`);
+        console.log(`Songs: ${this.player.getMeta('songs')}`);
       } catch (err) {
         reject(err);
       }

@@ -10,9 +10,7 @@ void loadPlugins(const Nan::FunctionCallbackInfo<v8::Value>& args) {
   printf("LOADING PLUGINS\n");
   v8::String::Utf8Value dataDir(args[0]->ToString());
   std::string strDataDir = std::string(*dataDir);
-  printf("Plugin dir: %s", strDataDir.c_str());
   ChipPlugin::createPlugins(strDataDir);
-  printf("PLUGInS LOADED\n");
 }
 
 void initModule(v8::Local<v8::Object> exports) {

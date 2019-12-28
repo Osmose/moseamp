@@ -61,7 +61,7 @@ NAN_METHOD(MusicPlayer::getMeta) {
 
   std::string result = self->chipPlayer->getMeta(strMetaName);
 
-  info.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, result.c_str(), v8::NewStringType::kNormal).ToLocalChecked());
+  info.GetReturnValue().Set(Nan::New(result).ToLocalChecked());
 }
 
 NAN_METHOD(MusicPlayer::getMetaInt) {
@@ -89,21 +89,17 @@ NAN_METHOD(MusicPlayer::freePlayer) {
 }
 
 NAN_METHOD(MusicPlayer::play) {
-  printf("PLAY\n");
   MusicPlayer* self = Nan::ObjectWrap::Unwrap<MusicPlayer>(info.This());
 
   int size = info[0]->IntegerValue();
   std::vector<int16_t> samples(size, 0);
-  printf("SAMPLES %u\n", size);
 
   self->chipPlayer->getSamples(&samples[0], size);
 
-  printf("got samples\n");
   v8::Local<v8::Array> returnSamples = Nan::New<v8::Array>(size);
   for (int i = 0; i < size; i++) {
     Nan::Set(returnSamples, i, Nan::New(samples.at(i)));
   }
-  printf("samples transferred\n");
 
   info.GetReturnValue().Set(returnSamples);
 }
