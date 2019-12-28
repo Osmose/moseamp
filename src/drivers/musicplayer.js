@@ -1,21 +1,8 @@
-import ffi from 'ffi';
-import ref from 'ref';
 import path from 'path';
-import ArrayType from 'ref-array';
-import StructType from 'ref-struct';
 import { Map } from 'immutable';
+import bindings from 'bindings';
 
-const AudioBufferArray = ArrayType(ref.types.short);
-
-const musicplayer = ffi.Library(path.resolve(__dirname, 'libmusicplayer.dylib'), {
-  init: ['void', ['string']],
-  playerFor: ['pointer', ['string']],
-  getMeta: ['string', ['pointer', 'string']],
-  getMetaInt: [ref.types.int, ['pointer', 'string']],
-  play: ['void', ['pointer', AudioBufferArray, ref.types.int]],
-  freePlayer: ['void', ['pointer']],
-  seek: ['void', ['pointer', ref.types.int]],
-});
+const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
 
 export const driverId = 'musicplayer';
 
@@ -32,13 +19,58 @@ const CATEGORIES = {
     name: 'Playstation 2',
     extensions: ['psf2', 'minipsf2'],
   },
+  spectrum_zx: {
+    name: 'Spectrum ZX',
+    extensions: ['ay'],
+  },
+  gb: {
+    name: 'Gameboy',
+    extensions: ['gbs'],
+  },
+  genesis: {
+    name: 'Genesis',
+    extensions: ['gym'],
+  },
+  nec_pc_engine: {
+    name: 'NEC PC Engine',
+    extensions: ['hes'],
+  },
+  turbografx_16: {
+    name: 'TurboGrafx-16',
+    extensions: ['kss'], // TODO: kss is used by other sega stuff
+    columns: [
+      { attr: 'track', name: 'Name', flex: 1, align: 'right' },
+      { attr: 'name', name: 'Name', flex: 4 },
+      { attr: 'game', name: 'Game', flex: 3 },
+    ],
+  },
+  nes: {
+    name: 'Nintendo (NES)',
+    extensions: ['nsf', 'nsfe'],
+  },
+  snes: {
+    name: 'Super Nintendo',
+    extensions: ['spc'],
+    columns: [
+      { attr: 'name', name: 'Name', flex: 4 },
+      { attr: 'game', name: 'Game', flex: 3 },
+    ],
+  },
+  master_system: {
+    name: 'Sega Master System',
+    extensions: ['vgm'], // TODO: vgm is three consoles in one
+  },
+  gba: {
+    name: 'Gameboy Advance',
+    extensions: ['gsf', 'minigsf'],
+  },
 };
 
 export function getDisplayName(category) {
   return CATEGORIES[category].name;
 }
 
-musicplayer.init(path.resolve(__dirname, 'musicplayer_data'));
+loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 function getCategory(filename) {
   const ext = path.extname(filename).slice(1).toLowerCase();
@@ -97,19 +129,19 @@ export async function createEntries(filename) {
 export class Sound {
   constructor(entry, ctx) {
     this.entry = entry;
-    this.buffer = new AudioBufferArray(8192 * 2);
     this.promiseLoaded = new Promise((resolve, reject) => {
-      this.player = musicplayer.playerFor(entry.get('filename'));
-      if (this.player.isNull()) {
-        this.player = null;
-        reject(new Error('No plugin could handle file.'));
-      } else {
-        console.log(entry);
-        if (entry.get('track')) {
-          musicplayer.seek(this.player, entry.get('track'));
-        }
-        resolve();
+      try {
+        this.player = new MusicPlayer(entry.get('filename'));
+        console.log(`Title: ${this.player.getMeta('title')}`);
+      } catch (err) {
+        reject(err);
       }
+
+      console.log(entry);
+      if (entry.get('track')) {
+        this.player.seek(entry.get('track'));
+      }
+      resolve();
     });
 
     this.sourceNode = ctx.createGain();
@@ -126,11 +158,11 @@ export class Sound {
     const left = event.outputBuffer.getChannelData(0);
     const right = event.outputBuffer.getChannelData(1);
     if (this.playing && this.player) {
-      musicplayer.play(this.player, this.buffer, 8192 * 2);
+      const samples = this.player.play(8192 * 2);
 
       for (let k = 0; k < 8192; k++) {
-        left[k] = this.buffer[k * 2];
-        right[k] = this.buffer[(k * 2) + 1];
+        left[k] = samples[k * 2];
+        right[k] = samples[(k * 2) + 1];
       }
     } else {
       for (let k = 0; k < 8192; k++) {
@@ -142,7 +174,7 @@ export class Sound {
 
   onDelete() {
     if (this.player) {
-      musicplayer.freePlayer(this.player);
+      this.player.freePlayer();
       this.player = null;
     }
   }

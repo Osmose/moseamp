@@ -80,7 +80,7 @@ public:
     static constexpr const char* SLASH_STR = "/";
     static const char PathSeparator;
     static constexpr const char* PathSeparator_STR = ":";
-    static constexpr int maxPath = PATH_MAX;
+    static constexpr int maxPath = 4096;
     static int Fileno(FILE* fp) { return fileno(fp); }
     static FILE* Fopen(const char* name, const char* mode)
     {
@@ -311,4 +311,3 @@ private:
 };
 
 } // namespace utils
-

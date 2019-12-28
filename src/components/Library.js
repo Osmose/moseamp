@@ -79,6 +79,9 @@ export default class Library extends React.Component {
 
   render() {
     const { entries, categoryInfo, selectedEntry } = this.props;
+    if (!categoryInfo) {
+      return null;
+    }
     const totalFlex = categoryInfo.columns.map(c => c.flex).reduce((a, b) => a + b);
     const availableWidth = this.width - 18;
     let selectedEntryIndex;

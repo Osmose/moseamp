@@ -22,8 +22,7 @@ module.exports = {
         from: './node_modules/fixed-data-table-2/dist/fixed-data-table-base.css',
         to: 'css/fixed-data-table-base.css',
       },
-      { from: './libs/libmusicplayer.dylib', to: 'libmusicplayer.dylib' },
-      { from: './libs/musicplayer_data', to: 'musicplayer_data' },
+      { from: './musicplayer/data', to: 'musicplayer_data' },
     ]),
   ],
   node: {
