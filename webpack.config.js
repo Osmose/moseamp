@@ -29,6 +29,8 @@ module.exports = {
         to: 'webfonts/[name].[ext]',
       },
       { from: './musicplayer/data', to: 'musicplayer_data' },
+      { from: './native_build/Release/musicplayer_node.node', to: 'musicplayer_node.node' },
+      { from: './native_build/Release/musicplayer_node.node', to: 'musicplayer_node.node' },
     ]),
   ],
   node: {

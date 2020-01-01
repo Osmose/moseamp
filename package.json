@@ -16,8 +16,9 @@
     "build": "webpack --config webpack.config.js",
     "build:prod": "webpack --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.config.js",
+    "compile": "cmake-js build --target musicplayer_node --out native_build",
     "start": "MOSEAMP_DEVTOOLS=1 electron .",
-    "package:macos": "electron-packager . MoseAmp --platform=darwin --icon=resources/mac/icon.icns --out=dist --overwrite"
+    "package:macos": "bin/package.sh"
   },
   "author": "Michael Kelly",
   "license": "MIT",
@@ -52,6 +53,7 @@
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.7.7",
     "@babel/preset-react": "^7.7.4",
+    "appdmg": "^0.6.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "copy-webpack-plugin": "^5.1.1",

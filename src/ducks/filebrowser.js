@@ -11,7 +11,7 @@ const SET_CURRENT_ENTRIES = 'filebrowser/SET_CURRENT_ENTRIES';
 function defaultState() {
   return {
     root: path.parse(process.cwd()).root,
-    currentPath: 'Users/osmose',
+    currentPath: '',
     currentEntries: [],
     loading: false,
   };
