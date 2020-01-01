@@ -235,8 +235,18 @@ html, body {
   display: inline-block
 }
 
+.file-browser .entries .icon .image-icon {
+  vertical-align: middle;
+  width: 16px;
+}
+
 .file-browser .entries .entry:hover {
-  background: #4a81d7;
+  background: hsl(217, 64%, 60%);
+  cursor: pointer;
+}
+
+.file-browser .entries .entry:active {
+  background: hsl(217, 64%, 40%);
   cursor: pointer;
 }
 
@@ -247,61 +257,6 @@ html, body {
 
 .library-header {
   border-right: 1px solid #151515;
-}
-
-.public_fixedDataTableCell_cellContent {
-
-}
-
-.fixedDataTableLayout_header {
-  background: linear-gradient(180deg, #4a4a4a, #282828);
-  border-top: 1px solid #5f5f5f;
-  border-bottom: 1px solid #171717;
-  color: #d4d4d4;
-  text-shadow: 0 1px 2px #000;
-  font-weight: normal;
-  font-size: .9rem;
-  box-shadow: none;
-}
-
-.library-row.selected {
-  background: #4a81d7;
-  color: #FFF;
-}
-
-.public_fixedDataTableRow_odd:not(.selected) {
-  background: #0f0f0f;
-}
-
-.public_fixedDataTableRow_even:not(.selected) {
-  background: #1d1d1d;
-}
-
-.fixedDataTableCellLayout_main,
-.fixedDataTableLayout_hasBottomBorder {
-  border: none;
-}
-
-.public_Scrollbar_main.public_Scrollbar_mainActive,
-.public_Scrollbar_main {
-  background-color: #0f0f0f;
-  border-left: 1px solid #1d1d1d;
-}
-
-.public_Scrollbar_mainOpaque,
-.public_Scrollbar_mainOpaque.public_Scrollbar_mainActive,
-.public_Scrollbar_mainOpaque:hover {
-  background-color: #0f0f0f;
-}
-
-.public_Scrollbar_face:after {
-  background-color: #a9a9a9;
-}
-
-.public_Scrollbar_main:hover .public_Scrollbar_face:after,
-.public_Scrollbar_mainActive .public_Scrollbar_face:after,
-.public_Scrollbar_faceActive:after {
-  background-color: #999999;
 }
 
 .console-icon {

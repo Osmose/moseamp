@@ -12,7 +12,14 @@ import {
   loadEntriesForCurrentPath,
 } from 'moseamp/ducks/filebrowser';
 import { openFile } from 'moseamp/ducks/player';
+import FILE_TYPES from 'moseamp/filetypes';
 
+const EXTENSIONS_ICONS = {};
+for (const [code, type] of Object.entries(FILE_TYPES)) {
+  for (const extension of type.extensions) {
+    EXTENSIONS_ICONS[extension] = `img/${code}.png`;
+  }
+}
 
 export default
 @connect(
@@ -116,6 +123,11 @@ class FileIcon extends React.Component {
     const { entry } = this.props;
     if (entry.type === 'directory') {
       return <Icon name="folder-open" />;
+    }
+
+    const iconPath = EXTENSIONS_ICONS[entry.ext];
+    if (iconPath) {
+      return <img src={iconPath} className="image-icon" />;
     }
 
     return <Icon name="file" />;

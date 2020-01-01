@@ -96,6 +96,7 @@ export function loadEntriesForCurrentPath() {
       return {
         fullPath: path.join(fullNewPath, dirEnt.name),
         path: path.join(currentPath, dirEnt.name),
+        ext: path.extname(dirEnt.name),
         name: dirEnt.name,
         type: dirEnt.isDirectory() ? 'directory' : 'file',
       };
