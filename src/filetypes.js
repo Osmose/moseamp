@@ -1,4 +1,4 @@
-export default {
+const FILE_TYPES = {
   n64: {
     name: 'Nintendo64',
     extensions: ['.usf', '.miniusf'],
@@ -52,3 +52,14 @@ export default {
     extensions: ['.mp3', '.ogg', '.wav'],
   },
 };
+
+export const SUPPORTED_EXTENSIONS = [];
+export const EXTENSIONS_ICONS = {};
+for (const [code, type] of Object.entries(FILE_TYPES)) {
+  for (const extension of type.extensions) {
+    SUPPORTED_EXTENSIONS.push(extension);
+    EXTENSIONS_ICONS[extension] = `img/${code}.png`;
+  }
+}
+
+export default FILE_TYPES;

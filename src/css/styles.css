@@ -287,6 +287,12 @@ html, body {
   line-height: 30px;
 }
 
+.player-info-title .image-icon {
+  width: 16px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
 .player-controls {
   text-align: center;
   flex: 2;

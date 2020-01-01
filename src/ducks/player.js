@@ -4,11 +4,16 @@ import path from 'path';
 
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 
+// == Actions
+
 const SET_CURRENT_FILE_PATH = 'player/SET_CURRENT_FILE_PATH';
 const SET_PLAYING = 'player/SET_PLAYING';
 const SET_VOLUME = 'player/SET_VOLUME';
 const SET_CURRENT_TIME = 'player/SET_CURRENT_TIME';
 const SET_DURATION = 'player/SET_DURATION';
+const SET_META = 'player/SET_META';
+
+// == Reducer
 
 function defaultState() {
   return {
@@ -17,6 +22,8 @@ function defaultState() {
     volume: DEFAULT_GAIN,
     currentTime: null,
     duration: null,
+    currentTitle: null,
+    currentArtist: null,
   };
 }
 
@@ -48,18 +55,30 @@ export default function reducer(state = defaultState(), action = {}) {
         ...state,
         duration: action.duration,
       };
+    case SET_META:
+      return {
+        ...state,
+        currentTitle: action.meta.title,
+        currentArtist: action.meta.artist,
+      };
     default:
       return state;
   }
 }
 
+// == Action Creators
+
 export function openFile(filePath) {
   return async dispatch => {
     try {
-      await player.load(filePath);
+      const meta = await player.load(filePath);
       dispatch({
         type: SET_CURRENT_FILE_PATH,
         filePath,
+      });
+      dispatch({
+        type: SET_META,
+        meta,
       });
       dispatch(play());
     } catch (err) {
@@ -117,6 +136,28 @@ export function setDuration(duration) {
   };
 }
 
+export function setMeta(meta) {
+  return {
+    type: SET_META,
+    meta,
+  };
+}
+
+export function loadPlayerInfo() {
+  return async dispatch => {
+    const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
+    try {
+      const data = JSON.parse(await fs.readFile(filename));
+      dispatch(setVolume(data.volume));
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  };
+}
+
+// == Selectors
+
 export function getCurrentFilePath(state) {
   return state.player.currentFilePath;
 }
@@ -137,18 +178,15 @@ export function getDuration(state) {
   return state.player.duration;
 }
 
-export function loadPlayerInfo() {
-  return async dispatch => {
-    const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
-    try {
-      const data = JSON.parse(await fs.readFile(filename));
-      dispatch(setVolume(data.volume));
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  };
+export function getCurrentTitle(state) {
+  return state.player.currentTitle;
 }
+
+export function getCurrentArtist(state) {
+  return state.player.currentArtist;
+}
+
+// == Middleware
 
 export const savePlayerInfoMiddleware = store => next => action => {
   const result = next(action);

@@ -1,3 +1,5 @@
+import path from 'path';
+
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -11,9 +13,12 @@ import {
   getVolume,
   setVolume,
   getCurrentTime,
+  getCurrentArtist,
+  getCurrentTitle,
   getDuration,
   seek,
 } from 'moseamp/ducks/player';
+import { EXTENSIONS_ICONS } from 'moseamp/filetypes';
 import { DEFAULT_GAIN } from 'moseamp/player';
 import { formatDuration } from 'moseamp/utils';
 import Icon from 'moseamp/components/Icon';
@@ -47,9 +52,10 @@ class PlayerControls extends React.Component {
     const { playing, currentTime, duration } = this.props;
     return (
       <div className="player-controls">
-        {playing
-          ? <PauseButton />
-          : <PlayButton />
+        {
+          playing
+            ? <PauseButton />
+            : <PlayButton />
         }
         <div className="seek-bar">
           <div className="current-time">
@@ -75,18 +81,24 @@ class PlayerControls extends React.Component {
 
 @connect(
   state => ({
+    currentTitle: getCurrentTitle(state),
+    currentArtist: getCurrentArtist(state),
     currentFilePath: getCurrentFilePath(state),
   }),
 )
 class PlayingEntryInfo extends React.Component {
   render() {
-    const { currentFilePath } = this.props;
+    const { currentFilePath, currentTitle, currentArtist } = this.props;
+    const extension = currentFilePath && path.extname(currentFilePath);
     return (
       <div className="player-info">
         <div className="player-info-title">
-          {currentFilePath || '---'}
+          {extension && <img src={EXTENSIONS_ICONS[extension]} className="image-icon" />}
+          {currentTitle}
         </div>
-        <div className="player-info-artist" />
+        <div className="player-info-artist">
+          {currentArtist}
+        </div>
       </div>
     );
   }
@@ -112,9 +124,9 @@ class PlayButton extends React.Component {
     }
 
     return (
-      <a className={className} onClick={this.handleClick}>
+      <button type="button" className={className} onClick={this.handleClick}>
         <Icon name="play" />
-      </a>
+      </button>
     );
   }
 }
@@ -128,7 +140,7 @@ class PauseButton extends React.Component {
 
   render() {
     return (
-      <button className="control-button" onClick={this.handleClick}>
+      <button type="button" className="control-button" onClick={this.handleClick}>
         <Icon name="pause" />
       </button>
     );

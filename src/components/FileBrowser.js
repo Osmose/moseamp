@@ -12,16 +12,8 @@ import {
   loadEntriesForCurrentPath,
 } from 'moseamp/ducks/filebrowser';
 import { openFile } from 'moseamp/ducks/player';
-import FILE_TYPES from 'moseamp/filetypes';
+import { EXTENSIONS_ICONS, SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
 
-const SUPPORTED_EXTENSIONS = [];
-const EXTENSIONS_ICONS = {};
-for (const [code, type] of Object.entries(FILE_TYPES)) {
-  for (const extension of type.extensions) {
-    SUPPORTED_EXTENSIONS.push(extension);
-    EXTENSIONS_ICONS[extension] = `img/${code}.png`;
-  }
-}
 
 export default
 @connect(

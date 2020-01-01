@@ -57,6 +57,18 @@ class Player {
     } else {
       this.ctx = this.ctx44100;
     }
+
+    return {
+      title: (
+        this.musicPlayer.getMeta('title')
+        || this.musicPlayer.getMeta('sub_title')
+        || path.basename(filePath)
+      ),
+      artist: (
+        this.musicPlayer.getMeta('game')
+        || '---'
+      ),
+    };
   }
 
   setVolume(volume) {
