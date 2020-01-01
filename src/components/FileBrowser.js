@@ -14,9 +14,11 @@ import {
 import { openFile } from 'moseamp/ducks/player';
 import FILE_TYPES from 'moseamp/filetypes';
 
+const SUPPORTED_EXTENSIONS = [];
 const EXTENSIONS_ICONS = {};
 for (const [code, type] of Object.entries(FILE_TYPES)) {
   for (const extension of type.extensions) {
+    SUPPORTED_EXTENSIONS.push(extension);
     EXTENSIONS_ICONS[extension] = `img/${code}.png`;
   }
 }
@@ -50,7 +52,7 @@ class FileBrowser extends React.Component {
     for (const entry of entries) {
       if (entry.type === 'directory') {
         directories.push(entry);
-      } else {
+      } else if (SUPPORTED_EXTENSIONS.includes(entry.ext)) {
         files.push(entry);
       }
     }
