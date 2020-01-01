@@ -4,11 +4,13 @@ const nodeExternals = require('webpack-node-externals');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: './src/renderer.js',
+  entry: {
+    renderer: './src/renderer.js',
+  },
   mode: 'development',
   devtool: 'source-map',
   output: {
-    filename: 'renderer.bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'build'),
   },
   target: 'electron-renderer',
@@ -16,12 +18,15 @@ module.exports = {
     new CopyWebpackPlugin([
       { from: './src/main.js', to: 'main.js' },
       { from: './src/index.html', to: 'index.html' },
-      { from: './src/font/*', to: 'font/[name].[ext]' },
       { from: './src/css/*', to: 'css/[name].[ext]' },
       { from: './src/img/*', to: 'img/[name].[ext]' },
       {
-        from: './node_modules/fixed-data-table-2/dist/fixed-data-table-base.css',
-        to: 'css/fixed-data-table-base.css',
+        from: './node_modules/@fortawesome/fontawesome-free/css/all.css',
+        to: 'css/fontawesome.css',
+      },
+      {
+        from: './node_modules/@fortawesome/fontawesome-free/webfonts/*',
+        to: 'webfonts/[name].[ext]',
       },
       { from: './musicplayer/data', to: 'musicplayer_data' },
     ]),

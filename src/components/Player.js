@@ -7,7 +7,7 @@ import {
   play,
   pause,
   getPlaying,
-  getPlayingEntry,
+  getCurrentFilePath,
   getVolume,
   setVolume,
   getCurrentTime,
@@ -75,26 +75,18 @@ class PlayerControls extends React.Component {
 
 @connect(
   state => ({
-    playingEntry: getPlayingEntry(state),
+    currentFilePath: getCurrentFilePath(state),
   }),
 )
 class PlayingEntryInfo extends React.Component {
   render() {
-    const { playingEntry } = this.props;
+    const { currentFilePath } = this.props;
     return (
       <div className="player-info">
         <div className="player-info-title">
-          {playingEntry
-            ? playingEntry.get('name')
-            : '---'
-          }
+          {currentFilePath || '---'}
         </div>
-        <div className="player-info-artist">
-          {playingEntry
-            ? playingEntry.get('artist')
-            : '---'
-          }
-        </div>
+        <div className="player-info-artist" />
       </div>
     );
   }
@@ -102,7 +94,7 @@ class PlayingEntryInfo extends React.Component {
 
 @connect(
   state => ({
-    playingEntry: getPlayingEntry(state),
+    currentFilePath: getCurrentFilePath(state),
   }),
   { play },
 )
@@ -113,9 +105,9 @@ class PlayButton extends React.Component {
   }
 
   render() {
-    const { playingEntry } = this.props;
+    const { currentFilePath } = this.props;
     let className = 'control-button';
-    if (!playingEntry) {
+    if (!currentFilePath) {
       className += ' disabled';
     }
 

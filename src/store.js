@@ -1,21 +1,19 @@
-import { createStore, applyMiddleware, compose } from 'redux';
+import { combineReducers, createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { combineReducers } from 'redux-immutable';
 
-import library, { saveEntriesMiddleware } from 'moseamp/ducks/library';
+import filebrowser from 'moseamp/ducks/filebrowser';
 import player, { savePlayerInfoMiddleware } from 'moseamp/ducks/player';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 export default createStore(
   combineReducers({
-    library,
     player,
+    filebrowser,
   }),
   composeEnhancers(
     applyMiddleware(
       thunk,
-      saveEntriesMiddleware,
       savePlayerInfoMiddleware,
     ),
   ),

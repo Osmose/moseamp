@@ -17,10 +17,11 @@ const {
   dialog,
 } = remote;
 
+export default
 @connect(state => ({
   availableCategories: getAvailableCategories(state),
 }))
-export default class Sidebar extends React.Component {
+class Sidebar extends React.Component {
   render() {
     const { availableCategories } = this.props;
     return (

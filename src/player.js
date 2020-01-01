@@ -1,92 +1,79 @@
-import { createSound } from 'moseamp/drivers';
-import store from 'moseamp/store';
-import { setDuration, setCurrentTime, setPlaying } from 'moseamp/ducks/player';
+import path from 'path';
+
+import bindings from 'bindings';
+
+const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
+loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 export const DEFAULT_GAIN = 0.7;
+const GAIN_FACTOR = 0.0001;
+const SAMPLE_COUNT = 2048;
 
 class Player {
   constructor() {
     this.ctx44100 = new AudioContext({sampleRate: 44100});
     this.ctx48000 = new AudioContext({sampleRate: 48000});
-    this.ctx = this.ctx44100;
+    this.ctxs = [this.ctx44100, this.ctx48000];
 
-    for (const ctx of [this.ctx44100, this.ctx48000]) {
+    this.ctx = null;
+    this.musicPlayer = null;
+
+    for (const ctx of this.ctxs) {
+      ctx.suspend();
+
       ctx.gainNode = ctx.createGain();
-      ctx.gainNode.gain.value = DEFAULT_GAIN;
+      ctx.gainNode.gain.value = DEFAULT_GAIN * GAIN_FACTOR;
       ctx.gainNode.connect(ctx.destination);
+
+      ctx.scriptNode = ctx.createScriptProcessor(SAMPLE_COUNT, 1, 2);
+      ctx.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
+      ctx.scriptNode.connect(ctx.gainNode);
     }
   }
 
-  async loadSound(entry) {
-    if (this.playing) {
-      this.pause();
+  handleAudioProcess(event) {
+    if (!this.musicPlayer) {
+      return;
     }
 
-    if (this.currentSound) {
-      this.currentSound.sourceNode.disconnect(this.gainNode);
-      if (this.currentSound.supportsTime) {
-        this.currentSound.removeListener(this);
-      }
-      if (this.currentSound.onDelete) {
-        this.currentSound.onDelete();
-      }
+    const left = event.outputBuffer.getChannelData(0);
+    const right = event.outputBuffer.getChannelData(1);
+    const samples = this.musicPlayer.play(SAMPLE_COUNT * 2);
+    for (let k = 0; k < SAMPLE_COUNT; k++) {
+      left[k] = samples[k * 2];
+      right[k] = samples[(k * 2) + 1];
+    }
+  }
+
+  async load(filePath) {
+    if (this.musicPlayer) {
+      this.musicPlayer.freePlayer();
     }
 
-    if (entry.get('category') === 'ps2') {
+    this.musicPlayer = new MusicPlayer(filePath);
+
+    if (this.musicPlayer.getMeta('format') === 'Playstation2') {
       this.ctx = this.ctx48000;
     } else {
       this.ctx = this.ctx44100;
     }
-    this.currentSound = await createSound(entry, this.ctx);
-
-    this.currentSound.sourceNode.connect(this.ctx.gainNode);
-    if (this.currentSound.supportsTime) {
-      store.dispatch(setDuration(this.currentSound.duration));
-      this.currentSound.addListener(this);
-    } else {
-      store.dispatch(setCurrentTime(null));
-      store.dispatch(setDuration(null));
-    }
   }
 
   setVolume(volume) {
-    this.ctx.gainNode.gain.value = volume;
-  }
-
-  seek(time) {
-    if (!this.currentSound || !this.currentSound.supportsTime) {
-      throw new Error('Cannot seek');
+    for (const ctx of this.ctxs) {
+      ctx.gainNode.gain.value = volume * GAIN_FACTOR;
     }
-
-    this.currentSound.seek(time);
   }
 
-  play() {
-    if (!this.currentSound) {
-      throw new Error('No sound to play.');
+  async play() {
+    if (this.ctx) {
+      return this.ctx.resume();
     }
-
-    this.currentSound.play();
   }
 
-  pause() {
-    if (!this.currentSound) {
-      throw new Error('No sound to pause.');
-    }
-
-    this.currentSound.pause();
-  }
-
-  handleEvent(event) {
-    switch (event.type) {
-      case 'timeupdate':
-        store.dispatch(setCurrentTime(event.target.currentTime));
-        break;
-      case 'ended':
-        store.dispatch(setPlaying(false));
-        break;
-      default:
-        // Do nothing
+  async pause() {
+    if (this.ctx) {
+      return this.ctx.suspend();
     }
   }
 }

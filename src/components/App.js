@@ -2,18 +2,15 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Sidebar from 'moseamp/components/Sidebar';
-import Library from 'moseamp/components/Library';
+import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
-import SearchField from 'moseamp/components/SearchField';
-import { loadEntries } from 'moseamp/ducks/library';
 import { loadPlayerInfo } from 'moseamp/ducks/player';
 
-@connect(null, { loadEntries, loadPlayerInfo })
+export default
+@connect(null, { loadPlayerInfo })
 @autobind
-export default class App extends React.Component {
+class App extends React.Component {
   componentDidMount() {
-    this.props.loadEntries();
     this.props.loadPlayerInfo();
   }
 
@@ -21,9 +18,8 @@ export default class App extends React.Component {
     return (
       <div className="app">
         <TitleBar />
-        <div className="library">
-          <Sidebar />
-          <Library />
+        <div className="main-container">
+          <FileBrowser />
         </div>
         <Player />
       </div>
@@ -38,7 +34,6 @@ class TitleBar extends React.Component {
         <div className="title">
           MoseAmp
         </div>
-        <SearchField />
       </div>
     );
   }

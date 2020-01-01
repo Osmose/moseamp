@@ -5,6 +5,7 @@ import autobind from 'autobind-decorator';
 import { getSearchQuery, setSearchQuery } from 'moseamp/ducks/library';
 import Icon from 'moseamp/components/Icon';
 
+export default
 @connect(
   state => ({
     query: getSearchQuery(state),
@@ -12,7 +13,7 @@ import Icon from 'moseamp/components/Icon';
   { setSearchQuery },
 )
 @autobind
-export default class SearchField extends React.Component {
+class SearchField extends React.Component {
   handleChange(event) {
     this.props.setSearchQuery(event.target.value);
   }

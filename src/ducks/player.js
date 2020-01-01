@@ -1,50 +1,65 @@
-import { Map } from 'immutable';
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 
-const SET_CURRENT_ENTRY_ID = 'player/SET_CURRENT_ENTRY_ID';
+const SET_CURRENT_FILE_PATH = 'player/SET_CURRENT_FILE_PATH';
 const SET_PLAYING = 'player/SET_PLAYING';
 const SET_VOLUME = 'player/SET_VOLUME';
 const SET_CURRENT_TIME = 'player/SET_CURRENT_TIME';
 const SET_DURATION = 'player/SET_DURATION';
 
 function defaultState() {
-  return new Map({
-    currentEntryId: null,
+  return {
+    currentFilePath: null,
     playing: false,
     volume: DEFAULT_GAIN,
     currentTime: null,
     duration: null,
-  });
+  };
 }
 
 export default function reducer(state = defaultState(), action = {}) {
   switch (action.type) {
-    case SET_CURRENT_ENTRY_ID:
-      return state.set('currentEntryId', action.entryId).set('playing', false);
+    case SET_CURRENT_FILE_PATH:
+      return {
+        ...state,
+        currentFilePath: action.filePath,
+        playing: false,
+      };
     case SET_PLAYING:
-      return state.set('playing', action.playing);
+      return {
+        ...state,
+        playing: action.playing,
+      };
     case SET_VOLUME:
-      return state.set('volume', action.volume);
+      return {
+        ...state,
+        volume: action.volume,
+      };
     case SET_CURRENT_TIME:
-      return state.set('currentTime', action.currentTime);
+      return {
+        ...state,
+        currentTime: action.currentTime,
+      };
     case SET_DURATION:
-      return state.set('duration', action.duration);
+      return {
+        ...state,
+        duration: action.duration,
+      };
     default:
       return state;
   }
 }
 
-export function openEntry(entry) {
+export function openFile(filePath) {
   return async dispatch => {
     try {
-      await player.loadSound(entry);
+      await player.load(filePath);
       dispatch({
-        type: SET_CURRENT_ENTRY_ID,
-        entryId: entry.get('id'),
+        type: SET_CURRENT_FILE_PATH,
+        filePath,
       });
       dispatch(play());
     } catch (err) {
@@ -102,30 +117,24 @@ export function setDuration(duration) {
   };
 }
 
-export function getPlayingEntry(state) {
-  let entry = null;
-  const id = state.getIn(['player', 'currentEntryId']);
-  if (id) {
-    entry = state.getIn(['library', 'entries', id]);
-  }
-
-  return entry || null;
+export function getCurrentFilePath(state) {
+  return state.player.currentFilePath;
 }
 
 export function getPlaying(state) {
-  return state.getIn(['player', 'playing']);
+  return state.player.playing;
 }
 
 export function getVolume(state) {
-  return state.getIn(['player', 'volume']);
+  return state.player.volume;
 }
 
 export function getCurrentTime(state) {
-  return state.getIn(['player', 'currentTime']);
+  return state.player.currentTime;
 }
 
 export function getDuration(state) {
-  return state.getIn(['player', 'duration']);
+  return state.player.duration;
 }
 
 export function loadPlayerInfo() {

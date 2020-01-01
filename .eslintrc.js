@@ -42,5 +42,6 @@ module.exports = {
     'max-classes-per-file': 'off',
     'react/destructuring-assignment': 'off',
     'react/jsx-props-no-spreading': 'off',
+    'consistent-return': 'off',
   },
 };
