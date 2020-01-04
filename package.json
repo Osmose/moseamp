@@ -17,6 +17,7 @@
     "build:prod": "webpack --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.config.js",
     "compile": "cmake-js build --target musicplayer_node --out native_build",
+    "clean": "cmake-js clean --target musicplayer_node --out native_build",
     "start": "MOSEAMP_DEVTOOLS=1 electron .",
     "package:macos": "bin/package.sh"
   },
