@@ -121,9 +121,7 @@ app.on('ready', async () => {
   createWindow();
 
   const shortcutEvents = {
-    'Cmd+Alt+Space': 'play-pause',
-    medianexttrack: 'next-track',
-    mediaprevioustrack: 'previous-track',
+    MediaPlayPause: 'play-pause',
   };
   for (const [accelerator, eventName] of Object.entries(shortcutEvents)) {
     // eslint-disable-next-line no-loop-func
