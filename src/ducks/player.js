@@ -12,12 +12,15 @@ const SET_VOLUME = 'player/SET_VOLUME';
 const SET_CURRENT_TIME = 'player/SET_CURRENT_TIME';
 const SET_DURATION = 'player/SET_DURATION';
 const SET_META = 'player/SET_META';
+const SET_CURRENT_SONG = 'player/SET_CURRENT_SONG';
 
 // == Reducer
 
 function defaultState() {
   return {
     currentFilePath: null,
+    currentSong: null,
+    songCount: null,
     playing: false,
     volume: DEFAULT_GAIN,
     currentTime: null,
@@ -39,6 +42,7 @@ export default function reducer(state = defaultState(), action = {}) {
       return {
         ...state,
         playing: action.playing,
+        currentSong: action.song,
       };
     case SET_VOLUME:
       return {
@@ -60,6 +64,12 @@ export default function reducer(state = defaultState(), action = {}) {
         ...state,
         currentTitle: action.meta.title,
         currentArtist: action.meta.artist,
+        songCount: action.meta.songs,
+      };
+    case SET_CURRENT_SONG:
+      return {
+        ...state,
+        currentSong: action.song,
       };
     default:
       return state;
@@ -94,11 +104,12 @@ export function setPlaying(playing) {
   };
 }
 
-export function play() {
-  player.play();
+export function play(song = null) {
+  player.play(song);
   return {
     type: SET_PLAYING,
     playing: true,
+    song,
   };
 }
 
@@ -125,8 +136,8 @@ export function setCurrentTime(currentTime) {
   };
 }
 
-export function seek(time) {
-  player.seek(time);
+export function seek() {
+  // player.seek(time);
 }
 
 export function setDuration(duration) {
@@ -140,6 +151,14 @@ export function setMeta(meta) {
   return {
     type: SET_META,
     meta,
+  };
+}
+
+export function setCurrentSong(song) {
+  player.seek(song);
+  return {
+    type: SET_CURRENT_SONG,
+    song,
   };
 }
 
@@ -184,6 +203,14 @@ export function getCurrentTitle(state) {
 
 export function getCurrentArtist(state) {
   return state.player.currentArtist;
+}
+
+export function getCurrentSong(state) {
+  return state.player.currentSong;
+}
+
+export function getSongCount(state) {
+  return state.player.songCount;
 }
 
 // == Middleware

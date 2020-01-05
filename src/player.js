@@ -68,6 +68,7 @@ class Player {
         this.musicPlayer.getMeta('game')
         || '---'
       ),
+      songs: this.musicPlayer.getMetaInt('songs'),
     };
   }
 
@@ -77,9 +78,16 @@ class Player {
     }
   }
 
-  async play() {
+  seek(song) {
+    this.musicPlayer.seek(song);
+  }
+
+  async play(song) {
     if (this.ctx) {
-      return this.ctx.resume();
+      if (song !== null) {
+        this.musicPlayer.seek(song);
+      }
+      await this.ctx.resume();
     }
   }
 
@@ -90,4 +98,5 @@ class Player {
   }
 }
 
-export default new Player();
+window.player = new Player();
+export default window.player;

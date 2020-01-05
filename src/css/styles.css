@@ -30,6 +30,7 @@ html, body {
 }
 
 .title-bar {
+  border-top: 1px solid #000; /* https://github.com/electron/electron/issues/13164 */
   height: 37px;
   text-align: center;
   line-height: 37px;
@@ -275,19 +276,19 @@ html, body {
   flex-direction: row;
 }
 
-.player-info {
+.current-song {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.player-info-title,
-.player-info-artist {
+.current-song-title,
+.current-song-artist {
   height: 30px;
   line-height: 30px;
 }
 
-.player-info-title .image-icon {
+.current-song-title .image-icon {
   width: 16px;
   margin-right: 5px;
   vertical-align: middle;
@@ -299,6 +300,11 @@ html, body {
   padding: 0 20px;
   display: flex;
   flex-direction: column;
+}
+
+.player-controls-buttons {
+  display: flex;
+  flex-direction: row;
 }
 
 .control-button {
@@ -320,9 +326,15 @@ html, body {
   outline: none;
 }
 
-.control-button.disabled {
+.control-button.disabled,
+.control-button:disabled {
   color: #4a4a4a;
   cursor: pointer;
+}
+
+.control-button:focus {
+  outline: none;
+  text-shadow: 0 0 2px hsl(217, 64%, 60%);
 }
 
 .player-volume-container {
