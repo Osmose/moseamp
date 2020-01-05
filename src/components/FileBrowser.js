@@ -53,20 +53,20 @@ class FileBrowser extends React.Component {
       <div className="file-browser">
         <ol className="path-segments">
           {pathSegments.map(segment => (
-            <>
+            <React.Fragment key={segment.path}>
               <li className="segment" onClick={() => this.handleClickSegment(segment)}>
                 {segment.name}
               </li>
               <li className="separator" />
-            </>
+            </React.Fragment>
           ))}
         </ol>
         <ol className="entries">
           {directories.map(directory => (
-            <Entry entry={directory} />
+            <Entry entry={directory} key={directory.fullPath} />
           ))}
           {files.map(file => (
-            <Entry entry={file} />
+            <Entry entry={file} key={file.fullPath} />
           ))}
         </ol>
       </div>
