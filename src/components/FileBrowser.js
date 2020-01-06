@@ -57,7 +57,9 @@ class FileBrowser extends React.Component {
               <li className="segment" onClick={() => this.handleClickSegment(segment)}>
                 {segment.name}
               </li>
-              <li className="separator" />
+              <li className="separator">
+                <div className="inner" />
+              </li>
             </React.Fragment>
           ))}
         </ol>

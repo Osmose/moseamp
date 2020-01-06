@@ -12,18 +12,14 @@ import {
   getCurrentFilePath,
   getVolume,
   setVolume,
-  getCurrentTime,
   getCurrentArtist,
   getCurrentTitle,
-  getDuration,
   getSongCount,
   getCurrentSong,
   seek,
-  setCurrentSong,
 } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS } from 'moseamp/filetypes';
 import { DEFAULT_GAIN } from 'moseamp/player';
-import { formatDuration } from 'moseamp/utils';
 import Icon from 'moseamp/components/Icon';
 
 export default class Player extends React.Component {
@@ -41,36 +37,30 @@ export default class Player extends React.Component {
 @connect(
   state => ({
     playing: getPlaying(state),
-    currentTime: getCurrentTime(state),
-    duration: getDuration(state),
     currentSong: getCurrentSong(state),
     songCount: getSongCount(state),
   }),
   {
-    setCurrentSong,
+    seek,
   },
 )
 @autobind
 class PlayerControls extends React.Component {
-  handleChangeTime(time) {
-    seek(time);
-  }
-
   handleClickPrev() {
-    this.props.setCurrentSong(this.props.currentSong - 1);
+    this.props.seek(this.props.currentSong - 1);
   }
 
   handleClickNext() {
-    this.props.setCurrentSong(this.props.currentSong + 1);
+    this.props.seek(this.props.currentSong + 1);
   }
 
 
   render() {
-    const { playing, currentTime, duration, currentSong, songCount } = this.props;
+    const { playing, currentSong, songCount } = this.props;
     return (
       <div className="player-controls">
         <div className="player-controls-buttons">
-          {songCount > 0 && (
+          {songCount > 1 && (
             <button
               type="button"
               className="control-button"
@@ -85,7 +75,7 @@ class PlayerControls extends React.Component {
               ? <PauseButton />
               : <PlayButton />
           }
-          {songCount > 0 && (
+          {songCount > 1 && (
             <button
               type="button"
               className="control-button"
@@ -95,23 +85,6 @@ class PlayerControls extends React.Component {
               <Icon name="angle-right" />
             </button>
           )}
-        </div>
-        <div className="seek-bar">
-          <div className="current-time">
-            {currentTime && formatDuration(currentTime)}
-          </div>
-          <ReactSlider
-            disabled={duration === null}
-            min={0}
-            max={duration !== null ? Math.floor(duration) : 1}
-            step={1}
-            value={currentTime !== null ? Math.floor(currentTime) : 1}
-            withBars={duration !== null}
-            onChange={this.handleChangeTime}
-          />
-          <div className="duration">
-            {duration && formatDuration(duration)}
-          </div>
         </div>
       </div>
     );
@@ -135,7 +108,7 @@ class CurrentSong extends React.Component {
       <div className="current-song">
         <div className="current-song-title">
           {extension && <img src={EXTENSIONS_ICONS[extension]} className="image-icon" />}
-          {songCount > 0 && `Track ${currentSong + 1} / ${songCount} - `}
+          {songCount > 1 && `Track ${currentSong + 1} / ${songCount} - `}
           {currentTitle}
         </div>
         <div className="current-song-artist">

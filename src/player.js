@@ -82,11 +82,8 @@ class Player {
     this.musicPlayer.seek(song);
   }
 
-  async play(song) {
+  async play() {
     if (this.ctx) {
-      if (song !== null) {
-        this.musicPlayer.seek(song);
-      }
       await this.ctx.resume();
     }
   }

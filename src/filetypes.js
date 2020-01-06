@@ -21,7 +21,7 @@ const FILE_TYPES = {
   },
   genesis: {
     name: 'Genesis',
-    extensions: ['.gym'],
+    extensions: ['.gym', '.vgz'],
   },
   nec_pc_engine: {
     name: 'NEC PC Engine',

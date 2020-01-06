@@ -42,7 +42,6 @@ export default function reducer(state = defaultState(), action = {}) {
       return {
         ...state,
         playing: action.playing,
-        currentSong: action.song,
       };
     case SET_VOLUME:
       return {
@@ -90,6 +89,9 @@ export function openFile(filePath) {
         type: SET_META,
         meta,
       });
+      if (meta.songs > 0) {
+        dispatch(seek(0));
+      }
       dispatch(play());
     } catch (err) {
       console.log(err);
@@ -104,12 +106,11 @@ export function setPlaying(playing) {
   };
 }
 
-export function play(song = null) {
-  player.play(song);
+export function play() {
+  player.play();
   return {
     type: SET_PLAYING,
     playing: true,
-    song,
   };
 }
 
@@ -136,10 +137,6 @@ export function setCurrentTime(currentTime) {
   };
 }
 
-export function seek() {
-  // player.seek(time);
-}
-
 export function setDuration(duration) {
   return {
     type: SET_DURATION,
@@ -154,7 +151,7 @@ export function setMeta(meta) {
   };
 }
 
-export function setCurrentSong(song) {
+export function seek(song) {
   player.seek(song);
   return {
     type: SET_CURRENT_SONG,

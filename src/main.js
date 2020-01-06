@@ -1,4 +1,3 @@
-/* eslint-disable global-require import/no-extraneous-dependencies */
 const { app, BrowserWindow, globalShortcut, Menu, shell } = require('electron');
 const path = require('path');
 const url = require('url');
@@ -107,7 +106,7 @@ app.on('ready', async () => {
       default: installExtension,
       REACT_DEVELOPER_TOOLS,
       REDUX_DEVTOOLS,
-    } = require('electron-devtools-installer');
+    } = require('electron-devtools-installer'); // eslint-disable-line
 
     try {
       await installExtension(REACT_DEVELOPER_TOOLS);
