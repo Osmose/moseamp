@@ -18,7 +18,7 @@
     "watch": "webpack --watch --config webpack.config.js",
     "compile": "cmake-js build --target musicplayer_node --out native_build",
     "clean": "cmake-js clean --target musicplayer_node --out native_build",
-    "start": "MOSEAMP_DEVTOOLS=1 electron .",
+    "start": "electron .",
     "package:macos": "bin/package.sh"
   },
   "author": "Michael Kelly",
@@ -58,7 +58,6 @@
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "copy-webpack-plugin": "^5.1.1",
-    "electron-devtools-installer": "^2.2.4",
     "electron-packager": "^14.1.1",
     "electron-rebuild": "^1.8.8",
     "eslint": "^6.8.0",

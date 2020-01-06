@@ -100,23 +100,6 @@ const menu = Menu.buildFromTemplate(template);
 
 app.on('ready', async () => {
   Menu.setApplicationMenu(menu);
-
-  if (process.env.MOSEAMP_DEVTOOLS) {
-    const {
-      default: installExtension,
-      REACT_DEVELOPER_TOOLS,
-      REDUX_DEVTOOLS,
-    } = require('electron-devtools-installer'); // eslint-disable-line
-
-    try {
-      await installExtension(REACT_DEVELOPER_TOOLS);
-      await installExtension(REDUX_DEVTOOLS);
-    } catch (err) {
-      console.error('Failed to start devtools');
-      console.error(err);
-    }
-  }
-
   createWindow();
 
   const shortcutEvents = {

@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.12)
 # Name of the project (will be the name of the plugin)
 project(musicplayer_node)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 add_subdirectory(musicplayer)
 
 # Build a shared library named after the project from the files in `src/`
