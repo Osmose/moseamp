@@ -76,6 +76,21 @@ export function getCurrentEntries(state) {
 
 // == Action Creators
 
+export function changeFullPath(newFullPath) {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const root = getRoot(state);
+
+    const parsed = path.parse(newFullPath);
+    if (parsed.root !== root) {
+      throw new Error('Multiple root directories not yet supported.');
+    }
+
+    const newPath = newFullPath.slice(root.length);
+    dispatch(changePath(newPath));
+  };
+}
+
 export function changePath(newPath) {
   return async dispatch => {
     dispatch({

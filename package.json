@@ -30,12 +30,14 @@
     "buffer-crc32": "^0.2.13",
     "cmake-js": "^6.0.0",
     "electron": "^7.1.7",
+    "electron-store": "^5.1.0",
     "extract-zip": "^1.6.7",
     "fixed-data-table-2": "^1.0.2",
     "fs-extra": "^8.1.0",
     "glob-promise": "^3.4.0",
     "immutable": "^3.8.2",
     "lodash": "^4.17.15",
+    "lodash.clonedeep": "^4.5.0",
     "mousetrap": "1.6.3",
     "nan": "^2.14.0",
     "node-abi": "^2.13.0",
@@ -47,7 +49,8 @@
     "redux": "^4.0.5",
     "redux-immutable": "^4.0.0",
     "redux-thunk": "^2.3.0",
-    "reselect": "^4.0.0"
+    "reselect": "^4.0.0",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",

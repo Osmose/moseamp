@@ -4,14 +4,15 @@ import { connect } from 'react-redux';
 
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
-import { loadPlayerInfo } from 'moseamp/ducks/player';
+import Sidebar from 'moseamp/components/Sidebar';
+import { loadPrefs } from 'moseamp/ducks/prefs';
 
 export default
-@connect(null, { loadPlayerInfo })
+@connect(null, { loadPrefs })
 @autobind
 class App extends React.Component {
   componentDidMount() {
-    this.props.loadPlayerInfo();
+    this.props.loadPrefs();
   }
 
   render() {
@@ -19,6 +20,7 @@ class App extends React.Component {
       <div className="app">
         <TitleBar />
         <div className="main-container">
+          <Sidebar />
           <FileBrowser />
         </div>
         <Player />

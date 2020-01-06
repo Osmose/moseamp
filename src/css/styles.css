@@ -1,8 +1,25 @@
+:root {
+  --white: #FFF;
+  --white-83: hsl(0, 0%, 83%);
+  --gray-60: hsl(0, 0%, 60%);
+  --gray-37: hsl(0, 0%, 40%);
+  --gray-25: hsl(0, 0%, 25%);
+  --gray-15: hsl(0, 0%, 15%);
+  --black-9: hsl(0, 0%, 9%);
+  --black: #000;
+
+  --blue-75: hsl(217, 64%, 75%);
+  --blue-60: hsl(217, 64%, 60%);
+  --blue-40: hsl(217, 64%, 40%);
+  --blue-25: hsl(217, 64%, 25%);
+}
+
 * {
   box-sizing: border-box;
 }
 
 html, body {
+  color: var(--white);
   margin: 0;
   padding: 0;
   height: 100%;
@@ -22,52 +39,19 @@ html, body {
 }
 
 .title-bar, .player-bar {
-  background: linear-gradient(180deg, #3f3f3f, #272727);
-  border-top: 1px solid #5f5f5f;
-  border-bottom: 1px solid #171717;
-  color: #d4d4d4;
-  text-shadow: 0 1px 2px #000;
+  background: linear-gradient(180deg, var(--gray-25), var(--gray-15));
+  border-top: 1px solid var(--gray-37);
+  border-bottom: 1px solid var(--black-9);
+  text-shadow: 0 1px 2px var(--black);
 }
 
 .title-bar {
-  border-top: 1px solid #000; /* https://github.com/electron/electron/issues/13164 */
+  border-top: 1px solid var(--black); /* https://github.com/electron/electron/issues/13164 */
   height: 37px;
   text-align: center;
   line-height: 37px;
   -webkit-app-region: drag;
   flex: 0 0 auto;
-}
-
-.search-field-container {
-  position: absolute;
-  right: 15px;
-  top: 9px;
-  height: 19px;
-  -webkit-user-select: all;
-  -webkit-app-region: no-drag;
-}
-
-.search-field-container .icon {
-  position: absolute;
-  left: 3px;
-  top: -9px;
-  font-size: 12px;
-  color: #e7e6e6;
-}
-
-.search-field {
-  background: #303030;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px rgba(255, 255, 255, 0.3);
-  border-radius: 9px;
-  border: 1px solid #141414;
-  padding: 3px 5px 3px 20px;
-  display: block;
-  height: 100%;
-  color: #e7e6e6;
-}
-
-.search-field:focus {
-  outline: none;
 }
 
 .main-container {
@@ -77,60 +61,80 @@ html, body {
   overflow: hidden;
 }
 
-.category-sidebar {
+.sidebar {
   flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  background: #555555;
-  border-right: 1px solid #333333;
+  background: var(--gray-37);
+  border-right: 1px solid var(--gray-20);
   padding: 15px;
   -webkit-user-select: none;
-  color: #e7e6e6;
 }
 
-.sidebar-link {
-  cursor: pointer;
-  flex: 0 0 auto;
-  padding: 5px 0;
-  text-align: left;
-}
-
-.sidebar-link:hover {
-  color: #a9a9a9;
-}
-
-.category-list-heading {
-  color: #a9a9a9;
-  font-size: 1rem;
-  margin-top: 0;
+.sidebar-heading {
+  font-size: 1.1rem;
+  margin: 0 0 10px;
   font-weight: normal;
-  flex: 0 0 auto;
+  font-variant: small-caps;
+  color: var(--white-83)
 }
 
-.category-list {
+.sidebar-list {
   list-style-type: none;
-  padding-left: 0;
-  margin-top: 0;
-  flex: 1;
+  padding: 0;
+  margin: 0 0 10px 10px;
 }
 
-.category-list-item {
-  margin: 0 -15px;
-  padding: 5px 15px 5px;
+.sidebar-list li {
+  margin-bottom: 5px;
+}
+
+.sidebar-list .sidebar-link {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.sidebar-list .sidebar-link:hover {
+  text-decoration: underline;
+}
+
+.sidebar-list .sidebar-link:active {
+  color: var(--gray-60);
+  outline: none;
+}
+
+.sidebar-entry .menu-button,
+.sidebar-heading .menu-button {
+  float: right;
+  border: none;
+  background: var(--gray-25);
+  color: var(--white);
   cursor: pointer;
+  font-size: 1em;
+  margin-left: 10px;
+  border-radius: 4px;
 }
 
-.category-list-item:hover {
-  color: #a9a9a9;
+.sidebar-entry .menu-button {
+  visibility: hidden;
 }
 
-.category-list-item .console-icon {
-  margin-right: 5px;
+.sidebar-entry:hover .menu-button {
+  visibility: visible;
 }
 
-.category-list-item.selected {
-  background: #4a81d7;
-  color: #FFF;
+.sidebar-entry:hover .menu-button:hover,
+.sidebar-heading .menu-button:hover {
+  color: var(--white-83);
+}
+
+.sidebar-entry:hover .menu-button:active,
+.sidebar-heading .menu-button:active {
+  color: var(--gray-60);
+  outline: none;
+}
+
+.sidebar-entry:hover .menu-button:focus,
+.sidebar-heading .menu-button:focus {
+  outline: none;
 }
 
 .file-browser {
@@ -138,8 +142,7 @@ html, body {
   position: relative;
   -webkit-user-select: none;
   cursor: default;
-  color: #FFF;
-  background: #0f0f0f;
+  background: var(--black-9);
   display: flex;
   flex-direction: column;
 }
@@ -151,8 +154,14 @@ html, body {
   display: flex;
   flex-direction: row;
   width: 100%;
-  background: linear-gradient(180deg, #5f5f5f 1px, #4a4a4a 1px, #282828 29px, #171717 29px);
-  text-shadow: 0 1px 2px #000;
+  background: linear-gradient(
+    180deg,
+    var(--gray-37) 1px,
+    var(--gray-25) 1px,
+    var(--gray-15) 29px,
+    var(--black-9) 29px
+  );
+  text-shadow: 0 1px 2px var(--black);
   flex: 0 0 30px;
 }
 
@@ -185,31 +194,31 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  border-top: 1px solid #5f5f5f;
-  outline: 1px solid #171717;
+  border-top: 1px solid var(--gray-37);
+  outline: 1px solid var(--black-9);
   transform-origin: 0 0;
   transform: rotate(45deg);
-  background: linear-gradient(105deg, #4a4a4a, #282828);
+  background: linear-gradient(105deg, var(--gray-25), var(--gray-15));
 }
 
 .file-browser .path-segments .separator:nth-last-child(3),
 .file-browser .path-segments .segment:nth-last-child(2) {
   background: linear-gradient(
     180deg,
-    hsl(217, 64%, 75%) 1px,
-    hsl(217, 64%, 60%) 1px,
-    hsl(217, 64%, 40%) 29px,
-    hsl(217, 64%, 25%) 29px
+    var(--blue-75) 1px,
+    var(--blue-60) 1px,
+    var(--blue-40) 29px,
+    var(--blue-25) 29px
   );
 }
 
 .file-browser .path-segments .separator:last-child::after {
-  border-top: 1px solid hsl(217, 64%, 75%);
-  outline: 1px solid hsl(217, 64%, 25%);
+  border-top: 1px solid var(--blue-75);
+  outline: 1px solid var(--blue-25);
   background: linear-gradient(
     105deg,
-    hsl(217, 64%, 60%),
-    hsl(217, 64%, 40%)
+    var(--blue-60),
+    var(--blue-40)
   );
 }
 
@@ -225,7 +234,7 @@ html, body {
 }
 
 .file-browser .entries li:nth-child(even) {
-  background: #1d1d1d;
+  background: var(--gray-15);
 }
 
 .file-browser .entries .icon {
@@ -249,15 +258,6 @@ html, body {
 .file-browser .entries .entry:active {
   background: hsl(217, 64%, 40%);
   cursor: pointer;
-}
-
-.library-table {
-  border: none;
-
-}
-
-.library-header {
-  border-right: 1px solid #151515;
 }
 
 .console-icon {
@@ -308,34 +308,34 @@ html, body {
 }
 
 .control-button {
-  color: #e2e2e2;
+  color: var(--white-83);
   font-size: 2rem;
   border: none;
   background: none;
   font-weight: bold;
-  text-shadow: 0 1px 1px #000;
+  text-shadow: 0 1px 1px var(--black);
   cursor: pointer;
   flex: 1;
 }
 
 .control-button:hover {
-  color: #a9a9a9;
+  color: var(--gray-60);
 }
 
 .control-button:active {
-  color: #5f5f5f;
+  color: var(--gray-37);
   outline: none;
 }
 
 .control-button.disabled,
 .control-button:disabled {
-  color: #4a4a4a;
+  color: var(--gray-25);
   cursor: pointer;
 }
 
 .control-button:focus {
   outline: none;
-  text-shadow: 0 0 2px hsl(217, 64%, 60%);
+  text-shadow: 0 0 2px var(--blue-60);
 }
 
 .player-volume-container {

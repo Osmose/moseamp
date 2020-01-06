@@ -1,120 +1,117 @@
+import path from 'path';
+
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
 
-import {
-  setSelectedCategory,
-  createLibraryEntries,
-  getSelectedCategory,
-  getAvailableCategories,
-  rescanLibrary,
-} from 'moseamp/ducks/library';
-import { getCategoryInfo } from 'moseamp/drivers';
+import { addEntry, getEntries, removeEntry } from 'moseamp/ducks/favorites';
+import { changeFullPath } from 'moseamp/ducks/filebrowser';
 import Icon from 'moseamp/components/Icon';
 
 const {
   dialog,
+  getCurrentWindow,
+  Menu,
 } = remote;
 
-export default
-@connect(state => ({
-  availableCategories: getAvailableCategories(state),
-}))
-class Sidebar extends React.Component {
+export default class Sidebar extends React.Component {
   render() {
-    const { availableCategories } = this.props;
     return (
-      <div className="category-sidebar">
-        <h2 className="category-list-heading">Categories</h2>
-        <ul className="category-list">
-          {availableCategories.map(category => (
-            <CategoryItem code={category} key={category} />
-          ))}
-        </ul>
-        <AddToLibraryButton />
-        <RescanLibraryButton />
+      <div className="sidebar">
+        <Favorites />
       </div>
     );
   }
 }
 
-@connect(null, { createLibraryEntries })
-@autobind
-class AddToLibraryButton extends React.Component {
-  handleClick() {
-    dialog.showOpenDialog({
-      title: 'Add to Library',
-      buttonLabel: 'Add',
-      properties: ['openFile', 'multiSelections', 'openDirectory'],
-    }, this.props.createLibraryEntries);
-  }
-
-  render() {
-    return (
-      <a onClick={this.handleClick} className="sidebar-link">
-        <Icon name="plus" />
-        Add to Library
-      </a>
-    );
-  }
-}
-
-@connect(null, { rescanLibrary })
-@autobind
-class RescanLibraryButton extends React.Component {
-  handleClick() {
-    this.props.rescanLibrary();
-  }
-
-  render() {
-    return (
-      <a onClick={this.handleClick} className="sidebar-link">
-        <Icon name="arrows-cw" />
-        Rescan Library
-      </a>
-    );
-  }
-}
-
 @connect(
-  (state, props) => ({
-    selected: getSelectedCategory(state) === props.code,
+  (state) => ({
+    entries: getEntries(state),
   }),
-  { setSelectedCategory },
+  { addEntry, removeEntry, changeFullPath },
 )
 @autobind
-class CategoryItem extends React.Component {
-  handleClick() {
-    this.props.setSelectedCategory(this.props.code);
+class Favorites extends React.Component {
+  async handleClickAdd() {
+    const result = await dialog.showOpenDialog(getCurrentWindow(), {
+      title: 'Add Favorite Directory',
+      buttonLabel: 'Add Favorite',
+      properties: ['openDirectory', 'createDirectory', 'multiSelections'],
+    });
+
+    if (result.cancelled) {
+      return;
+    }
+
+    for (const entryPath of result.filePaths) {
+      this.props.addEntry(path.basename(entryPath), entryPath);
+    }
   }
 
   render() {
-    const { selected, code } = this.props;
-    const categoryInfo = getCategoryInfo(code);
-    let className = 'category-list-item';
-    if (selected) {
-      className += ' selected';
-    }
-
-    if (!categoryInfo) {
-      return null;
-    }
+    const { entries } = this.props;
 
     return (
-      <li className={className} onClick={this.handleClick}>
-        <ConsoleIcon code={code} />
-        {categoryInfo.name}
-      </li>
+      <div className="favorites">
+        <h2 className="sidebar-heading">
+          <span>Favorites</span>
+          <button type="button" className="menu-button" onClick={this.handleClickAdd}>
+            <Icon name="plus" />
+          </button>
+        </h2>
+        <ul className="sidebar-list">
+          {entries.map(entry => (
+            <FavoritesEntry key={entry.id} entry={entry} />
+          ))}
+        </ul>
+      </div>
     );
   }
 }
 
-class ConsoleIcon extends React.Component {
+let activeContextEntryProps = null;
+const entryContextMenu = Menu.buildFromTemplate([
+  {
+    label: 'Remove',
+    click() {
+      const props = activeContextEntryProps;
+      if (props) {
+        props.removeEntry(props.entry.id);
+      }
+    },
+  },
+]);
+
+@connect(
+  () => ({}),
+  { removeEntry, changeFullPath },
+)
+@autobind
+class FavoritesEntry extends React.Component {
+  handleClickMenu() {
+    activeContextEntryProps = this.props;
+    entryContextMenu.popup({
+      callback() {
+        activeContextEntryProps = null;
+      },
+    });
+  }
+
+  handleClickName() {
+    this.props.changeFullPath(this.props.entry.path);
+  }
+
   render() {
-    const { code } = this.props;
+    const { entry } = this.props;
+
     return (
-      <img src={`img/${code}.png`} className="console-icon" />
+      <li className="sidebar-entry">
+        <button type="button" className="menu-button" onClick={this.handleClickMenu}>
+          <Icon name="ellipsis-v" />
+        </button>
+        <a href="#" className="sidebar-link" onClick={this.handleClickName}>{entry.name}</a>
+      </li>
     );
   }
 }

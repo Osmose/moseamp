@@ -1,7 +1,4 @@
-import fs from 'fs-extra';
-import os from 'os';
-import path from 'path';
-
+import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 
 // == Actions
@@ -70,6 +67,11 @@ export default function reducer(state = defaultState(), action = {}) {
         ...state,
         currentSong: action.song,
       };
+    case LOAD_PREFS:
+      return {
+        ...state,
+        volume: action.prefs.volume || state.volume,
+      };
     default:
       return state;
   }
@@ -124,6 +126,7 @@ export function pause() {
 
 export function setVolume(volume) {
   player.setVolume(volume);
+  setPref('volume', volume);
   return {
     type: SET_VOLUME,
     volume,
@@ -156,19 +159,6 @@ export function seek(song) {
   return {
     type: SET_CURRENT_SONG,
     song,
-  };
-}
-
-export function loadPlayerInfo() {
-  return async dispatch => {
-    const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
-    try {
-      const data = JSON.parse(await fs.readFile(filename));
-      dispatch(setVolume(data.volume));
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
   };
 }
 
@@ -209,26 +199,3 @@ export function getCurrentSong(state) {
 export function getSongCount(state) {
   return state.player.songCount;
 }
-
-// == Middleware
-
-export const savePlayerInfoMiddleware = store => next => action => {
-  const result = next(action);
-  if (action.type === SET_VOLUME) {
-    const data = {
-      volume: getVolume(store.getState()),
-    };
-    (async () => {
-      const filename = path.resolve(os.homedir(), '.moseamp', 'player.json');
-      await fs.ensureDir(path.dirname(filename));
-
-      try {
-        await fs.writeFile(filename, JSON.stringify(data));
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    })();
-  }
-  return result;
-};

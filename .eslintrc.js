@@ -43,5 +43,6 @@ module.exports = {
     'react/destructuring-assignment': 'off',
     'react/jsx-props-no-spreading': 'off',
     'consistent-return': 'off',
+    'jsx-a11y/anchor-is-valid': 'off',
   },
 };
