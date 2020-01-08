@@ -1,0 +1,21 @@
+name: CI
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '13.x'
+    - run: npm install
+    - run: npm run compile
+    - run: npm run build:prod
+    - run: npm run package:macos
+    - uses: actions/upload-artifact@v1
+      with:
+        name: dmg
+        path: dist/MoseAmp.dmg
