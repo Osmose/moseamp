@@ -178,14 +178,14 @@ class FavoritesEntry extends React.Component {
             </button>
             {renaming
               ? (
-                <form onSubmit={this.handleSubmitRename}>
+                <form onSubmit={this.handleSubmitRename} className="text-input-form">
                   <input
                     className="text-input"
                     type="text"
                     value={nameInputValue}
                     onChange={this.handleNameChange}
-                    onBlur={this.handleSubmitRename}
                     ref={(element) => { this.nameInput = element; }}
+                    size={nameInputValue.length + 1}
                   />
                 </form>
               )

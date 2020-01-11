@@ -145,6 +145,10 @@ html, body {
   outline: none;
 }
 
+.sidebar-entry .text-input-form {
+  display: inline;
+}
+
 .sidebar-entry .text-input {
   border: none;
   background: transparent;
