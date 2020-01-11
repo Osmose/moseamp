@@ -67,7 +67,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: MoseAmp.dmg
+          asset_path: ./MoseAmp.dmg/MoseAmp.dmg
           asset_name: MoseAmp.dmg
           asset_content_type: application/octet-stream
       - name: Upload EXE
@@ -76,6 +76,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: MoseAmp.zip
+          asset_path: ./MoseAmp.zip/MoseAmp.zip
           asset_name: MoseAmp.zip
           asset_content_type: application/octet-stream
