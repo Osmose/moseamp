@@ -8,6 +8,7 @@ import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 const ADD_ENTRY = 'favorites/ADD_ENTRY';
 const REMOVE_ENTRY = 'favorites/REMOVE_ENTRY';
 const REORDER_ENTRIES = 'favorites/REORDER_ENTRIES';
+const RENAME_ENTRY = 'favorites/RENAME_ENTRY';
 
 // == Reducer
 
@@ -36,6 +37,20 @@ export default function reducer(favorites = defaultState(), action = {}) {
       return {
         ...favorites,
         entries: reorderedEntries,
+      };
+    case RENAME_ENTRY:
+      return {
+        ...favorites,
+        entries: favorites.entries.map(entry => {
+          if (entry.id === action.entryId) {
+            return {
+              ...entry,
+              name: action.newName,
+            };
+          }
+
+          return entry;
+        }),
       };
     case LOAD_PREFS:
       return {
@@ -87,6 +102,18 @@ export function reorderEntries(fromIndex, toIndex) {
       type: REORDER_ENTRIES,
       fromIndex,
       toIndex,
+    });
+    const state = getState();
+    setPref('favoritesEntries', getEntries(state));
+  };
+}
+
+export function renameEntry(entryId, newName) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: RENAME_ENTRY,
+      entryId,
+      newName,
     });
     const state = getState();
     setPref('favoritesEntries', getEntries(state));

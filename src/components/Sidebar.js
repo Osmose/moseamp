@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { remote } from 'electron';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import { addEntry, getEntries, removeEntry, reorderEntries } from 'moseamp/ducks/favorites';
+import { addEntry, getEntries, removeEntry, reorderEntries, renameEntry } from 'moseamp/ducks/favorites';
 import { changeFullPath } from 'moseamp/ducks/filebrowser';
 import Icon from 'moseamp/components/Icon';
 
@@ -90,13 +90,21 @@ class Favorites extends React.Component {
   }
 }
 
-let activeContextEntryProps = null;
+let activeContextEntry = null;
 const entryContextMenu = Menu.buildFromTemplate([
+  {
+    label: 'Rename',
+    click() {
+      if (activeContextEntry) {
+        activeContextEntry.startRename();
+      }
+    },
+  },
   {
     label: 'Remove',
     click() {
-      const props = activeContextEntryProps;
-      if (props) {
+      if (activeContextEntry) {
+        const { props } = activeContextEntry;
         props.removeEntry(props.entry.id);
       }
     },
@@ -105,15 +113,30 @@ const entryContextMenu = Menu.buildFromTemplate([
 
 @connect(
   () => ({}),
-  { removeEntry, changeFullPath },
+  { removeEntry, renameEntry, changeFullPath },
 )
 @autobind
 class FavoritesEntry extends React.Component {
+  constructor(props) {
+    super(props);
+    this.nameInput = null;
+    this.state = {
+      renaming: false,
+      nameInputValue: '',
+    };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!prevState.renaming && this.state.renaming) {
+      this.nameInput.focus();
+    }
+  }
+
   handleClickMenu() {
-    activeContextEntryProps = this.props;
+    activeContextEntry = this;
     entryContextMenu.popup({
       callback() {
-        activeContextEntryProps = null;
+        activeContextEntry = null;
       },
     });
   }
@@ -122,8 +145,23 @@ class FavoritesEntry extends React.Component {
     this.props.changeFullPath(this.props.entry.path);
   }
 
+  startRename() {
+    this.setState({ renaming: true, nameInputValue: this.props.entry.name });
+  }
+
+  handleSubmitRename(event) {
+    event.preventDefault();
+    this.props.renameEntry(this.props.entry.id, this.state.nameInputValue);
+    this.setState({ renaming: false });
+  }
+
+  handleNameChange(event) {
+    this.setState({ nameInputValue: event.target.value });
+  }
+
   render() {
     const { entry, index } = this.props;
+    const { renaming, nameInputValue } = this.state;
 
     return (
       <Draggable draggableId={entry.id} index={index}>
@@ -138,7 +176,24 @@ class FavoritesEntry extends React.Component {
             <button type="button" className="menu-button" onClick={this.handleClickMenu}>
               <Icon name="ellipsis-v" />
             </button>
-            <a href="#" className="sidebar-link" onClick={this.handleClickName}>{entry.name}</a>
+            {renaming
+              ? (
+                <form onSubmit={this.handleSubmitRename}>
+                  <input
+                    className="text-input"
+                    type="text"
+                    value={nameInputValue}
+                    onChange={this.handleNameChange}
+                    onBlur={this.handleSubmitRename}
+                    ref={(element) => { this.nameInput = element; }}
+                  />
+                </form>
+              )
+              : (
+                <a href="#" className="sidebar-link" onClick={this.handleClickName}>
+                  {entry.name}
+                </a>
+              )}
           </li>
         )}
       </Draggable>

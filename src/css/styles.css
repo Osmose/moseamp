@@ -17,6 +17,9 @@
   --orange-60: hsl(43, 100%, 60%);
   --orange-40: hsl(43, 100%, 40%);
   --orange-25: hsl(43, 100%, 25%);
+
+  --main-font-family: Fira sans, system-ui, sans-serif;
+  --main-font-size: 14px;
 }
 
 * {
@@ -29,8 +32,8 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
-  font-family: Fira sans, system-ui, sans-serif;
-  font-size: 14px;
+  font-family: var(--main-font-family);
+  font-size: var(--main-font-size);
 }
 
 #app-container, .app {
@@ -140,6 +143,16 @@ html, body {
 .sidebar-entry:hover .menu-button:focus,
 .sidebar-heading .menu-button:focus {
   outline: none;
+}
+
+.sidebar-entry .text-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--white);
+  font-family: var(--main-font-family);
+  font-size: var(--main-font-size);
+  padding: 0;
 }
 
 .file-browser {
