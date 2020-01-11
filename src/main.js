@@ -1,13 +1,24 @@
 const { app, BrowserWindow, globalShortcut, Menu, shell } = require('electron');
 const path = require('path');
 const url = require('url');
+const windowStateKeeper = require('electron-window-state');
+
 
 let browserWindow = null;
 
 function createWindow() {
+  // Load the previous state with fallback to defaults
+  const mainWindowState = windowStateKeeper({
+    defaultWidth: 900,
+    defaultHeight: 700,
+  });
+
   browserWindow = new BrowserWindow({
-    width: 900,
-    height: 700,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
+
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       experimentalFeatures: true,
@@ -23,6 +34,9 @@ function createWindow() {
   browserWindow.on('closed', () => {
     browserWindow = null;
   });
+
+  // Monitor window for size/position changes and save them
+  mainWindowState.manage(browserWindow);
 }
 
 const template = [
