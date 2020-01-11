@@ -4,8 +4,9 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 import { remote } from 'electron';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import { addEntry, getEntries, removeEntry } from 'moseamp/ducks/favorites';
+import { addEntry, getEntries, removeEntry, reorderEntries } from 'moseamp/ducks/favorites';
 import { changeFullPath } from 'moseamp/ducks/filebrowser';
 import Icon from 'moseamp/components/Icon';
 
@@ -29,7 +30,7 @@ export default class Sidebar extends React.Component {
   (state) => ({
     entries: getEntries(state),
   }),
-  { addEntry, removeEntry, changeFullPath },
+  { addEntry, removeEntry, changeFullPath, reorderEntries },
 )
 @autobind
 class Favorites extends React.Component {
@@ -49,6 +50,15 @@ class Favorites extends React.Component {
     }
   }
 
+  handleDragEnd(result) {
+    if (!result.destination) {
+      return;
+    }
+
+    console.log(`Reoder from ${result.source.index} to ${result.destination.index}`);
+    this.props.reorderEntries(result.source.index, result.destination.index);
+  }
+
   render() {
     const { entries } = this.props;
 
@@ -60,11 +70,21 @@ class Favorites extends React.Component {
             <Icon name="plus" />
           </button>
         </h2>
-        <ul className="sidebar-list">
-          {entries.map(entry => (
-            <FavoritesEntry key={entry.id} entry={entry} />
-          ))}
-        </ul>
+        <DragDropContext onDragEnd={this.handleDragEnd}>
+          <Droppable droppableId="favorites">
+            {(provided) => (
+              <ul
+                className="sidebar-list"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {entries.map((entry, index) => (
+                  <FavoritesEntry key={entry.id} entry={entry} index={index} />
+                ))}
+              </ul>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
     );
   }
@@ -103,15 +123,25 @@ class FavoritesEntry extends React.Component {
   }
 
   render() {
-    const { entry } = this.props;
+    const { entry, index } = this.props;
 
     return (
-      <li className="sidebar-entry">
-        <button type="button" className="menu-button" onClick={this.handleClickMenu}>
-          <Icon name="ellipsis-v" />
-        </button>
-        <a href="#" className="sidebar-link" onClick={this.handleClickName}>{entry.name}</a>
-      </li>
+      <Draggable draggableId={entry.id} index={index}>
+        {(provided) => (
+          <li
+            className="sidebar-entry"
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            style={provided.draggableProps.style}
+          >
+            <button type="button" className="menu-button" onClick={this.handleClickMenu}>
+              <Icon name="ellipsis-v" />
+            </button>
+            <a href="#" className="sidebar-link" onClick={this.handleClickName}>{entry.name}</a>
+          </li>
+        )}
+      </Draggable>
     );
   }
 }

@@ -41,6 +41,7 @@
     "nan": "^2.14.0",
     "node-abi": "^2.13.0",
     "react": "^16.12.0",
+    "react-beautiful-dnd": "^12.2.0",
     "react-dom": "^16.12.0",
     "react-redux": "^7.1.3",
     "react-slider": "^1.0.1",

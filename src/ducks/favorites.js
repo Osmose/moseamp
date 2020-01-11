@@ -7,6 +7,7 @@ import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 
 const ADD_ENTRY = 'favorites/ADD_ENTRY';
 const REMOVE_ENTRY = 'favorites/REMOVE_ENTRY';
+const REORDER_ENTRIES = 'favorites/REORDER_ENTRIES';
 
 // == Reducer
 
@@ -27,6 +28,14 @@ export default function reducer(favorites = defaultState(), action = {}) {
       return {
         ...favorites,
         entries: favorites.entries.filter(entry => entry.id !== action.entryId),
+      };
+    case REORDER_ENTRIES:
+      const reorderedEntries = [...favorites.entries];
+      const [removed] = reorderedEntries.splice(action.fromIndex, 1);
+      reorderedEntries.splice(action.toIndex, 0, removed);
+      return {
+        ...favorites,
+        entries: reorderedEntries,
       };
     case LOAD_PREFS:
       return {
@@ -66,6 +75,18 @@ export function removeEntry(entryId) {
     dispatch({
       type: REMOVE_ENTRY,
       entryId,
+    });
+    const state = getState();
+    setPref('favoritesEntries', getEntries(state));
+  };
+}
+
+export function reorderEntries(fromIndex, toIndex) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: REORDER_ENTRIES,
+      fromIndex,
+      toIndex,
     });
     const state = getState();
     setPref('favoritesEntries', getEntries(state));
