@@ -12,6 +12,11 @@
   --blue-60: hsl(217, 64%, 60%);
   --blue-40: hsl(217, 64%, 40%);
   --blue-25: hsl(217, 64%, 25%);
+
+  --orange-75: hsl(43, 100%, 75%);
+  --orange-60: hsl(43, 100%, 60%);
+  --orange-40: hsl(43, 100%, 40%);
+  --orange-25: hsl(43, 100%, 25%);
 }
 
 * {
@@ -233,7 +238,7 @@ html, body {
   padding: 5px 10px;
 }
 
-.file-browser .entries li:nth-child(even) {
+.file-browser .entries .entry:nth-child(even) {
   background: var(--gray-15);
 }
 
@@ -250,14 +255,20 @@ html, body {
   width: 16px;
 }
 
-.file-browser .entries .entry:hover {
-  background: hsl(217, 64%, 60%);
+.file-browser .entries .entry:hover,
+.file-browser .entries .entry.current-entry:hover {
+  background: var(--blue-60);
   cursor: pointer;
 }
 
-.file-browser .entries .entry:active {
-  background: hsl(217, 64%, 40%);
+.file-browser .entries .entry:active,
+.file-browser .entries .entry.current-entry:active {
+  background: var(--blue-40);
   cursor: pointer;
+}
+
+.file-browser .entries .entry.current-entry {
+  background: linear-gradient(180deg, var(--blue-60), var(--blue-40));
 }
 
 .console-icon {

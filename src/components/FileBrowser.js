@@ -11,7 +11,7 @@ import {
   getLoading,
   loadEntriesForCurrentPath,
 } from 'moseamp/ducks/filebrowser';
-import { openFile } from 'moseamp/ducks/player';
+import { openFile, getCurrentFilePath } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS, SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
 
 
@@ -80,6 +80,7 @@ class FileBrowser extends React.Component {
   state => ({
     currentPath: getCurrentPath(state),
     loading: getLoading(state),
+    currentFilePath: getCurrentFilePath(state),
   }),
   {
     changePath,
@@ -97,10 +98,14 @@ class Entry extends React.Component {
   }
 
   render() {
-    const { currentPath, entry, loading } = this.props;
+    const { currentPath, currentFilePath, entry, loading } = this.props;
 
+    const isCurrentFile = currentFilePath === entry.fullPath;
     return (
-      <li className="entry" onClick={() => this.handleClickEntry(entry)}>
+      <li
+        className={`entry ${isCurrentFile ? 'current-entry' : ''}`}
+        onClick={() => this.handleClickEntry(entry)}
+      >
         <span className="icon">
           {
             loading && currentPath === entry.path
