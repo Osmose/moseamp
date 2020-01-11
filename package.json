@@ -11,13 +11,12 @@
     "runtimeVersion": "7.1.7"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js",
     "build:prod": "webpack --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.config.js",
     "compile": "cmake-js build --target musicplayer_node --out native_build",
     "clean": "cmake-js clean --target musicplayer_node --out native_build",
-    "start": "electron .",
+    "start": "concurrently --kill-others --success first \"electron .\" \"npm:watch\"",
     "package:macos": "bin/package_macos.sh",
     "package:windows": "bash bin\\package_windows.sh"
   },
@@ -60,6 +59,7 @@
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "bestzip": "^2.1.5",
+    "concurrently": "^5.0.2",
     "copy-webpack-plugin": "^5.1.1",
     "electron-packager": "^14.1.1",
     "electron-rebuild": "^1.8.8",
