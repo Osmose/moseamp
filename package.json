@@ -8,8 +8,7 @@
   "private": true,
   "cmake-js": {
     "runtime": "electron",
-    "runtimeVersion": "7.1.7",
-    "arch": "x64"
+    "runtimeVersion": "7.1.7"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,7 +18,8 @@
     "compile": "cmake-js build --target musicplayer_node --out native_build",
     "clean": "cmake-js clean --target musicplayer_node --out native_build",
     "start": "electron .",
-    "package:macos": "bin/package.sh"
+    "package:macos": "bin/package_macos.sh",
+    "package:windows": "bash bin\\package_windows.sh"
   },
   "author": "Michael Kelly",
   "license": "MIT",
@@ -57,9 +57,9 @@
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.7.7",
     "@babel/preset-react": "^7.7.4",
-    "appdmg": "^0.6.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
+    "bestzip": "^2.1.5",
     "copy-webpack-plugin": "^5.1.1",
     "electron-packager": "^14.1.1",
     "electron-rebuild": "^1.8.8",
@@ -73,5 +73,8 @@
     "webpack-cli": "^3.3.10",
     "webpack-merge": "^4.2.2",
     "webpack-node-externals": "^1.7.2"
+  },
+  "optionalDependencies": {
+    "appdmg": "^0.6.0"
   }
 }

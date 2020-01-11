@@ -15,4 +15,3 @@
 #include "uadeplugin/UADEPlugin.h"
 #include "rsnplugin/RSNPlugin.h"
 #include "ayflyplugin/AyflyPlugin.h"
-

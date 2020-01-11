@@ -42,7 +42,7 @@ private:
             return hash < other.hash;
         }
         bool operator<(uint64_t other) const { return hash < other; }
-    } __attribute__((packed));
+    };
 
     static std::vector<LengthEntry> mainHash;
     static std::vector<uint16_t> extraLengths;

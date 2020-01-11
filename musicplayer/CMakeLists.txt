@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(external/zlib)
 set(ZLIB_LIBRARIES zlibstatic)
-set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/external/zlib ${CMAKE_BINARY_DIR}/external/zlib)
+set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/external/zlib ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
 
 add_subdirectory(psf)
 
