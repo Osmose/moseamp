@@ -1,10 +1,10 @@
-import fs from 'fs';
 import path from 'path';
+
+import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 
 // == Actions
 
 const CHANGE_PATH = 'filebrowser/CHANGE_PATH';
-const SET_CURRENT_ENTRIES = 'filebrowser/SET_CURRENT_ENTRIES';
 
 // == Reducer
 
@@ -12,7 +12,6 @@ function defaultState() {
   return {
     root: path.parse(process.cwd()).root,
     currentPath: '',
-    currentEntries: [],
     loading: false,
   };
 }
@@ -25,11 +24,10 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
         currentPath: action.path,
         loading: true,
       };
-    case SET_CURRENT_ENTRIES:
+    case LOAD_PREFS:
       return {
         ...filebrowser,
-        currentEntries: action.entries,
-        loading: false,
+        currentPath: action.prefs.filebrowserCurrentPath || '',
       };
     default:
       return filebrowser;
@@ -70,8 +68,8 @@ export function getCurrentPathSegments(state) {
   return segments;
 }
 
-export function getCurrentEntries(state) {
-  return state.filebrowser.currentEntries;
+export function getFullCurrentPath(state) {
+  return path.join(getRoot(state), getCurrentPath(state));
 }
 
 // == Action Creators
@@ -92,35 +90,13 @@ export function changeFullPath(newFullPath) {
 }
 
 export function changePath(newPath) {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch({
       type: CHANGE_PATH,
       path: newPath,
     });
-    dispatch(loadEntriesForCurrentPath());
-  };
-}
 
-export function loadEntriesForCurrentPath() {
-  return async (dispatch, getState) => {
     const state = getState();
-    const currentPath = getCurrentPath(state);
-    const fullNewPath = path.join(getRoot(state), currentPath);
-    const dirEntries = await fs.promises.readdir(fullNewPath, {withFileTypes: true});
-    const entries = dirEntries.map(dirEnt => {
-      return {
-        fullPath: path.join(fullNewPath, dirEnt.name),
-        path: path.join(currentPath, dirEnt.name),
-        ext: path.extname(dirEnt.name),
-        name: dirEnt.name,
-        type: dirEnt.isDirectory() ? 'directory' : 'file',
-      };
-    });
-    entries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-
-    dispatch({
-      type: SET_CURRENT_ENTRIES,
-      entries,
-    });
+    setPref('filebrowserCurrentPath', getCurrentPath(state));
   };
 }

@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -6,10 +9,9 @@ import Icon from 'moseamp/components/Icon';
 import {
   changePath,
   getCurrentPath,
+  getFullCurrentPath,
   getCurrentPathSegments,
-  getCurrentEntries,
   getLoading,
-  loadEntriesForCurrentPath,
 } from 'moseamp/ducks/filebrowser';
 import { openFile, getCurrentFilePath } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS, SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
@@ -18,18 +20,48 @@ import { EXTENSIONS_ICONS, SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
 export default
 @connect(
   state => ({
-    entries: getCurrentEntries(state),
+    currentPath: getCurrentPath(state),
+    fullCurrentPath: getFullCurrentPath(state),
     pathSegments: getCurrentPathSegments(state),
   }),
   {
     changePath,
-    loadEntriesForCurrentPath,
   },
 )
 @autobind
 class FileBrowser extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      entries: [],
+    };
+  }
+
   componentDidMount() {
-    this.props.loadEntriesForCurrentPath();
+    const { fullCurrentPath, currentPath } = this.props;
+    this.loadEntries(fullCurrentPath, currentPath);
+  }
+
+  componentDidUpdate(prevProps) {
+    const { fullCurrentPath, currentPath } = this.props;
+    if (prevProps.fullCurrentPath !== fullCurrentPath) {
+      this.loadEntries(fullCurrentPath, currentPath);
+    }
+  }
+
+  async loadEntries(fullCurrentPath, currentPath) {
+    const dirEntries = await fs.promises.readdir(fullCurrentPath, {withFileTypes: true});
+    const entries = dirEntries.map(dirEnt => {
+      return {
+        fullPath: path.join(fullCurrentPath, dirEnt.name),
+        path: path.join(currentPath, dirEnt.name),
+        ext: path.extname(dirEnt.name),
+        name: dirEnt.name,
+        type: dirEnt.isDirectory() ? 'directory' : 'file',
+      };
+    });
+    entries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    this.setState({ entries });
   }
 
   handleClickSegment(segment) {
@@ -37,7 +69,8 @@ class FileBrowser extends React.Component {
   }
 
   render() {
-    const { entries, pathSegments } = this.props;
+    const { pathSegments } = this.props;
+    const { entries } = this.state;
 
     const directories = [];
     const files = [];
