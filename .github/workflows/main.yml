@@ -37,8 +37,8 @@ jobs:
       - run: npm run package:windows
       - uses: actions/upload-artifact@v1
         with:
-          name: MoseAmp.exe
-          path: dist/MoseAmp.exe
+          name: MoseAmp.zip
+          path: dist/MoseAmp.zip
 
   release:
     name: Release
@@ -50,7 +50,7 @@ jobs:
           name: MoseAmp.dmg
       - uses: actions/download-artifact@v1
         with:
-          name: MoseAmp.exe
+          name: MoseAmp.zip
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -76,6 +76,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: MoseAmp.exe
-          asset_name: MoseAmp.exe
+          asset_path: MoseAmp.zip
+          asset_name: MoseAmp.zip
           asset_content_type: application/octet-stream
