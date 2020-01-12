@@ -5,7 +5,7 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Icon from 'moseamp/components/Icon';
+import { FontAwesome } from 'moseamp/components/Icon';
 import {
   changePath,
   getCurrentPath,
@@ -142,7 +142,7 @@ class Entry extends React.Component {
         <span className="icon">
           {
             loading && currentPath === entry.path
-              ? <Icon name="spinner" className="fa-spin" />
+              ? <FontAwesome code="spinner" className="fa-spin" />
               : <FileIcon entry={entry} />
           }
         </span>
@@ -156,7 +156,7 @@ class FileIcon extends React.Component {
   render() {
     const { entry } = this.props;
     if (entry.type === 'directory') {
-      return <Icon name="folder-open" />;
+      return <FontAwesome code="folder-open" />;
     }
 
     const iconPath = EXTENSIONS_ICONS[entry.ext];
@@ -164,6 +164,6 @@ class FileIcon extends React.Component {
       return <img src={iconPath} className="image-icon" />;
     }
 
-    return <Icon name="file" />;
+    return <FontAwesome code="file" />;
   }
 }

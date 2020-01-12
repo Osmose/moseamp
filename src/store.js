@@ -5,7 +5,7 @@ import favorites from 'moseamp/ducks/favorites';
 import filebrowser from 'moseamp/ducks/filebrowser';
 import player from 'moseamp/ducks/player';
 
-export default createStore(
+const store = createStore(
   combineReducers({
     player,
     filebrowser,
@@ -17,3 +17,6 @@ export default createStore(
     ),
   ),
 );
+
+window.store = store;
+export default store;

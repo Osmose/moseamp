@@ -20,7 +20,7 @@ import {
 } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS } from 'moseamp/filetypes';
 import { DEFAULT_GAIN } from 'moseamp/player';
-import Icon from 'moseamp/components/Icon';
+import { FontAwesome } from 'moseamp/components/Icon';
 
 export default class Player extends React.Component {
   render() {
@@ -67,7 +67,7 @@ class PlayerControls extends React.Component {
               disabled={currentSong < 1}
               onClick={this.handleClickPrev}
             >
-              <Icon name="angle-left" />
+              <FontAwesome code="angle-left" />
             </button>
           )}
           {
@@ -82,7 +82,7 @@ class PlayerControls extends React.Component {
               disabled={currentSong >= songCount - 1}
               onClick={this.handleClickNext}
             >
-              <Icon name="angle-right" />
+              <FontAwesome code="angle-right" />
             </button>
           )}
         </div>
@@ -140,7 +140,7 @@ class PlayButton extends React.Component {
 
     return (
       <button type="button" className={className} onClick={this.handleClick}>
-        <Icon name="play" />
+        <FontAwesome code="play" />
       </button>
     );
   }
@@ -156,7 +156,7 @@ class PauseButton extends React.Component {
   render() {
     return (
       <button type="button" className="control-button" onClick={this.handleClick}>
-        <Icon name="pause" />
+        <FontAwesome code="pause" />
       </button>
     );
   }
@@ -176,16 +176,16 @@ class VolumeControls extends React.Component {
 
   render() {
     const { volume } = this.props;
-    let iconName = 'volume-up';
+    let iconCode = 'volume-up';
     if (volume <= 0) {
-      iconName = 'volume-off';
+      iconCode = 'volume-off';
     } else if (volume < DEFAULT_GAIN) {
-      iconName = 'volume-down';
+      iconCode = 'volume-down';
     }
 
     return (
       <div className="player-volume-container">
-        <Icon name={iconName} className="volume-icon" />
+        <FontAwesome code={iconCode} className="volume-icon" />
         <ReactSlider
           min={0}
           max={DEFAULT_GAIN * 2}

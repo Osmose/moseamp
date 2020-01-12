@@ -6,9 +6,16 @@ import { connect } from 'react-redux';
 import { remote } from 'electron';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import { addEntry, getEntries, removeEntry, reorderEntries, renameEntry } from 'moseamp/ducks/favorites';
+import {
+  addEntry,
+  getEntries,
+  removeEntry,
+  reorderEntries,
+  renameEntry,
+  setEntryIconId,
+} from 'moseamp/ducks/favorites';
 import { changeFullPath } from 'moseamp/ducks/filebrowser';
-import Icon from 'moseamp/components/Icon';
+import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 
 const {
   dialog,
@@ -55,7 +62,6 @@ class Favorites extends React.Component {
       return;
     }
 
-    console.log(`Reoder from ${result.source.index} to ${result.destination.index}`);
     this.props.reorderEntries(result.source.index, result.destination.index);
   }
 
@@ -67,7 +73,7 @@ class Favorites extends React.Component {
         <h2 className="sidebar-heading">
           <span>Favorites</span>
           <button type="button" className="menu-button" onClick={this.handleClickAdd}>
-            <Icon name="plus" />
+            <FontAwesome code="plus" />
           </button>
         </h2>
         <DragDropContext onDragEnd={this.handleDragEnd}>
@@ -93,7 +99,15 @@ class Favorites extends React.Component {
 let activeContextEntry = null;
 const entryContextMenu = Menu.buildFromTemplate([
   {
-    label: 'Rename',
+    label: 'Change icon...',
+    click() {
+      if (activeContextEntry) {
+        activeContextEntry.iconComponent.showIconPicker();
+      }
+    },
+  },
+  {
+    label: 'Rename...',
     click() {
       if (activeContextEntry) {
         activeContextEntry.startRename();
@@ -120,6 +134,7 @@ class FavoritesEntry extends React.Component {
   constructor(props) {
     super(props);
     this.nameInput = null;
+    this.iconComponent = null;
     this.state = {
       renaming: false,
       nameInputValue: '',
@@ -170,12 +185,20 @@ class FavoritesEntry extends React.Component {
             className="sidebar-entry"
             ref={provided.innerRef}
             {...provided.draggableProps}
-            {...provided.dragHandleProps}
             style={provided.draggableProps.style}
           >
+            <FontAwesome code="grip-lines" className="drag-handle" {...provided.dragHandleProps} />
+
             <button type="button" className="menu-button" onClick={this.handleClickMenu}>
-              <Icon name="ellipsis-v" />
+              <FontAwesome code="ellipsis-v" />
             </button>
+
+            <EntryIcon
+              entryId={entry.id}
+              iconId={entry.iconId}
+              ref={(component) => { this.iconComponent = component; }}
+            />
+
             {renaming
               ? (
                 <form onSubmit={this.handleSubmitRename} className="text-input-form">
@@ -197,6 +220,91 @@ class FavoritesEntry extends React.Component {
           </li>
         )}
       </Draggable>
+    );
+  }
+}
+
+@connect(
+  null,
+  { setEntryIconId },
+  null,
+  {forwardRef: true},
+)
+@autobind
+class EntryIcon extends React.Component {
+  constructor(props) {
+    super(props);
+    this.iconElement = null;
+    this.state = {
+      choosingIcon: false,
+    };
+  }
+
+  componentDidMount() {
+    document.addEventListener('click', this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
+  }
+
+  handleClickOutside(event) {
+    if (!this.iconElement.contains(event.target)) {
+      this.setState({ choosingIcon: false });
+    }
+  }
+
+  showIconPicker() {
+    this.setState({ choosingIcon: true });
+  }
+
+  handleClickIconButton(icon) {
+    const { entryId } = this.props;
+    this.props.setEntryIconId(entryId, icon.id);
+    this.setState({ choosingIcon: false });
+  }
+
+  render() {
+    const { iconId = 'folder' } = this.props;
+    const { choosingIcon } = this.state;
+
+    return (
+      <span
+        className="entry-icon"
+        ref={(iconElement) => { this.iconElement = iconElement; }}
+      >
+        <Icon iconId={iconId} />
+        <Tooltip visible={choosingIcon} className="icon-chooser">
+          {STATIC_ICONS.map(icon => (
+            <button
+              key={icon.id}
+              type="button"
+              className="icon-button"
+              onClick={() => this.handleClickIconButton(icon)}
+            >
+              <Icon iconId={icon.id} />
+            </button>
+          ))}
+        </Tooltip>
+      </span>
+    );
+  }
+}
+
+class Tooltip extends React.Component {
+  render() {
+    const { children, visible, className } = this.props;
+    return (
+      <div
+        className={`tooltip ${className}`}
+        style={{
+          visibility: visible ? 'visible' : 'hidden',
+          opacity: visible ? '100%' : '0%',
+        }}
+      >
+        <div className="pip" />
+        {children}
+      </div>
     );
   }
 }

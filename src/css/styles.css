@@ -88,11 +88,12 @@ html, body {
 .sidebar-list {
   list-style-type: none;
   padding: 0;
-  margin: 0 0 10px 10px;
+  margin: 0 0 10px;
 }
 
 .sidebar-list li {
   margin-bottom: 5px;
+  padding-left: 10px;
 }
 
 .sidebar-list .sidebar-link {
@@ -157,6 +158,83 @@ html, body {
   font-family: var(--main-font-family);
   font-size: var(--main-font-size);
   padding: 0;
+}
+
+.sidebar-entry .entry-icon {
+  margin-right: 5px;
+  position: relative;
+}
+
+.sidebar-entry .icon-image {
+  width: 16px;
+  vertical-align: bottom;
+}
+
+.sidebar-entry .drag-handle {
+  visibility: hidden;
+  color: var(--white-83);
+  font-size: 12px;
+}
+
+.sidebar-entry:hover .drag-handle {
+  visibility: visible;
+  cursor: pointer;
+  position: relative;
+  left: -5px;
+}
+
+.sidebar-entry .tooltip {
+  position: absolute;
+  margin: 10px 0 0;
+  padding: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--gray-60);
+  background: var(--gray-15);
+  z-index: 100;
+  top: 100%;
+  width: 150px;
+  transition: all .1s linear;
+  box-shadow: 0px 5px 10px -3px var(--gray-15);
+}
+
+.sidebar-entry .tooltip .pip {
+  width: 20px;
+  padding-bottom: calc(20px / 1.41);
+  position: absolute;
+  top: -14px;
+  left: 8px;
+  overflow: hidden;
+}
+
+.sidebar-entry .tooltip .pip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--gray-60);
+  background: var(--gray-15);
+  transform-origin: bottom right;
+  transform: rotate(-45deg);
+}
+
+.sidebar-entry .icon-chooser .icon-button {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  color: var(--white);
+}
+
+.sidebar-entry .icon-chooser .icon-button:hover {
+  background: var(--blue-60);
+}
+
+.sidebar-entry .icon-chooser .icon-button:active {
+  background: var(--blue-40);
 }
 
 .file-browser {
