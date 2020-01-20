@@ -1,6 +1,7 @@
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
+import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-electron-titlebar';
 
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
@@ -30,6 +31,32 @@ class App extends React.Component {
 }
 
 class TitleBar extends React.Component {
+  render() {
+    if (process.platform === 'darwin') {
+      return <MacTitleBar />;
+    }
+
+    return <WindowsTitleBar />;
+  }
+}
+
+class WindowsTitleBar extends React.Component {
+  componentDidMount() {
+    this.titlebar = new CustomTitleBar({
+      backgroundColor: TitleBarColor.fromHex('#404040'),
+    });
+  }
+
+  componentWillUnmount() {
+    this.titlebar.dispose();
+  }
+
+  render() {
+    return null;
+  }
+}
+
+class MacTitleBar extends React.Component {
   render() {
     return (
       <div className="title-bar">

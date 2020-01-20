@@ -19,6 +19,7 @@ function createWindow() {
     width: mainWindowState.width,
     height: mainWindowState.height,
 
+    frame: process.platform !== 'win32',
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       experimentalFeatures: true,
@@ -108,6 +109,13 @@ if (process.platform === 'darwin') {
       },
     },
   ];
+} else {
+  template.unshift({
+    label: 'File',
+    submenu: [
+      { role: 'quit' },
+    ],
+  });
 }
 
 const menu = Menu.buildFromTemplate(template);

@@ -11,12 +11,13 @@
     "runtimeVersion": "7.1.7"
   },
   "scripts": {
+    "run": "electron .",
     "build": "webpack --config webpack.config.js",
     "build:prod": "webpack --config webpack.prod.js",
     "watch": "webpack --watch --config webpack.config.js",
     "compile": "cmake-js build --target musicplayer_node --out native_build",
     "clean": "cmake-js clean --target musicplayer_node --out native_build",
-    "start": "concurrently --kill-others --success first \"electron .\" \"npm:watch\"",
+    "start": "concurrently --kill-others --success first \"npm:run\" \"npm:watch\"",
     "package:macos": "bin/package_macos.sh",
     "package:windows": "bash bin\\package_windows.sh"
   },
@@ -28,6 +29,7 @@
     "bindings": "^1.5.0",
     "buffer-crc32": "^0.2.13",
     "cmake-js": "^6.0.0",
+    "custom-electron-titlebar": "^3.2.1",
     "electron": "^7.1.7",
     "electron-store": "^5.1.0",
     "electron-window-state": "^5.0.3",
