@@ -2,6 +2,8 @@ import path from 'path';
 
 import bindings from 'bindings';
 
+import FILE_TYPES from 'moseamp/filetypes';
+
 const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
@@ -9,8 +11,100 @@ export const DEFAULT_GAIN = 0.7;
 const GAIN_FACTOR = 0.0001;
 const SAMPLE_COUNT = 2048;
 
-class Player {
+class DispatchPlayer {
   constructor() {
+    this.currentPlayer = null;
+    this.players = [
+      new MusicPlayerPlayer(),
+      new WebAudioPlayer(),
+    ];
+  }
+
+  async load(filePath) {
+    const extension = path.extname(filePath);
+    const fileType = Object.values(FILE_TYPES).find(ft => ft.extensions.includes(extension));
+    const player = this.players.find(p => p.id === fileType.playerId);
+
+    if (this.currentPlayer) {
+      this.currentPlayer.pause();
+    }
+    this.currentPlayer = player;
+    return player.load(filePath);
+  }
+
+  setVolume(volume) {
+    this.currentPlayer.setVolume(volume);
+  }
+
+  seek(song) {
+    this.currentPlayer.seek(song);
+  }
+
+  async play() {
+    return this.currentPlayer.play();
+  }
+
+  async pause() {
+    return this.currentPlayer.pause();
+  }
+}
+
+class WebAudioPlayer {
+  constructor() {
+    this.id = 'webaudioplayer';
+
+    this.ctx = new AudioContext();
+    this.gainNode = this.ctx.createGain();
+    this.gainNode.gain.value = DEFAULT_GAIN;
+    this.gainNode.connect(this.ctx.destination);
+  }
+
+  async load(filePath) {
+    this.pause();
+    if (this.sourceNode) {
+      this.sourceNode.disconnect();
+    }
+
+    this.audio = new Audio();
+    await new Promise(resolve => {
+      this.audio.addEventListener('canplaythrough', resolve);
+      this.audio.src = filePath;
+    });
+    this.sourceNode = this.ctx.createMediaElementSource(this.audio);
+    this.sourceNode.connect(this.gainNode);
+    this.audio.loop = true;
+    this.audio.play();
+
+
+    return {
+      title: path.basename(filePath),
+      artist: 'Unknown',
+      songs: 0,
+    };
+  }
+
+  setVolume(volume) {
+    this.gainNode.gain.value = volume;
+  }
+
+  seek() {
+    // NOOP
+  }
+
+  async play() {
+    await this.ctx.resume();
+  }
+
+  async pause() {
+    return this.ctx.suspend();
+  }
+}
+
+// This name is so dumb
+class MusicPlayerPlayer {
+  constructor() {
+    this.id = 'musicplayer';
+
     this.ctx44100 = new AudioContext({sampleRate: 44100});
     this.ctx48000 = new AudioContext({sampleRate: 48000});
     this.ctxs = [this.ctx44100, this.ctx48000];
@@ -46,6 +140,7 @@ class Player {
   }
 
   async load(filePath) {
+    this.pause();
     if (this.musicPlayer) {
       this.musicPlayer.freePlayer();
     }
@@ -95,5 +190,5 @@ class Player {
   }
 }
 
-window.player = new Player();
+window.player = new DispatchPlayer();
 export default window.player;
