@@ -91,6 +91,20 @@ class PlayerControls extends React.Component {
   }
 }
 
+class HoverScroll extends React.Component {
+  render() {
+    return (
+      <div className="hover-scroll">
+        <div className="hover-scroll-parent">
+          <div className="hover-scroll-child">
+            {this.props.children}
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
 @connect(
   state => ({
     currentTitle: getCurrentTitle(state),
@@ -107,12 +121,16 @@ class CurrentSong extends React.Component {
     return (
       <div className="current-song">
         <div className="current-song-title">
-          {extension && <img src={EXTENSIONS_ICONS[extension]} className="image-icon" />}
-          {songCount > 1 && `Track ${currentSong + 1} / ${songCount} - `}
-          {currentTitle}
+          <HoverScroll>
+            {extension && <img src={EXTENSIONS_ICONS[extension]} className="image-icon" />}
+            {songCount > 1 && `Track ${currentSong + 1} / ${songCount} - `}
+            {currentTitle}
+          </HoverScroll>
         </div>
         <div className="current-song-artist">
-          {currentArtist}
+          <HoverScroll>
+            {currentArtist}
+          </HoverScroll>
         </div>
       </div>
     );

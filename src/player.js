@@ -1,6 +1,7 @@
 import path from 'path';
 
 import bindings from 'bindings';
+import * as musicMetadata from 'music-metadata';
 
 import FILE_TYPES from 'moseamp/filetypes';
 
@@ -76,11 +77,25 @@ class WebAudioPlayer {
     this.audio.play();
 
 
-    return {
+    const metadata = {
       title: path.basename(filePath),
       artist: 'Unknown',
       songs: 0,
     };
+
+    try {
+      const { common } = await musicMetadata.parseFile(filePath);
+      if (common.title) {
+        metadata.title = common.title;
+      }
+      if (common.artist) {
+        metadata.artist = common.artist;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    return metadata;
   }
 
   setVolume(volume) {

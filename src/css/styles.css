@@ -400,6 +400,39 @@ html, body {
   vertical-align: middle;
 }
 
+.hover-scroll {
+  position: relative;
+  min-width: 100%;
+}
+
+.hover-scroll:hover .hover-scroll-parent {
+  animation: bounce-parent 8s linear infinite;
+  position: absolute;
+  display: inline-block;
+  min-width: 100%;
+}
+
+@keyframes bounce-parent {
+  0% { left: 0; }
+  37% { left: 100%; }
+  50% { left: 100%; }
+  87% { left: 0%; }
+}
+
+.hover-scroll:hover .hover-scroll-child {
+  animation: bounce-child 8s linear infinite;
+  display: inline-block;
+  position: relative;
+  min-width: 100%;
+}
+
+@keyframes bounce-child {
+  0% { right: 0%; }
+  37% { right: 100%; }
+  50% { right: 100%; }
+  87% { right: 0%; }
+}
+
 .player-controls {
   text-align: center;
   flex: 2;
