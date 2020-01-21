@@ -263,6 +263,11 @@ html, body {
   );
   text-shadow: 0 1px 2px var(--black);
   flex: 0 0 30px;
+  overflow: auto;
+}
+
+.file-browser .path-segments::-webkit-scrollbar {
+  display: none;
 }
 
 .file-browser .path-segments .segment {
