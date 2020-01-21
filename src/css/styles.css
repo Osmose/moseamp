@@ -22,6 +22,17 @@
   --main-font-size: 14px;
 }
 
+::-webkit-scrollbar {
+  background-color: var(--gray-15);
+  width: 16px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--gray-37);
+  border-radius: 50px;
+  border: 4px solid var(--gray-15);
+}
+
 * {
   box-sizing: border-box;
 }
