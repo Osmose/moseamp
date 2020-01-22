@@ -3,6 +3,10 @@ import zlib from 'zlib';
 import fs from 'fs-extra';
 
 export function formatDuration(duration) {
+  if (duration === Infinity) {
+    return '∞';
+  }
+
   const seconds = Math.floor(duration % 60);
   const minutes = Math.floor(duration / 60);
   const hours = Math.floor(duration / 3600);

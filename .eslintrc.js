@@ -44,5 +44,6 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'consistent-return': 'off',
     'jsx-a11y/anchor-is-valid': 'off',
+    'react/jsx-curly-newline': 'off',
   },
 };

@@ -1,4 +1,5 @@
 import path from 'path';
+import EventEmitter from 'events';
 
 import bindings from 'bindings';
 import * as musicMetadata from 'music-metadata';
@@ -12,13 +13,21 @@ export const DEFAULT_GAIN = 0.7;
 const GAIN_FACTOR = 0.0001;
 const SAMPLE_COUNT = 2048;
 
-class DispatchPlayer {
+class DispatchPlayer extends EventEmitter {
   constructor() {
+    super();
     this.currentPlayer = null;
     this.players = [
       new MusicPlayerPlayer(),
       new WebAudioPlayer(),
     ];
+
+    // Forward timeupdate events.
+    for (const player of this.players) {
+      player.on('timeupdate', (currentTime) => {
+        this.emit('timeupdate', currentTime);
+      });
+    }
   }
 
   async load(filePath) {
@@ -27,7 +36,8 @@ class DispatchPlayer {
     const player = this.players.find(p => p.id === fileType.playerId);
 
     if (this.currentPlayer) {
-      this.currentPlayer.pause();
+      await this.currentPlayer.pause();
+      this.currentPlayer.tidy();
     }
     this.currentPlayer = player;
     return player.load(filePath);
@@ -37,8 +47,8 @@ class DispatchPlayer {
     this.currentPlayer.setVolume(volume);
   }
 
-  seek(song) {
-    this.currentPlayer.seek(song);
+  seek(song, position) {
+    this.currentPlayer.seek(song, position);
   }
 
   async play() {
@@ -50,8 +60,10 @@ class DispatchPlayer {
   }
 }
 
-class WebAudioPlayer {
+class WebAudioPlayer extends EventEmitter {
   constructor() {
+    super();
+
     this.id = 'webaudioplayer';
 
     this.ctx = new AudioContext();
@@ -61,11 +73,6 @@ class WebAudioPlayer {
   }
 
   async load(filePath) {
-    this.pause();
-    if (this.sourceNode) {
-      this.sourceNode.disconnect();
-    }
-
     this.audio = new Audio();
     await new Promise(resolve => {
       this.audio.addEventListener('canplaythrough', resolve);
@@ -75,12 +82,16 @@ class WebAudioPlayer {
     this.sourceNode.connect(this.gainNode);
     this.audio.loop = true;
     this.audio.play();
+    this.audio.addEventListener('timeupdate', () => {
+      this.emit('timeupdate', this.audio.currentTime);
+    });
 
 
     const metadata = {
       title: path.basename(filePath),
       artist: 'Unknown',
       songs: 0,
+      duration: this.audio.duration,
     };
 
     try {
@@ -102,8 +113,14 @@ class WebAudioPlayer {
     this.gainNode.gain.value = volume;
   }
 
-  seek() {
-    // NOOP
+  seek(song, position) {
+    this.audio.currentTime = position;
+  }
+
+  tidy() {
+    if (this.sourceNode) {
+      this.sourceNode.disconnect();
+    }
   }
 
   async play() {
@@ -116,8 +133,10 @@ class WebAudioPlayer {
 }
 
 // This name is so dumb
-class MusicPlayerPlayer {
+class MusicPlayerPlayer extends EventEmitter {
   constructor() {
+    super();
+
     this.id = 'musicplayer';
 
     this.ctx44100 = new AudioContext({sampleRate: 44100});
@@ -126,6 +145,8 @@ class MusicPlayerPlayer {
 
     this.ctx = null;
     this.musicPlayer = null;
+    this.startTime = null;
+    this.currentTimeInterval = null;
 
     for (const ctx of this.ctxs) {
       ctx.suspend();
@@ -155,11 +176,6 @@ class MusicPlayerPlayer {
   }
 
   async load(filePath) {
-    this.pause();
-    if (this.musicPlayer) {
-      this.musicPlayer.freePlayer();
-    }
-
     this.musicPlayer = new MusicPlayer(filePath);
 
     if (this.musicPlayer.getMeta('format') === 'Playstation2') {
@@ -167,6 +183,11 @@ class MusicPlayerPlayer {
     } else {
       this.ctx = this.ctx44100;
     }
+
+    this.startTime = this.ctx.currentTime;
+    this.currentTimeInterval = setInterval(() => {
+      this.emit('timeupdate', this.ctx.currentTime - this.startTime);
+    }, 1000);
 
     return {
       title: (
@@ -179,6 +200,7 @@ class MusicPlayerPlayer {
         || '---'
       ),
       songs: this.musicPlayer.getMetaInt('songs'),
+      duration: Infinity,
     };
   }
 
@@ -189,7 +211,19 @@ class MusicPlayerPlayer {
   }
 
   seek(song) {
-    this.musicPlayer.seek(song);
+    if (song !== null) {
+      this.musicPlayer.seek(song);
+    }
+  }
+
+  tidy() {
+    if (this.musicPlayer) {
+      this.musicPlayer.freePlayer();
+    }
+
+    if (this.currentTimeInterval) {
+      clearInterval(this.currentTimeInterval);
+    }
   }
 
   async play() {

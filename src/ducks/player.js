@@ -61,6 +61,7 @@ export default function reducer(state = defaultState(), action = {}) {
         currentTitle: action.meta.title,
         currentArtist: action.meta.artist,
         songCount: action.meta.songs,
+        duration: action.meta.duration,
       };
     case SET_CURRENT_SONG:
       return {
@@ -87,6 +88,7 @@ export function openFile(filePath) {
         type: SET_CURRENT_FILE_PATH,
         filePath,
       });
+      dispatch(setCurrentTime(0));
       dispatch({
         type: SET_META,
         meta,

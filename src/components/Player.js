@@ -3,7 +3,6 @@ import path from 'path';
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
-import ReactSlider from 'react-slider';
 
 import {
   play,
@@ -16,11 +15,14 @@ import {
   getCurrentTitle,
   getSongCount,
   getCurrentSong,
+  getDuration,
+  getCurrentTime,
   seek,
 } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS } from 'moseamp/filetypes';
-import { DEFAULT_GAIN } from 'moseamp/player';
+import player, { DEFAULT_GAIN } from 'moseamp/player';
 import { FontAwesome } from 'moseamp/components/Icon';
+import { formatDuration } from 'moseamp/utils';
 
 export default class Player extends React.Component {
   render() {
@@ -39,6 +41,9 @@ export default class Player extends React.Component {
     playing: getPlaying(state),
     currentSong: getCurrentSong(state),
     songCount: getSongCount(state),
+    duration: getDuration(state),
+    currentFilePath: getCurrentFilePath(state),
+    currentTime: getCurrentTime(state),
   }),
   {
     seek,
@@ -54,9 +59,8 @@ class PlayerControls extends React.Component {
     this.props.seek(this.props.currentSong + 1);
   }
 
-
   render() {
-    const { playing, currentSong, songCount } = this.props;
+    const { playing, currentSong, songCount, duration, currentFilePath, currentTime } = this.props;
     return (
       <div className="player-controls">
         <div className="player-controls-buttons">
@@ -86,7 +90,47 @@ class PlayerControls extends React.Component {
             </button>
           )}
         </div>
+        <div className="seek-bar">
+          <div className="current-time">
+            {currentFilePath && formatDuration(currentTime)}
+          </div>
+          <SeekBar currentTime={currentTime} duration={duration} empty={!currentFilePath} />
+          <div className="duration">
+            {currentFilePath && formatDuration(duration)}
+          </div>
+        </div>
       </div>
+    );
+  }
+}
+
+@autobind
+class SeekBar extends React.Component {
+  handleClick(event) {
+    const { duration, empty } = this.props;
+    if (empty || duration === Infinity) {
+      return;
+    }
+
+    const clickValue = Math.floor(
+      (event.nativeEvent.offsetX / event.target.offsetWidth) * duration,
+    );
+    player.seek(null, clickValue);
+  }
+
+  render() {
+    const { currentTime, duration, empty } = this.props;
+    const progressProps = {};
+    if (empty) {
+      progressProps.max = 1;
+      progressProps.value = 0;
+    } else if (duration !== Infinity) {
+      progressProps.max = duration;
+      progressProps.value = currentTime;
+    }
+
+    return (
+      <progress className="slider" onClick={this.handleClick} {...progressProps} />
     );
   }
 }
@@ -188,8 +232,9 @@ class PauseButton extends React.Component {
 )
 @autobind
 class VolumeControls extends React.Component {
-  handleChange(value) {
-    this.props.setVolume(value);
+  handleClick(event) {
+    const clickValue = (event.nativeEvent.offsetX / event.target.offsetWidth) * (DEFAULT_GAIN * 2);
+    this.props.setVolume(clickValue);
   }
 
   render() {
@@ -204,13 +249,12 @@ class VolumeControls extends React.Component {
     return (
       <div className="player-volume-container">
         <FontAwesome code={iconCode} className="volume-icon" />
-        <ReactSlider
+        <progress
+          className="slider"
           min={0}
           max={DEFAULT_GAIN * 2}
-          step={0.1}
           value={volume}
-          onChange={this.handleChange}
-          withBars
+          onClick={this.handleClick}
         />
       </div>
     );
