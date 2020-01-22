@@ -28,6 +28,13 @@ class DispatchPlayer extends EventEmitter {
         this.emit('timeupdate', currentTime);
       });
     }
+
+    // Forward ended events.
+    for (const player of this.players) {
+      player.on('ended', () => {
+        this.emit('ended');
+      });
+    }
   }
 
   async load(filePath) {
@@ -80,10 +87,12 @@ class WebAudioPlayer extends EventEmitter {
     });
     this.sourceNode = this.ctx.createMediaElementSource(this.audio);
     this.sourceNode.connect(this.gainNode);
-    this.audio.loop = true;
     this.audio.play();
     this.audio.addEventListener('timeupdate', () => {
       this.emit('timeupdate', this.audio.currentTime);
+    });
+    this.audio.addEventListener('ended', () => {
+      this.emit('ended');
     });
 
 

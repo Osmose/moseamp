@@ -6,21 +6,25 @@ import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-elect
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
 import Sidebar from 'moseamp/components/Sidebar';
-import { setCurrentTime } from 'moseamp/ducks/player';
+import { loadEntries } from 'moseamp/ducks/filebrowser';
+import { setCurrentTime, loadNextEntry } from 'moseamp/ducks/player';
 import { loadPrefs } from 'moseamp/ducks/prefs';
 import player from 'moseamp/player';
 
 export default
-@connect(null, { loadPrefs, setCurrentTime })
+@connect(null, { loadPrefs, loadEntries, setCurrentTime, loadNextEntry })
 @autobind
 class App extends React.Component {
   componentDidMount() {
     this.props.loadPrefs();
+    this.props.loadEntries();
     player.on('timeupdate', this.props.setCurrentTime);
+    player.on('ended', this.props.loadNextEntry);
   }
 
   componentWillUnmount() {
     player.off('timeupdate', this.props.setCurrentTime);
+    player.off('ended', this.props.loadNextEntry);
   }
 
   render() {

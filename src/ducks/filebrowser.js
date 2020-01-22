@@ -1,10 +1,12 @@
 import path from 'path';
+import fs from 'fs';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 
 // == Actions
 
 const CHANGE_PATH = 'filebrowser/CHANGE_PATH';
+const SET_ENTRIES = 'filebrowser/SET_ENTRIES';
 
 // == Reducer
 
@@ -12,6 +14,7 @@ function defaultState() {
   return {
     root: path.parse(process.cwd()).root,
     currentPath: '',
+    entries: [],
     loading: false,
   };
 }
@@ -23,6 +26,12 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
         ...filebrowser,
         currentPath: action.path,
         loading: true,
+      };
+    case SET_ENTRIES:
+      return {
+        ...filebrowser,
+        entries: action.entries.map(entry => ({...entry})),
+        loading: false,
       };
     case LOAD_PREFS:
       return {
@@ -72,6 +81,10 @@ export function getFullCurrentPath(state) {
   return path.join(getRoot(state), getCurrentPath(state));
 }
 
+export function getEntries(state) {
+  return state.filebrowser.entries;
+}
+
 // == Action Creators
 
 export function changeFullPath(newFullPath) {
@@ -90,13 +103,38 @@ export function changeFullPath(newFullPath) {
 }
 
 export function changePath(newPath) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     dispatch({
       type: CHANGE_PATH,
       path: newPath,
     });
+    dispatch(loadEntries());
 
+    setPref('filebrowserCurrentPath', newPath);
+  };
+}
+
+export function loadEntries() {
+  return async (dispatch, getState) => {
     const state = getState();
-    setPref('filebrowserCurrentPath', getCurrentPath(state));
+
+    const fullCurrentPath = getFullCurrentPath(state);
+    const currentPath = getCurrentPath(state);
+    const dirEntries = await fs.promises.readdir(fullCurrentPath, {withFileTypes: true});
+    const entries = dirEntries.map(dirEnt => {
+      return {
+        fullPath: path.join(fullCurrentPath, dirEnt.name),
+        path: path.join(currentPath, dirEnt.name),
+        ext: path.extname(dirEnt.name),
+        name: dirEnt.name,
+        type: dirEnt.isDirectory() ? 'directory' : 'file',
+      };
+    });
+    entries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+    dispatch({
+      type: SET_ENTRIES,
+      entries,
+    });
   };
 }

@@ -1,4 +1,5 @@
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
+import { getEntries } from 'moseamp/ducks/filebrowser';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 
 // == Actions
@@ -161,6 +162,17 @@ export function seek(song) {
   return {
     type: SET_CURRENT_SONG,
     song,
+  };
+}
+
+export function loadNextEntry() {
+  return (dispatch, getState) => {
+    const state = getState();
+    const fileEntries = getEntries(state).filter(entry => entry.type === 'file');
+    const currentFilePath = getCurrentFilePath(state);
+    const currentEntryIndex = fileEntries.findIndex(entry => entry.fullPath === currentFilePath);
+    const nextEntry = fileEntries[(currentEntryIndex + 1) % fileEntries.length];
+    dispatch(openFile(nextEntry.fullPath));
   };
 }
 
