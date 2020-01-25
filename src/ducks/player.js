@@ -1,6 +1,9 @@
+import fs from 'fs';
+import path from 'path';
+
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
-import { getEntries } from 'moseamp/ducks/filebrowser';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
+import { SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
 
 // == Actions
 
@@ -166,13 +169,18 @@ export function seek(song) {
 }
 
 export function loadNextEntry() {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const state = getState();
-    const fileEntries = getEntries(state).filter(entry => entry.type === 'file');
     const currentFilePath = getCurrentFilePath(state);
-    const currentEntryIndex = fileEntries.findIndex(entry => entry.fullPath === currentFilePath);
-    const nextEntry = fileEntries[(currentEntryIndex + 1) % fileEntries.length];
-    dispatch(openFile(nextEntry.fullPath));
+    const directory = path.dirname(currentFilePath);
+    const dirEntries = await fs.promises.readdir(directory, {withFileTypes: true});
+    const playablePaths = dirEntries
+      .filter(entry => !entry.isDirectory())
+      .filter(entry => SUPPORTED_EXTENSIONS.includes(path.extname(entry.name)))
+      .map(entry => path.join(directory, entry.name));
+    const currentPathIndex = playablePaths.findIndex(filePath => filePath === currentFilePath);
+    const nextPath = playablePaths[(currentPathIndex + 1) % playablePaths.length];
+    dispatch(openFile(nextPath));
   };
 }
 
