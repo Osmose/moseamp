@@ -318,7 +318,7 @@ class LoopButton extends React.Component {
   render() {
     const { loop } = this.props;
     return (
-      <button type="button" className={`control-button ${loop ? 'on' : 'off'}`} onClick={this.handleClick}>
+      <button type="button" className={`control-button loop ${loop ? 'on' : 'off'}`} onClick={this.handleClick}>
         <FontAwesome code="retweet" />
         <span>1</span>
       </button>

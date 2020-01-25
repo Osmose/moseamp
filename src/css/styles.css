@@ -511,7 +511,11 @@ html, body {
 
 .control-button:focus {
   outline: none;
-  text-shadow: 0 0 2px var(--blue-60);
+}
+
+.control-button.loop span {
+  font-size: 1rem;
+  vertical-align: 9px;
 }
 
 .player-volume-container {
