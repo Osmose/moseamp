@@ -19,12 +19,16 @@ class App extends React.Component {
     this.props.loadPrefs();
     this.props.loadEntries();
     player.on('timeupdate', this.props.setCurrentTime);
-    player.on('ended', this.props.loadNextEntry);
+    player.on('ended', this.handleEnded);
   }
 
   componentWillUnmount() {
     player.off('timeupdate', this.props.setCurrentTime);
-    player.off('ended', this.props.loadNextEntry);
+    player.off('ended', this.handleEnded);
+  }
+
+  handleEnded() {
+    this.props.loadNextEntry(true);
   }
 
   render() {

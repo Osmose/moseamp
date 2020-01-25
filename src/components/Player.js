@@ -17,6 +17,12 @@ import {
   getCurrentSong,
   getDuration,
   getCurrentTime,
+  getShuffle,
+  setShuffle,
+  loadPrevEntry,
+  loadNextEntry,
+  getLoop,
+  setLoop,
   seek,
 } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS } from 'moseamp/filetypes';
@@ -64,31 +70,45 @@ class PlayerControls extends React.Component {
     return (
       <div className="player-controls">
         <div className="player-controls-buttons">
-          {songCount > 1 && (
-            <button
-              type="button"
-              className="control-button"
-              disabled={currentSong < 1}
-              onClick={this.handleClickPrev}
-            >
-              <FontAwesome code="angle-left" />
-            </button>
-          )}
+          {songCount > 1
+            ? (
+              <button
+                type="button"
+                className="control-button"
+                disabled={currentSong < 1}
+                onClick={this.handleClickPrev}
+              >
+                <FontAwesome code="angle-left" />
+              </button>
+            )
+            : (
+              <div className="spacer" />
+            )
+          }
+          <ShuffleButton />
+          <PrevButton />
           {
             playing
               ? <PauseButton />
               : <PlayButton />
           }
-          {songCount > 1 && (
-            <button
-              type="button"
-              className="control-button"
-              disabled={currentSong >= songCount - 1}
-              onClick={this.handleClickNext}
-            >
-              <FontAwesome code="angle-right" />
-            </button>
-          )}
+          <NextButton />
+          <LoopButton />
+          {songCount > 1
+            ? (
+              <button
+                type="button"
+                className="control-button"
+                disabled={currentSong >= songCount - 1}
+                onClick={this.handleClickNext}
+              >
+                <FontAwesome code="angle-right" />
+              </button>
+            )
+            : (
+              <div className="spacer" />
+            )
+          }
         </div>
         <div className="seek-bar">
           <div className="current-time">
@@ -195,7 +215,7 @@ class PlayButton extends React.Component {
 
   render() {
     const { currentFilePath } = this.props;
-    let className = 'control-button';
+    let className = 'control-button primary';
     if (!currentFilePath) {
       className += ' disabled';
     }
@@ -217,8 +237,85 @@ class PauseButton extends React.Component {
 
   render() {
     return (
-      <button type="button" className="control-button" onClick={this.handleClick}>
+      <button type="button" className="control-button primary" onClick={this.handleClick}>
         <FontAwesome code="pause" />
+      </button>
+    );
+  }
+}
+
+@connect(null, { loadPrevEntry })
+@autobind
+class PrevButton extends React.Component {
+  handleClick() {
+    this.props.loadPrevEntry();
+  }
+
+  render() {
+    return (
+      <button type="button" className="control-button" onClick={this.handleClick}>
+        <FontAwesome code="step-backward" />
+      </button>
+    );
+  }
+}
+
+@connect(null, { loadNextEntry })
+@autobind
+class NextButton extends React.Component {
+  handleClick() {
+    this.props.loadNextEntry();
+  }
+
+  render() {
+    return (
+      <button type="button" className="control-button" onClick={this.handleClick}>
+        <FontAwesome code="step-forward" />
+      </button>
+    );
+  }
+}
+
+@connect(
+  state => ({
+    shuffle: getShuffle(state),
+  }),
+  { setShuffle },
+)
+@autobind
+class ShuffleButton extends React.Component {
+  handleClick() {
+    this.props.setShuffle(!this.props.shuffle);
+  }
+
+  render() {
+    const { shuffle } = this.props;
+    return (
+      <button type="button" className={`control-button ${shuffle ? 'on' : 'off'}`} onClick={this.handleClick}>
+        <FontAwesome code="random" />
+      </button>
+    );
+  }
+}
+
+@connect(
+  state => ({
+    loop: getLoop(state),
+  }),
+  { setLoop },
+)
+@autobind
+class LoopButton extends React.Component {
+  handleClick() {
+    this.props.setLoop(!this.props.loop);
+  }
+
+  render() {
+    const { loop } = this.props;
+    return (
+      <button type="button" className={`control-button ${loop ? 'on' : 'off'}`} onClick={this.handleClick}>
+        <FontAwesome code="retweet" />
+        <span>1</span>
       </button>
     );
   }

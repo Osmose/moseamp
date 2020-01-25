@@ -462,15 +462,23 @@ html, body {
   flex-direction: row;
 }
 
+.player-controls-buttons .spacer {
+  flex: 1;
+}
+
 .control-button {
   color: var(--white-83);
-  font-size: 2rem;
+  font-size: 1.6rem;
   border: none;
   background: none;
   font-weight: bold;
   text-shadow: 0 1px 1px var(--black);
   cursor: pointer;
   flex: 1;
+}
+
+.control-button.primary {
+  font-size: 2.2rem;
 }
 
 .control-button:hover {
@@ -482,9 +490,21 @@ html, body {
   outline: none;
 }
 
+.control-button.on {
+  color: var(--blue-60);
+}
+
+.control-button.on:hover {
+  color: var(--blue-40);
+}
+
+.control-button.on:active {
+  color: var(--blue-25);
+}
+
 .control-button.disabled,
 .control-button:disabled {
-  color: var(--gray-25);
+  color: var(--gray-40);
   cursor: pointer;
 }
 
