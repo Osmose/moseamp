@@ -114,8 +114,13 @@ class PlayerControls extends React.Component {
           <div className="current-time">
             {currentFilePath && formatDuration(currentTime)}
           </div>
-          <SeekBar currentTime={currentTime} duration={duration} empty={!currentFilePath} />
-          <div className="duration">
+          <SeekBar
+            currentTime={currentTime}
+            duration={duration}
+            empty={!currentFilePath}
+            playing={playing}
+          />
+          <div className={`duration ${duration === Infinity ? 'infinite' : ''}`}>
             {currentFilePath && formatDuration(duration)}
           </div>
         </div>
@@ -139,7 +144,7 @@ class SeekBar extends React.Component {
   }
 
   render() {
-    const { currentTime, duration, empty } = this.props;
+    const { currentTime, duration, empty, playing } = this.props;
     const progressProps = {};
     if (empty) {
       progressProps.max = 1;
@@ -150,7 +155,7 @@ class SeekBar extends React.Component {
     }
 
     return (
-      <progress className="slider" onClick={this.handleClick} {...progressProps} />
+      <progress className={`slider ${playing ? 'playing' : 'paused'}`} onClick={this.handleClick} {...progressProps} />
     );
   }
 }

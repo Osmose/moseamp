@@ -390,9 +390,8 @@ html, body {
 }
 
 .player-bar {
-  flex: 0 0 auto;
+  flex: 0 0 80px;
   padding: 5px 15px;
-  min-height: 70px;
   -webkit-user-select: none;
   display: flex;
   flex-direction: row;
@@ -475,10 +474,12 @@ html, body {
   text-shadow: 0 1px 1px var(--black);
   cursor: pointer;
   flex: 1;
+  padding: 0;
 }
 
 .control-button.primary {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
+  flex: 2;
 }
 
 .control-button:hover {
@@ -549,6 +550,29 @@ html, body {
   background: linear-gradient(180deg, var(--blue-60), var(--blue-40));
 }
 
+.slider:not([value])::after {
+  content: '';
+  display: inline-block;
+  width: calc(100% - 2px);
+  height: 6px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--blue-60), var(--blue-40), var(--blue-40), var(--blue-60));
+  background-size: 200%;
+  animation: indeterminate-slider 4s linear infinite;
+  position: relative;
+  top: -21px;
+}
+
+.slider.paused:not([value])::after {
+  animation-play-state: paused;
+}
+
+@keyframes indeterminate-slider {
+  0% { background-position: 200% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* .slider {
 
 }
@@ -584,7 +608,7 @@ html, body {
 
 .seek-bar .current-time,
 .seek-bar .duration {
-  flex: 0 0 50px;
+  flex: 0 0 30px;
 }
 
 .seek-bar .current-time {
@@ -593,6 +617,10 @@ html, body {
 
 .seek-bar .duration {
   text-align: left;
+}
+
+.seek-bar .duration.infinite {
+  font-size: 1.4rem;
 }
 
 .seek-bar .slider {
