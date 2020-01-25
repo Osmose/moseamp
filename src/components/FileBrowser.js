@@ -12,7 +12,7 @@ import {
   loadEntries,
   getLoading,
 } from 'moseamp/ducks/filebrowser';
-import { openFile, getCurrentFilePath } from 'moseamp/ducks/player';
+import { openFile, getCurrentFilePath, getPlaying } from 'moseamp/ducks/player';
 import { EXTENSIONS_ICONS, SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
 
 
@@ -84,6 +84,7 @@ class FileBrowser extends React.Component {
     currentPath: getCurrentPath(state),
     loading: getLoading(state),
     currentFilePath: getCurrentFilePath(state),
+    playing: getPlaying(state),
   }),
   {
     changePath,
@@ -101,7 +102,7 @@ class Entry extends React.Component {
   }
 
   render() {
-    const { currentPath, currentFilePath, entry, loading } = this.props;
+    const { currentFilePath, entry, loading, playing } = this.props;
 
     const isCurrentFile = currentFilePath === entry.fullPath;
     return (
@@ -110,7 +111,12 @@ class Entry extends React.Component {
         onClick={() => this.handleClickEntry(entry)}
       >
         <span className="icon">
-          <EntryIcon entry={entry} loading={loading} isCurrentFile={isCurrentFile} />
+          <EntryIcon
+            entry={entry}
+            loading={loading}
+            isCurrentFile={isCurrentFile}
+            playing={playing}
+          />
         </span>
         <span>{entry.name}</span>
       </li>
@@ -120,13 +126,13 @@ class Entry extends React.Component {
 
 class EntryIcon extends React.Component {
   render() {
-    const { entry, loading, isCurrentFile } = this.props;
+    const { entry, loading, isCurrentFile, playing } = this.props;
     if (loading && isCurrentFile) {
       return <FontAwesome code="spinner" className="fa-spin" />;
     }
 
     if (isCurrentFile) {
-      return <FontAwesome code="play" />;
+      return <FontAwesome code={playing ? 'play' : 'pause'} />;
     }
 
     return <FileIcon entry={entry} />;
