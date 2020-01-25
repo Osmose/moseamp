@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash.clonedeep';
+import _ from 'lodash';
 import uuidv4 from 'uuid/v4';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
@@ -70,7 +70,7 @@ export default function reducer(favorites = defaultState(), action = {}) {
     case LOAD_PREFS:
       return {
         ...favorites,
-        entries: cloneDeep(action.prefs.favoritesEntries) || favorites.entries,
+        entries: _.cloneDeep(action.prefs.favoritesEntries) || favorites.entries,
       };
     default:
       return favorites;
@@ -147,7 +147,7 @@ export function setEntryIconId(entryId, iconId) {
       entryId,
       iconId,
     });
-    
+
     const state = getState();
     setPref('favoritesEntries', getEntries(state));
   };

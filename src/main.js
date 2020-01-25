@@ -1,6 +1,4 @@
 const { app, BrowserWindow, globalShortcut, Menu, shell } = require('electron');
-const path = require('path');
-const url = require('url');
 const windowStateKeeper = require('electron-window-state');
 
 
@@ -18,6 +16,7 @@ function createWindow() {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
+    show: false,
 
     frame: process.platform !== 'win32',
     titleBarStyle: 'hiddenInset',
@@ -26,11 +25,10 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
-  browserWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true,
-  }));
+  browserWindow.once('ready-to-show', () => {
+    browserWindow.show();
+  });
+  browserWindow.loadFile('build/index.html');
 
   browserWindow.on('closed', () => {
     browserWindow = null;
