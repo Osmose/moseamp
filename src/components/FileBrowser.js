@@ -110,15 +110,26 @@ class Entry extends React.Component {
         onClick={() => this.handleClickEntry(entry)}
       >
         <span className="icon">
-          {
-            loading && currentPath === entry.path
-              ? <FontAwesome code="spinner" className="fa-spin" />
-              : <FileIcon entry={entry} />
-          }
+          <EntryIcon entry={entry} loading={loading} isCurrentFile={isCurrentFile} />
         </span>
         <span>{entry.name}</span>
       </li>
     );
+  }
+}
+
+class EntryIcon extends React.Component {
+  render() {
+    const { entry, loading, isCurrentFile } = this.props;
+    if (loading && isCurrentFile) {
+      return <FontAwesome code="spinner" className="fa-spin" />;
+    }
+
+    if (isCurrentFile) {
+      return <FontAwesome code="play" />;
+    }
+
+    return <FileIcon entry={entry} />;
   }
 }
 
