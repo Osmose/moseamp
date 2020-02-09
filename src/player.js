@@ -4,7 +4,7 @@ import EventEmitter from 'events';
 import bindings from 'bindings';
 import * as musicMetadata from 'music-metadata';
 
-import FILE_TYPES from 'moseamp/filetypes';
+import { getTypeForExt } from 'moseamp/filetypes';
 
 const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
@@ -39,7 +39,7 @@ class DispatchPlayer extends EventEmitter {
 
   async load(filePath) {
     const extension = path.extname(filePath);
-    const fileType = Object.values(FILE_TYPES).find(ft => ft.extensions.includes(extension));
+    const fileType = getTypeForExt(extension);
     const player = this.players.find(p => p.id === fileType.playerId);
 
     if (this.currentPlayer) {

@@ -25,9 +25,9 @@ import {
   setLoop,
   seek,
 } from 'moseamp/ducks/player';
-import { EXTENSIONS_ICONS } from 'moseamp/filetypes';
+import { getTypeForExt } from 'moseamp/filetypes';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
-import { FontAwesome } from 'moseamp/components/Icon';
+import Icon, { FontAwesome } from 'moseamp/components/Icon';
 import { formatDuration } from 'moseamp/utils';
 
 export default class Player extends React.Component {
@@ -187,11 +187,12 @@ class CurrentSong extends React.Component {
   render() {
     const { currentFilePath, currentTitle, currentArtist, currentSong, songCount } = this.props;
     const extension = currentFilePath && path.extname(currentFilePath);
+    const fileType = getTypeForExt(extension);
     return (
       <div className="current-song">
+        {fileType && <Icon iconId={fileType.id} size={32} className="song-icon" />}
         <div className="current-song-title">
           <HoverScroll>
-            {extension && <img src={EXTENSIONS_ICONS[extension]} className="image-icon" />}
             {songCount > 1 && `Track ${currentSong + 1} / ${songCount} - `}
             {currentTitle}
           </HoverScroll>

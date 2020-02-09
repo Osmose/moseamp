@@ -177,7 +177,7 @@ html, body {
   position: relative;
 }
 
-.sidebar-entry .icon-image {
+.sidebar-entry .image-icon {
   width: 16px;
   vertical-align: bottom;
 }
@@ -406,14 +406,31 @@ html, body {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 47px 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas: "icon title" "icon artist";
   padding: 10px 0;
 }
 
-.current-song-title,
+.current-song .song-icon {
+  grid-area: icon;
+  position: relative;
+  width: 47px;
+  height: 32px;
+  margin: auto;
+  padding-right: 15px;
+}
+
+.current-song-title {
+  overflow: hidden;
+  grid-area: title;
+  line-height: 25px;
+}
+
 .current-song-artist {
-  flex: 1;
+  overflow: hidden;
+  grid-area: artist;
   line-height: 25px;
 }
 

@@ -1,12 +1,22 @@
 import React from 'react';
 
+import FILE_TYPES from 'moseamp/filetypes';
+
 class Icon extends React.Component {
   render() {
-    const { iconId, className, innerRef, ...restProps } = this.props;
+    const { iconId, className = '', size = 16, innerRef, ...restProps } = this.props;
 
     const staticIcon = STATIC_ICONS_MAP[iconId];
     if (staticIcon.type === 'image') {
-      return <img src={staticIcon.url} className={`icon-image ${className}`} ref={innerRef} {...restProps} />;
+      return (
+        <img
+          src={`img/${staticIcon.id}_${size}.png`}
+          srcSet={`img/${staticIcon.id}_${size * 2}.png 2x`}
+          className={`image-icon ${className}`}
+          ref={innerRef}
+          {...restProps}
+        />
+      );
     }
 
     return (
@@ -27,54 +37,11 @@ export default React.forwardRef((props, ref) => (
 ));
 
 export const STATIC_ICONS = [
-  {
-    id: 'gb',
-    name: 'Gameboy',
+  ...FILE_TYPES.map(fileType => ({
+    id: fileType.id,
+    name: fileType.name,
     type: 'image',
-    url: 'img/gb.png',
-  },
-  {
-    id: 'gba',
-    name: 'Gameboy Advance',
-    type: 'image',
-    url: 'img/gba.png',
-  },
-  {
-    id: 'genesis',
-    name: 'Genesis',
-    type: 'image',
-    url: 'img/genesis.png',
-  },
-  {
-    id: 'master_system',
-    name: 'Master System',
-    type: 'image',
-    url: 'img/master_system.png',
-  },
-  {
-    id: 'nes',
-    name: 'Nintendo Entertainment System',
-    type: 'image',
-    url: 'img/nes.png',
-  },
-  {
-    id: 'ps1',
-    name: 'Playstation',
-    type: 'image',
-    url: 'img/ps1.png',
-  },
-  {
-    id: 'ps2',
-    name: 'Playstation 2',
-    type: 'image',
-    url: 'img/ps2.png',
-  },
-  {
-    id: 'snes',
-    name: 'Super Nintendo',
-    type: 'image',
-    url: 'img/snes.png',
-  },
+  })),
   {
     id: 'folder',
     name: 'Folder',

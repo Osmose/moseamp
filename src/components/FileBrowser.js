@@ -2,7 +2,7 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { FontAwesome } from 'moseamp/components/Icon';
+import Icon, { FontAwesome } from 'moseamp/components/Icon';
 import {
   changePath,
   getCurrentPath,
@@ -13,7 +13,7 @@ import {
   getLoading,
 } from 'moseamp/ducks/filebrowser';
 import { openFile, getCurrentFilePath, getPlaying } from 'moseamp/ducks/player';
-import { EXTENSIONS_ICONS, SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
+import { getTypeForExt } from 'moseamp/filetypes';
 
 
 export default
@@ -47,7 +47,7 @@ class FileBrowser extends React.Component {
     for (const entry of entries) {
       if (entry.type === 'directory') {
         directories.push(entry);
-      } else if (SUPPORTED_EXTENSIONS.includes(entry.ext)) {
+      } else if (getTypeForExt(entry.ext)) {
         files.push(entry);
       }
     }
@@ -146,9 +146,9 @@ class FileIcon extends React.Component {
       return <FontAwesome code="folder-open" />;
     }
 
-    const iconPath = EXTENSIONS_ICONS[entry.ext];
-    if (iconPath) {
-      return <img src={iconPath} className="image-icon" />;
+    const fileType = getTypeForExt(entry.ext);
+    if (fileType) {
+      return <Icon iconId={fileType.id} />;
     }
 
     return <FontAwesome code="file" />;

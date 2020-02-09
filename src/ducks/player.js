@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
-import { SUPPORTED_EXTENSIONS } from 'moseamp/filetypes';
+import { getTypeForExt } from 'moseamp/filetypes';
 
 // == Actions
 
@@ -329,7 +329,7 @@ async function getPlayablePaths(directory, shuffle) {
   const dirEntries = await fs.promises.readdir(directory, {withFileTypes: true});
   let playablePaths = dirEntries
     .filter(entry => !entry.isDirectory())
-    .filter(entry => SUPPORTED_EXTENSIONS.includes(path.extname(entry.name)))
+    .filter(entry => getTypeForExt(path.extname(entry.name)))
     .map(entry => path.join(directory, entry.name));
 
   if (shuffle) {
