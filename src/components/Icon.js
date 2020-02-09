@@ -40,7 +40,8 @@ export const STATIC_ICONS = [
   ...FILE_TYPES.map(fileType => ({
     id: fileType.id,
     name: fileType.name,
-    type: 'image',
+    type: fileType.iconType,
+    code: fileType.iconCode,
   })),
   {
     id: 'folder',
