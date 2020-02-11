@@ -1,7 +1,8 @@
-const { app, BrowserWindow, globalShortcut, Menu, shell } = require('electron');
+const { app, BrowserWindow, dialog, globalShortcut, Menu, shell, systemPreferences } = require('electron');
 const windowStateKeeper = require('electron-window-state');
+const Store = require('electron-store');
 
-
+const store = new Store();
 let browserWindow = null;
 
 function createWindow() {
@@ -133,6 +134,36 @@ app.on('ready', async () => {
       }
     });
   }
+
+  // Request media keys access if necessary
+  // Thanks to SoundCleod for sharing how to do this
+  // https://github.com/salomvary/soundcleod/blob/13bd4e9f467debc669539ee89511e5c982017188/app/check-accessibility-permissions.js
+  browserWindow.once('ready-to-show', async () => {
+    if (process.platform === 'darwin' && !systemPreferences.isTrustedAccessibilityClient(false)) {
+      const neverAsk = store.get('neverAskForAccessibility');
+      if (neverAsk) {
+        return;
+      }
+
+      const { response } = await dialog.showMessageBox({
+        type: 'warning',
+        message: 'Enable accessibility access',
+        detail: (
+          'To use media keys to control playback with MoseAmp, you must add and enable it in ' +
+          'the list of trusted apps in System Preferences under Security & Privacy > Accessibility.' +
+          '\n\n MoseAmp must be restarted for changes to take effect.\n'
+        ),
+        defaultId: 0,
+        cancelId: 1,
+        buttons: ['Turn on accessibility', 'Not now', 'Stop asking'],
+      });
+      if (response === 0) {
+        systemPreferences.isTrustedAccessibilityClient(true);
+      } else if (response === 2) {
+        store.set('neverAskForAccessibility', true);
+      }
+    }
+  });
 });
 
 app.on('window-all-closed', () => {

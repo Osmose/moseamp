@@ -37,6 +37,7 @@ export const FontAwesome = React.forwardRef((props, ref) => {
     <i className={`${className} fas fa-${code}`} ref={ref} {...restProps} />
   );
 });
+FontAwesome.displayName = 'FontAwesome';
 
 export default React.forwardRef((props, ref) => (
   <Icon innerRef={ref} {...props} />
