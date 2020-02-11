@@ -12,7 +12,7 @@ class Icon extends React.Component {
         <img
           src={`img/${staticIcon.id}_${size}.png`}
           srcSet={`img/${staticIcon.id}_${size * 2}.png 2x`}
-          className={`image-icon ${className}`}
+          className={`image-icon ${className || ''}`}
           ref={innerRef}
           {...restProps}
         />
@@ -20,7 +20,13 @@ class Icon extends React.Component {
     }
 
     return (
-      <FontAwesome code={staticIcon.code} ref={innerRef} {...restProps} />
+      <FontAwesome
+        code={staticIcon.code}
+        ref={innerRef}
+        className={className}
+        style={{fontSize: `${size}px`}}
+        {...restProps}
+      />
     );
   }
 }
