@@ -1,7 +1,7 @@
 const FILE_TYPES = [
   {
     id: 'n64',
-    name: 'Nintendo64',
+    name: 'Nintendo 64',
     playerId: 'musicplayer',
     extensions: ['.usf', '.miniusf'],
     iconType: 'image',

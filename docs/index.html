@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>MoseAmp</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: hsl(0, 0%, 9%);
+        color: #fff;
+        font-family: Fira sans, system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.4em;
+      }
+
+      h1,
+      h2 {
+        text-align: center;
+      }
+
+      p {
+        max-width: 600px;
+        margin: 1em auto;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 960px;
+        margin: 15px auto;
+        padding: 0 15px;
+      }
+
+      .header {
+        text-align: center;
+      }
+
+      .header-icon {
+        max-width: 300px;
+      }
+
+      .screenshot {
+        width: 100%;
+      }
+
+      .format-list {
+        margin: 15px auto;
+        max-width: 400px;
+      }
+
+      .format-list i {
+        font-family: monospace;
+        font-style: normal;
+      }
+
+      .download-buttons {
+        text-align: center;
+        margin: 35px 0 10px;
+      }
+
+      .download-buttons a {
+        color: #fff;
+        text-decoration: none;
+        background: linear-gradient(180deg, hsl(217, 64%, 60%), hsl(217, 64%, 40%));
+        padding: 14px 18px 12px;
+        font-size: 20px;
+        margin: 0 10px;
+        border-top: 1px solid hsl(217, 64%, 75%);
+        border-left: 1px solid hsl(217, 64%, 75%);
+        border-right: 1px solid hsl(217, 64%, 25%);
+        border-bottom: 1px solid hsl(217, 64%, 25%);
+      }
+
+      .download-buttons a:hover {
+        background: hsl(217, 64%, 60%);
+      }
+
+      .download-buttons a:active {
+        background: hsl(217, 64%, 40%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <img src="moseamp.png" class="header-icon">
+        <h1>MoseAmp</h1>
+      </header>
+      <article>
+        <p>MoseAmp is a cross-platform, Electron-based audio player that specializes in playing music formats for video game consoles like the Playstation, Nintendo 64, and Sega Genesis.</p>
+
+        <div class="download-buttons">
+          <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.dmg">Download for MacOS</a>
+          <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.zip">Download for Windows</a>
+        </div>
+
+        <div><a href="screenshot.png"><img src="screenshot.png" class="screenshot"></a></div>
+
+        <h2>Supported Formats</h2>
+        <ul class="format-list">
+            <li>Nintendo 64 (<i>.usf</i>, <i>.miniusf</i>)</li>
+            <li>Nintendo DS (<i>.2sf</i>, <i>.mini2sf</i>)</li>
+            <li>Playstation (<i>.psf</i>, <i>.minipsf</i>)</li>
+            <li>Playstation 2 (<i>.psf2</i>, <i>.minipsf2</i>)</li>
+            <li>Gameboy (<i>.gbs</i>)</li>
+            <li>Sega Genesis (<i>.gym</i>, <i>.vgz</i>)</li>
+            <li>Sega Game Gear (<i>.kss</i>)</li>
+            <li>Nintendo (NES) (<i>.nsf</i>, <i>.nsfe</i>)</li>
+            <li>Super Nintendo (<i>.spc</i>)</li>
+            <li>Gameboy Advance (<i>.gsf</i>, <i>.minigsf</i>)</li>
+            <li>Audio (<i>.mp3</i>, <i>.ogg</i>, <i>.wav</i>)</li>
+        </ul>
+      </article>
+    </div>
+  </body>
+</html>
