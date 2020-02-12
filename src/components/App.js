@@ -7,7 +7,7 @@ import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-elect
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
 import Sidebar from 'moseamp/components/Sidebar';
-import { loadEntries, changeFullPath } from 'moseamp/ducks/filebrowser';
+import { loadEntries, changePath } from 'moseamp/ducks/filebrowser';
 import { setCurrentTime, loadNextEntry } from 'moseamp/ducks/player';
 import { loadPrefs } from 'moseamp/ducks/prefs';
 import player from 'moseamp/player';
@@ -18,7 +18,7 @@ export default
   loadEntries,
   setCurrentTime,
   loadNextEntry,
-  changeFullPath,
+  changePath,
 })
 @autobind
 class App extends React.Component {
@@ -41,7 +41,7 @@ class App extends React.Component {
   }
 
   handleOpenDirectory(event, message) {
-    this.props.changeFullPath(message);
+    this.props.changePath(message);
   }
 
   render() {

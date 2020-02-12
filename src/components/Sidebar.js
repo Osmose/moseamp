@@ -14,7 +14,7 @@ import {
   renameEntry,
   setEntryIconId,
 } from 'moseamp/ducks/favorites';
-import { changeFullPath } from 'moseamp/ducks/filebrowser';
+import { changePath } from 'moseamp/ducks/filebrowser';
 import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 
 const {
@@ -37,7 +37,7 @@ export default class Sidebar extends React.Component {
   (state) => ({
     entries: getEntries(state),
   }),
-  { addEntry, removeEntry, changeFullPath, reorderEntries },
+  { addEntry, removeEntry, changePath, reorderEntries },
 )
 @autobind
 class Favorites extends React.Component {
@@ -127,7 +127,7 @@ const entryContextMenu = Menu.buildFromTemplate([
 
 @connect(
   () => ({}),
-  { removeEntry, renameEntry, changeFullPath },
+  { removeEntry, renameEntry, changePath },
 )
 @autobind
 class FavoritesEntry extends React.Component {
@@ -157,7 +157,7 @@ class FavoritesEntry extends React.Component {
   }
 
   handleClickName() {
-    this.props.changeFullPath(this.props.entry.path);
+    this.props.changePath(this.props.entry.path);
   }
 
   startRename() {

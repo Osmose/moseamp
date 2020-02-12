@@ -7,14 +7,17 @@ import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 
 const CHANGE_PATH = 'filebrowser/CHANGE_PATH';
 const SET_ENTRIES = 'filebrowser/SET_ENTRIES';
+const HISTORY_BACK = 'filebrowser/HISTORY_BACK';
+const HISTORY_FORWARD = 'filebrowser/HISTORY_FORWARD';
 
 // == Reducer
 
 function defaultState() {
   return {
-    root: path.parse(process.cwd()).root,
-    currentPath: '',
+    currentPath: process.cwd(),
     entries: [],
+    history: [],
+    forwardHistory: [],
     loading: false,
   };
 }
@@ -26,6 +29,32 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
         ...filebrowser,
         currentPath: action.path,
         loading: true,
+        history: filebrowser.history.concat([filebrowser.currentPath]).slice(-100),
+        forwardHistory: [],
+      };
+    case HISTORY_BACK:
+      if (filebrowser.history.length < 1) {
+        return filebrowser;
+      }
+
+      const backPath = filebrowser.history[filebrowser.history.length - 1]
+      return {
+        ...filebrowser,
+        currentPath: backPath,
+        history: filebrowser.history.slice(0, -1),
+        forwardHistory: filebrowser.forwardHistory.concat([filebrowser.currentPath]),
+      };
+    case HISTORY_FORWARD:
+      if (filebrowser.forwardHistory.length < 1) {
+        return filebrowser;
+      }
+
+      const forwardPath = filebrowser.forwardHistory[filebrowser.forwardHistory.length - 1]
+      return {
+        ...filebrowser,
+        currentPath: forwardPath,
+        history: filebrowser.history.concat([filebrowser.currentPath]),
+        forwardHistory: filebrowser.forwardHistory.slice(0, -1),
       };
     case SET_ENTRIES:
       return {
@@ -54,21 +83,25 @@ export function getLoading(state) {
 }
 
 export function getRoot(state) {
-  return state.filebrowser.root;
+  const parsed = path.parse(getCurrentPath(state));
+  return parsed.root;
 }
 
 export function getCurrentPathSegments(state) {
+  const root = getRoot(state);
+  const rootlessPath = getCurrentPath(state).slice(root.length);
   const segments = (
-    path.normalize(getCurrentPath(state))
+    path.normalize(rootlessPath)
       .split(/[/\\]/)
       .filter(name => name && name !== '.')
-      .map((name, index, segmentNames) => ({
-        name,
-        path: segmentNames.slice(0, index + 1).join(path.sep),
-      }))
+      .map((name, index, segmentNames) => {
+        return {
+          name,
+          path: path.join(...[root, ...segmentNames.slice(0, index + 1)]),
+        };
+      })
   );
 
-  const root = getRoot(state);
   segments.unshift({
     name: root,
     path: root,
@@ -77,30 +110,11 @@ export function getCurrentPathSegments(state) {
   return segments;
 }
 
-export function getFullCurrentPath(state) {
-  return path.join(getRoot(state), getCurrentPath(state));
-}
-
 export function getEntries(state) {
   return state.filebrowser.entries;
 }
 
 // == Action Creators
-
-export function changeFullPath(newFullPath) {
-  return async (dispatch, getState) => {
-    const state = getState();
-    const root = getRoot(state);
-
-    const parsed = path.parse(newFullPath);
-    if (parsed.root !== root) {
-      throw new Error('Multiple root directories not yet supported.');
-    }
-
-    const newPath = newFullPath.slice(root.length);
-    dispatch(changePath(newPath));
-  };
-}
 
 export function changePath(newPath) {
   return async (dispatch) => {
@@ -118,12 +132,10 @@ export function loadEntries() {
   return async (dispatch, getState) => {
     const state = getState();
 
-    const fullCurrentPath = getFullCurrentPath(state);
     const currentPath = getCurrentPath(state);
-    const dirEntries = await fs.promises.readdir(fullCurrentPath, {withFileTypes: true});
+    const dirEntries = await fs.promises.readdir(currentPath, {withFileTypes: true});
     const entries = dirEntries.map(dirEnt => {
       return {
-        fullPath: path.join(fullCurrentPath, dirEnt.name),
         path: path.join(currentPath, dirEnt.name),
         ext: path.extname(dirEnt.name),
         name: dirEnt.name,
@@ -136,5 +148,23 @@ export function loadEntries() {
       type: SET_ENTRIES,
       entries,
     });
+  };
+}
+
+export function historyBack() {
+  return (dispatch) => {
+    dispatch({
+      type: HISTORY_BACK,
+    });
+    dispatch(loadEntries());
+  };
+}
+
+export function historyForward() {
+  return (dispatch) => {
+    dispatch({
+      type: HISTORY_FORWARD,
+    });
+    dispatch(loadEntries());
   };
 }
