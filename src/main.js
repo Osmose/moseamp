@@ -41,6 +41,24 @@ function createWindow() {
 
 const template = [
   {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open Directory',
+        async click() {
+          const { cancelled, filePaths } = await dialog.showOpenDialog({
+            title: 'Open Directory',
+            buttonLabel: 'Open',
+            properties: ['openDirectory']
+          });
+          if (!cancelled && filePaths.length > 0) {
+            browserWindow.webContents.send('openDirectory', filePaths[0]);
+          }
+        }
+      }
+    ]
+  },
+  {
     label: 'View',
     submenu: [
       { role: 'reload' },
@@ -91,7 +109,7 @@ if (process.platform === 'darwin') {
   });
 
   // Window menu
-  template[2].submenu = [
+  template[3].submenu = [
     { role: 'close' },
     { role: 'minimize' },
     { role: 'zoom' },
@@ -109,12 +127,8 @@ if (process.platform === 'darwin') {
     },
   ];
 } else {
-  template.unshift({
-    label: 'File',
-    submenu: [
-      { role: 'quit' },
-    ],
-  });
+  // File menu
+  template[0].submenu.push({ role: 'quit' });
 }
 
 const menu = Menu.buildFromTemplate(template);

@@ -1,18 +1,25 @@
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
+import { ipcRenderer } from 'electron';
 import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-electron-titlebar';
 
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
 import Sidebar from 'moseamp/components/Sidebar';
-import { loadEntries } from 'moseamp/ducks/filebrowser';
+import { loadEntries, changeFullPath } from 'moseamp/ducks/filebrowser';
 import { setCurrentTime, loadNextEntry } from 'moseamp/ducks/player';
 import { loadPrefs } from 'moseamp/ducks/prefs';
 import player from 'moseamp/player';
 
 export default
-@connect(null, { loadPrefs, loadEntries, setCurrentTime, loadNextEntry })
+@connect(null, {
+  loadPrefs,
+  loadEntries,
+  setCurrentTime,
+  loadNextEntry,
+  changeFullPath,
+})
 @autobind
 class App extends React.Component {
   componentDidMount() {
@@ -20,15 +27,21 @@ class App extends React.Component {
     this.props.loadEntries();
     player.on('timeupdate', this.props.setCurrentTime);
     player.on('ended', this.handleEnded);
+    ipcRenderer.on('openDirectory', this.handleOpenDirectory);
   }
 
   componentWillUnmount() {
     player.off('timeupdate', this.props.setCurrentTime);
     player.off('ended', this.handleEnded);
+    ipcRenderer.off('openDirectory', this.handleOpenDirectory);
   }
 
   handleEnded() {
     this.props.loadNextEntry(true);
+  }
+
+  handleOpenDirectory(event, message) {
+    this.props.changeFullPath(message);
   }
 
   render() {
