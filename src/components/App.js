@@ -7,19 +7,26 @@ import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-elect
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
 import Sidebar from 'moseamp/components/Sidebar';
+import Visualizer from 'moseamp/components/Visualizer';
+import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER } from 'moseamp/ducks/app';
 import { loadEntries, changePath } from 'moseamp/ducks/filebrowser';
 import { setCurrentTime, loadNextEntry } from 'moseamp/ducks/player';
 import { loadPrefs } from 'moseamp/ducks/prefs';
 import player from 'moseamp/player';
 
 export default
-@connect(null, {
-  loadPrefs,
-  loadEntries,
-  setCurrentTime,
-  loadNextEntry,
-  changePath,
-})
+@connect(
+  (state) => ({
+    mode: getMode(state),
+  }),
+  {
+    loadPrefs,
+    loadEntries,
+    setCurrentTime,
+    loadNextEntry,
+    changePath,
+  },
+)
 @autobind
 class App extends React.Component {
   componentDidMount() {
@@ -45,12 +52,15 @@ class App extends React.Component {
   }
 
   render() {
+    const { mode } = this.props;
+
     return (
       <div className="app">
         <TitleBar />
         <div className="main-container">
           <Sidebar />
-          <FileBrowser />
+          {mode === MODE_FILEBROWSER && <FileBrowser />}
+          {mode === MODE_VISUALIZER && <Visualizer />}
         </div>
         <Player />
       </div>

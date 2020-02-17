@@ -38,6 +38,7 @@
 }
 
 html, body {
+  background: var(--gray-15);
   color: var(--white);
   margin: 0;
   padding: 0;
@@ -86,12 +87,42 @@ html, body {
   background: var(--gray-40);
   border-right: 1px solid var(--gray-20);
   padding: 15px;
+  min-width: 200px;
   -webkit-user-select: none;
+}
+
+.sidebar > * {
+  margin-bottom: 20px;
+}
+
+.sidebar-mode {
+  display: block;
+  margin: 0 0 5px;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.sidebar-mode.selected {
+  background: var(--gray-25);
+}
+
+.sidebar-mode:not(.selected):hover {
+  cursor: pointer;
+  background: var(--gray-25);
+}
+
+.sidebar-mode:not(.selected):active {
+  cursor: pointer;
+  background: var(--gray-15);
+}
+
+.sidebar-mode .label {
+  margin-left: 5px;
 }
 
 .sidebar-heading {
   font-size: 1.1rem;
-  margin: 0 0 10px;
+  margin: 0 0 10px 10px;
   font-weight: normal;
   font-variant: small-caps;
   color: var(--white-83)
@@ -630,4 +661,8 @@ html, body {
 .seek-bar .slider {
   flex: 1;
   margin: 0 15px;
+}
+
+.visualizer {
+  flex: 1;
 }

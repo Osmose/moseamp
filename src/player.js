@@ -37,6 +37,10 @@ class DispatchPlayer extends EventEmitter {
     }
   }
 
+  getAnalysis() {
+    return this.currentPlayer ? this.currentPlayer.getAnalysis() : {};
+  }
+
   async load(filePath) {
     const extension = path.extname(filePath);
     const fileType = getTypeForExt(extension);
@@ -74,9 +78,24 @@ class WebAudioPlayer extends EventEmitter {
     this.id = 'webaudioplayer';
 
     this.ctx = new AudioContext();
+    this.analyserNode = this.ctx.createAnalyser();
+    this.analyserNode.fftSize = 512;
+    this.timeDomainBuffer = new Uint8Array(this.analyserNode.frequencyBinCount);
+    this.frequencyBuffer = new Uint8Array(this.analyserNode.frequencyBinCount);
+    this.analyserNode.connect(this.ctx.destination);
+
     this.gainNode = this.ctx.createGain();
     this.gainNode.gain.value = DEFAULT_GAIN;
-    this.gainNode.connect(this.ctx.destination);
+    this.gainNode.connect(this.analyserNode);
+  }
+
+  getAnalysis() {
+    this.analyserNode.getByteTimeDomainData(this.timeDomainBuffer);
+    this.analyserNode.getByteFrequencyData(this.frequencyBuffer);
+    return {
+      timeDomainData: this.timeDomainBuffer,
+      frequencyData: this.frequencyBuffer,
+    };
   }
 
   async load(filePath) {
@@ -160,14 +179,33 @@ class MusicPlayerPlayer extends EventEmitter {
     for (const ctx of this.ctxs) {
       ctx.suspend();
 
+      ctx.analyserNode = ctx.createAnalyser();
+      ctx.analyserNode.fftSize = 512;
+      ctx.timeDomainBuffer = new Uint8Array(ctx.analyserNode.frequencyBinCount);
+      ctx.frequencyBuffer = new Uint8Array(ctx.analyserNode.frequencyBinCount);
+      ctx.analyserNode.connect(ctx.destination);
+
       ctx.gainNode = ctx.createGain();
       ctx.gainNode.gain.value = DEFAULT_GAIN * GAIN_FACTOR;
-      ctx.gainNode.connect(ctx.destination);
+      ctx.gainNode.connect(ctx.analyserNode);
 
       ctx.scriptNode = ctx.createScriptProcessor(SAMPLE_COUNT, 1, 2);
       ctx.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
       ctx.scriptNode.connect(ctx.gainNode);
     }
+  }
+
+  getAnalysis() {
+    if (!this.ctx) {
+      return {};
+    }
+
+    this.ctx.analyserNode.getByteTimeDomainData(this.ctx.timeDomainBuffer);
+    this.ctx.analyserNode.getByteFrequencyData(this.ctx.frequencyBuffer);
+    return {
+      timeDomainData: this.ctx.timeDomainBuffer,
+      frequencyData: this.ctx.frequencyBuffer,
+    };
   }
 
   handleAudioProcess(event) {
