@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 import { getTypeForExt } from 'moseamp/filetypes';
+import { parseDurationString } from 'moseamp/utils';
 
 // == Actions
 
@@ -18,6 +19,8 @@ const SET_CURRENT_SONG = 'player/SET_CURRENT_SONG';
 const SET_SHUFFLE = 'player/SET_SHUFFLE';
 const SET_PLAYLIST = 'player/SET_PLAYLIST';
 const SET_LOOP = 'player/SET_LOOP';
+const SET_CUSTOM_DURATION = 'player/SET_CUSTOM_DURATION';
+const SET_USE_CUSTOM_DURATION = 'player/SET_USE_CUSTOM_DURATION';
 
 // == Reducer
 
@@ -35,6 +38,8 @@ function defaultState() {
     currentArtist: null,
     shuffle: false,
     loop: false,
+    useCustomDuration: false,
+    customDuration: '',
   };
 }
 
@@ -102,12 +107,24 @@ export default function reducer(state = defaultState(), action = {}) {
         ...state,
         loop: action.loop,
       };
+    case SET_CUSTOM_DURATION:
+      return {
+        ...state,
+        customDuration: action.customDuration,
+      };
+    case SET_USE_CUSTOM_DURATION:
+      return {
+        ...state,
+        useCustomDuration: action.useCustomDuration,
+      };
     case LOAD_PREFS:
       return {
         ...state,
         volume: action.prefs.volume || state.volume,
         shuffle: action.prefs.shuffle || state.shuffle,
         loop: action.prefs.loop || state.loop,
+        useCustomDuration: action.prefs.useCustomDuration || state.useCustomDuration,
+        customDuration: action.prefs.customDuration || state.customDuration,
       };
     default:
       return state;
@@ -227,6 +244,22 @@ export function setLoop(loop) {
   };
 }
 
+export function setCustomDuration(customDuration) {
+  setPref('customDuration', customDuration);
+  return {
+    type: SET_CUSTOM_DURATION,
+    customDuration,
+  };
+}
+
+export function setUseCustomDuration(useCustomDuration) {
+  setPref('useCustomDuration', useCustomDuration);
+  return {
+    type: SET_USE_CUSTOM_DURATION,
+    useCustomDuration,
+  };
+}
+
 export function loadNextEntry(automatic = false) {
   return async (dispatch, getState) => {
     const state = getState();
@@ -319,6 +352,18 @@ export function getPlaylist(state) {
 
 export function getLoop(state) {
   return state.player.loop;
+}
+
+export function getCustomDuration(state) {
+  return state.player.customDuration;
+}
+
+export function getCustomDurationSeconds(state) {
+  return parseDurationString(getCustomDuration(state));
+}
+
+export function getUseCustomDuration(state) {
+  return state.player.useCustomDuration;
 }
 
 // == Utils

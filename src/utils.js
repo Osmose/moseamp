@@ -4,7 +4,7 @@ export function formatDuration(duration) {
   }
 
   const seconds = Math.floor(duration % 60);
-  const minutes = Math.floor(duration / 60);
+  const minutes = Math.floor((duration % 3600) / 60);
   const hours = Math.floor(duration / 3600);
   let string = seconds.toString().padStart(2, '0');
   if (hours) {
@@ -13,4 +13,24 @@ export function formatDuration(duration) {
     string = `${minutes}:${string}`;
   }
   return string;
+}
+
+export function parseDurationString(durationString) {
+  try {
+    const segments = durationString.split(':').map(s => Number.parseInt(s, 10));
+    segments.reverse();
+    if (segments.includes(NaN) || segments.length > 3) {
+      throw new Error('Cannot parse');
+    }
+
+    let factor = 1;
+    let total = 0;
+    for (const segment of segments) {
+      total += segment * factor;
+      factor *= 60;
+    }
+    return total;
+  } catch (err) {
+    return null;
+  }
 }

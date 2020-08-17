@@ -1,3 +1,4 @@
+import autobind from 'autobind-decorator';
 import path from 'path';
 import EventEmitter from 'events';
 
@@ -13,6 +14,7 @@ export const DEFAULT_GAIN = 0.7;
 const GAIN_FACTOR = 0.0001;
 const SAMPLE_COUNT = 2048;
 
+@autobind
 class DispatchPlayer extends EventEmitter {
   constructor() {
     super();
@@ -51,7 +53,10 @@ class DispatchPlayer extends EventEmitter {
       this.currentPlayer.tidy();
     }
     this.currentPlayer = player;
-    return player.load(filePath);
+
+    const meta = await player.load(filePath);
+    this.emit('load', meta);
+    return meta;
   }
 
   setVolume(volume) {
@@ -62,12 +67,20 @@ class DispatchPlayer extends EventEmitter {
     this.currentPlayer.seek(song, position);
   }
 
+  fadeOut(duration) {
+    this.currentPlayer.fadeOut(duration);
+  }
+
   async play() {
     return this.currentPlayer.play();
   }
 
   async pause() {
     return this.currentPlayer.pause();
+  }
+
+  async stop() {
+    return this.currentPlayer.stop();
   }
 }
 
@@ -151,6 +164,10 @@ class WebAudioPlayer extends EventEmitter {
     }
   }
 
+  fadeOut() {
+    // Unused, all songs have durations for this player.
+  }
+
   async play() {
     await this.ctx.resume();
   }
@@ -158,41 +175,47 @@ class WebAudioPlayer extends EventEmitter {
   async pause() {
     return this.ctx.suspend();
   }
+
+  async stop() {
+    await this.ctx.suspend();
+    this.emit('ended');
+  }
 }
 
 // This name is so dumb
 class MusicPlayerPlayer extends EventEmitter {
   constructor() {
     super();
-
     this.id = 'musicplayer';
-
-    this.ctx44100 = new AudioContext({sampleRate: 44100});
-    this.ctx48000 = new AudioContext({sampleRate: 48000});
-    this.ctxs = [this.ctx44100, this.ctx48000];
-
     this.ctx = null;
     this.musicPlayer = null;
     this.startTime = null;
     this.currentTimeInterval = null;
+  }
 
-    for (const ctx of this.ctxs) {
-      ctx.suspend();
+  createContext(sampleRate) {
+    const ctx = new AudioContext({sampleRate});
+    ctx.suspend();
 
-      ctx.analyserNode = ctx.createAnalyser();
-      ctx.analyserNode.fftSize = 512;
-      ctx.timeDomainBuffer = new Uint8Array(ctx.analyserNode.frequencyBinCount);
-      ctx.frequencyBuffer = new Uint8Array(ctx.analyserNode.frequencyBinCount);
-      ctx.analyserNode.connect(ctx.destination);
+    ctx.analyserNode = ctx.createAnalyser();
+    ctx.analyserNode.fftSize = 512;
+    ctx.timeDomainBuffer = new Uint8Array(ctx.analyserNode.frequencyBinCount);
+    ctx.frequencyBuffer = new Uint8Array(ctx.analyserNode.frequencyBinCount);
+    ctx.analyserNode.connect(ctx.destination);
 
-      ctx.gainNode = ctx.createGain();
-      ctx.gainNode.gain.value = DEFAULT_GAIN * GAIN_FACTOR;
-      ctx.gainNode.connect(ctx.analyserNode);
+    ctx.fadeOutNode = ctx.createGain();
+    ctx.fadeOutNode.gain.value = 1;
+    ctx.fadeOutNode.connect(ctx.analyserNode);
 
-      ctx.scriptNode = ctx.createScriptProcessor(SAMPLE_COUNT, 1, 2);
-      ctx.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
-      ctx.scriptNode.connect(ctx.gainNode);
-    }
+    ctx.gainNode = ctx.createGain();
+    ctx.gainNode.gain.value = DEFAULT_GAIN * GAIN_FACTOR;
+    ctx.gainNode.connect(ctx.fadeOutNode);
+
+    ctx.scriptNode = ctx.createScriptProcessor(SAMPLE_COUNT, 1, 2);
+    ctx.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
+    ctx.scriptNode.connect(ctx.gainNode);
+
+    return ctx;
   }
 
   getAnalysis() {
@@ -226,10 +249,12 @@ class MusicPlayerPlayer extends EventEmitter {
     this.musicPlayer = new MusicPlayer(filePath);
 
     if (this.musicPlayer.getMeta('format') === 'Playstation2') {
-      this.ctx = this.ctx48000;
+      this.ctx = this.createContext(48000);
     } else {
-      this.ctx = this.ctx44100;
+      this.ctx = this.createContext(44100);
     }
+
+    this.ctx.fadeOutNode.gain.value = 1.0;
 
     this.startTime = this.ctx.currentTime;
     this.currentTimeInterval = setInterval(() => {
@@ -254,6 +279,14 @@ class MusicPlayerPlayer extends EventEmitter {
   setVolume(volume) {
     for (const ctx of this.ctxs) {
       ctx.gainNode.gain.value = volume * GAIN_FACTOR;
+    }
+  }
+
+  fadeOut(duration) {
+    if (this.ctx) {
+      const gain = this.ctx.fadeOutNode.gain;
+      gain.setValueAtTime(gain.value, this.ctx.currentTime);
+      gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + duration);
     }
   }
 
@@ -283,6 +316,11 @@ class MusicPlayerPlayer extends EventEmitter {
     if (this.ctx) {
       return this.ctx.suspend();
     }
+  }
+
+  async stop() {
+    await this.ctx.suspend();
+    this.emit('ended');
   }
 }
 

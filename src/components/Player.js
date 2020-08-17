@@ -24,10 +24,15 @@ import {
   getLoop,
   setLoop,
   seek,
+  getUseCustomDuration,
+  getCustomDuration,
+  setUseCustomDuration,
+  setCustomDuration,
 } from 'moseamp/ducks/player';
 import { getTypeForExt } from 'moseamp/filetypes';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 import Icon, { FontAwesome } from 'moseamp/components/Icon';
+import Tooltip from 'moseamp/components/Tooltip';
 import { formatDuration } from 'moseamp/utils';
 
 export default class Player extends React.Component {
@@ -120,9 +125,7 @@ class PlayerControls extends React.Component {
             empty={!currentFilePath}
             playing={playing}
           />
-          <div className={`duration ${duration === Infinity ? 'infinite' : ''}`}>
-            {currentFilePath && formatDuration(duration)}
-          </div>
+          <SongDuration />
         </div>
       </div>
     );
@@ -323,6 +326,106 @@ class LoopButton extends React.Component {
         <FontAwesome code="retweet" />
         <span>1</span>
       </button>
+    );
+  }
+}
+
+@connect(
+  state => ({
+    duration: getDuration(state),
+    currentFilePath: getCurrentFilePath(state),
+    useCustomDuration: getUseCustomDuration(state),
+    customDuration: getCustomDuration(state),
+  }),
+  {
+    setUseCustomDuration,
+    setCustomDuration,
+  },
+)
+@autobind
+class SongDuration extends React.Component {
+  constructor(props) {
+    super(props);
+    this.durationElement = null;
+    this.state = {
+      viewingTooltip: false,
+    };
+  }
+
+  componentDidMount() {
+    document.addEventListener('click', this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
+  }
+
+  handleClickOutside(event) {
+    if (!this.durationElement.contains(event.target)) {
+      this.setState({ viewingTooltip: false });
+    }
+  }
+
+  handleUseCustomDurationChange(event) {
+    this.props.setUseCustomDuration(event.target.value !== 'infinite');
+  }
+
+  handleCustomDurationChange(event) {
+    this.props.setCustomDuration(event.target.value);
+  }
+
+  showTooltip() {
+    this.setState({ viewingTooltip: true });
+  }
+
+  render() {
+    const { currentFilePath, useCustomDuration, customDuration, duration } = this.props;
+    const { viewingTooltip } = this.state;
+    return (
+      <div
+        className={`duration ${duration === Infinity ? 'infinite' : ''}`}
+        ref={(durationElement) => { this.durationElement = durationElement; }}
+      >
+        {currentFilePath && (
+          <>
+            <span className={duration === Infinity ? 'customizable-duration' : ''} onClick={this.showTooltip}>
+              {formatDuration(duration)}
+            </span>
+            <Tooltip visible={viewingTooltip} position="top">
+              <form className="custom-duration-form">
+                <h3>Play until:</h3>
+                <label>
+                  <input
+                    type="radio"
+                    name="use-custom-duration"
+                    value="infinite"
+                    checked={!useCustomDuration}
+                    onChange={this.handleUseCustomDurationChange}
+                  />
+                  Never stop
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="use-custom-duration"
+                    value="custom"
+                    checked={useCustomDuration}
+                    onChange={this.handleUseCustomDurationChange}
+                  />
+                  <input
+                    type="text"
+                    disabled={!useCustomDuration}
+                    value={customDuration}
+                    onChange={this.handleCustomDurationChange}
+                    pattern="((\d?\d:)?\d)?\d:\d\d"
+                    placeholder="e.g. 1:00"
+                  />
+                </label>
+              </form>
+            </Tooltip>
+          </>
+        )}
+      </div>
     );
   }
 }

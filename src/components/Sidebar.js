@@ -18,6 +18,7 @@ import {
 import { changePath } from 'moseamp/ducks/filebrowser';
 import { setPluginId } from 'moseamp/ducks/visualizer';
 import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
+import Tooltip from 'moseamp/components/Tooltip';
 import visualizerPlugins from 'moseamp/visualizer-plugins';
 
 const {
@@ -355,7 +356,7 @@ class EntryIcon extends React.Component {
         ref={(iconElement) => { this.iconElement = iconElement; }}
       >
         <Icon iconId={iconId} />
-        <Tooltip visible={choosingIcon} className="icon-chooser">
+        <Tooltip visible={choosingIcon} position="bottom" className="icon-chooser">
           {STATIC_ICONS.map(icon => (
             <button
               key={icon.id}
@@ -368,24 +369,6 @@ class EntryIcon extends React.Component {
           ))}
         </Tooltip>
       </span>
-    );
-  }
-}
-
-class Tooltip extends React.Component {
-  render() {
-    const { children, visible, className } = this.props;
-    return (
-      <div
-        className={`tooltip ${className}`}
-        style={{
-          visibility: visible ? 'visible' : 'hidden',
-          opacity: visible ? '100%' : '0%',
-        }}
-      >
-        <div className="pip" />
-        {children}
-      </div>
     );
   }
 }

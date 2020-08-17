@@ -10,14 +10,18 @@ import Sidebar from 'moseamp/components/Sidebar';
 import Visualizer from 'moseamp/components/Visualizer';
 import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER } from 'moseamp/ducks/app';
 import { loadEntries, changePath } from 'moseamp/ducks/filebrowser';
-import { setCurrentTime, loadNextEntry } from 'moseamp/ducks/player';
+import { setCurrentTime, loadNextEntry, getUseCustomDuration, getCustomDurationSeconds } from 'moseamp/ducks/player';
 import { loadPrefs } from 'moseamp/ducks/prefs';
 import player from 'moseamp/player';
+
+const FADEOUT_DURATION = 5;
 
 export default
 @connect(
   (state) => ({
     mode: getMode(state),
+    useCustomDuration: getUseCustomDuration(state),
+    customDurationSeconds: getCustomDurationSeconds(state),
   }),
   {
     loadPrefs,
@@ -29,17 +33,24 @@ export default
 )
 @autobind
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.fadeOutStart = null;
+  }
+
   componentDidMount() {
     this.props.loadPrefs();
     this.props.loadEntries();
-    player.on('timeupdate', this.props.setCurrentTime);
+    player.on('timeupdate', this.handleTimeUpdate);
     player.on('ended', this.handleEnded);
+    player.on('load', this.handlePlayerLoad);
     ipcRenderer.on('openDirectory', this.handleOpenDirectory);
   }
 
   componentWillUnmount() {
-    player.off('timeupdate', this.props.setCurrentTime);
+    player.off('timeupdate', this.handleTimeUpdate);
     player.off('ended', this.handleEnded);
+    player.on('load', this.handlePlayerLoad);
     ipcRenderer.off('openDirectory', this.handleOpenDirectory);
   }
 
@@ -49,6 +60,24 @@ class App extends React.Component {
 
   handleOpenDirectory(event, message) {
     this.props.changePath(message);
+  }
+
+  handleTimeUpdate(currentTime) {
+    this.props.setCurrentTime(currentTime);
+
+    const { customDurationSeconds, useCustomDuration } = this.props;
+    if (useCustomDuration && customDurationSeconds !== null) {
+      if (this.fadeOutStart === null && currentTime >= customDurationSeconds) {
+        player.fadeOut(FADEOUT_DURATION);
+        this.fadeOutStart = currentTime;
+      } else if (this.fadeOutStart !== null && currentTime >= (this.fadeOutStart + FADEOUT_DURATION)) {
+        player.stop();
+      }
+    }
+  }
+
+  handlePlayerLoad() {
+    this.fadeOutStart = null;
   }
 
   render() {

@@ -226,38 +226,63 @@ html, body {
   left: -5px;
 }
 
-.sidebar-entry .tooltip {
+.tooltip {
   position: absolute;
+  left: -11px;
   margin: 10px 0 0;
   padding: 10px;
   border-radius: 3px;
   border: 1px solid var(--gray-60);
   background: var(--gray-15);
   z-index: 100;
-  top: 100%;
   width: 150px;
   transition: all .1s linear;
   box-shadow: 0px 5px 10px -3px var(--gray-15);
 }
 
-.sidebar-entry .tooltip .pip {
+.tooltip.top {
+  bottom: 100%;
+  margin-bottom: 10px;
+}
+
+.tooltip.bottom {
+  top: 100%;
+  margin-top: 10px;
+}
+
+.tooltip .pip {
   width: 20px;
   padding-bottom: calc(20px / 1.41);
   position: absolute;
-  top: -14px;
   left: 8px;
   overflow: hidden;
 }
 
-.sidebar-entry .tooltip .pip::after {
+.tooltip.top .pip {
+  bottom: -14px;
+}
+
+.tooltip.bottom .pip {
+  top: -14px;
+}
+
+.tooltip .pip::after {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
+  left: -1px;
   width: 100%;
   height: 100%;
   border: 1px solid var(--gray-60);
   background: var(--gray-15);
+}
+
+.tooltip.top .pip::after {
+  transform-origin: top right;
+  transform: rotate(45deg);
+}
+
+.tooltip.bottom .pip::after {
   transform-origin: bottom right;
   transform: rotate(-45deg);
 }
@@ -652,6 +677,12 @@ html, body {
 
 .seek-bar .duration {
   text-align: left;
+  position: relative;
+}
+
+.seek-bar .customizable-duration {
+  cursor: pointer;
+  text-decoration: underline var(--gray-60);
 }
 
 .seek-bar .duration.infinite {
@@ -665,4 +696,37 @@ html, body {
 
 .visualizer {
   flex: 1;
+}
+
+.custom-duration-form {
+  font-size: var(--main-font-size);
+}
+
+.custom-duration-form h3 {
+  font-size: var(--main-font-size);
+  font-weight: normal;
+  margin: 0 0 10px;
+  padding: 0;
+  line-height: 1em;
+}
+
+.custom-duration-form label {
+  display: block;
+}
+
+.custom-duration-form label + label {
+  margin-top: 5px;
+}
+
+.custom-duration-form input[type="radio"] {
+  margin-right: 5px;
+}
+
+.custom-duration-form input[type="text"] {
+  width: 60px;
+}
+
+.custom-duration-form input[type="text"]:invalid {
+  outline: red auto 5px;
+  outline-offset: -2px;
 }
