@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <stdexcept>
+
 #include "BuildSettings.h"
 
 
@@ -189,7 +191,7 @@ MPT_CONSTEXPR11_FUN bool operator==(const mpt::UUID & a, const mpt::UUID & b) no
 }
 MPT_CONSTEXPR11_FUN bool operator!=(const mpt::UUID & a, const mpt::UUID & b) noexcept
 {
-	return (a.GetData1() != b.GetData1()) || (a.GetData2() != b.GetData2()) || (a.GetData3() != b.GetData3()) || (a.GetData4() != b.GetData4());	
+	return (a.GetData1() != b.GetData1()) || (a.GetData2() != b.GetData2()) || (a.GetData3() != b.GetData3()) || (a.GetData4() != b.GetData4());
 }
 
 } // namespace mpt
