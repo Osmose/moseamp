@@ -7,6 +7,13 @@ import {
   getPlaying,
   play,
   pause,
+  loadPrevEntry,
+  loadNextEntry,
+  nextTrack,
+  prevTrack,
+  increaseVolume,
+  decreaseVolume,
+  toggleMute,
 } from 'moseamp/ducks/player';
 import {
   historyBack,
@@ -30,6 +37,34 @@ function playPause() {
 }
 ipcRenderer.on('play-pause', playPause);
 Mousetrap.bind('space', playPause);
+
+ipcRenderer.on('load-next-entry', () => {
+  store.dispatch(loadNextEntry());
+});
+
+ipcRenderer.on('load-prev-entry', () => {
+  store.dispatch(loadPrevEntry());
+});
+
+ipcRenderer.on('next-track', () => {
+  store.dispatch(nextTrack());
+});
+
+ipcRenderer.on('prev-track', () => {
+  store.dispatch(prevTrack());
+});
+
+ipcRenderer.on('increase-volume', () => {
+  store.dispatch(increaseVolume());
+});
+
+ipcRenderer.on('decrease-volume', () => {
+  store.dispatch(decreaseVolume());
+});
+
+ipcRenderer.on('toggle-mute', () => {
+  store.dispatch(toggleMute());
+});
 
 // Back and forward through history on three finger swipe, backspace, or Cmd+arrow
 function back() {

@@ -11,6 +11,7 @@ const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 export const DEFAULT_GAIN = 0.7;
+export const MAX_GAIN = DEFAULT_GAIN * 2;
 const GAIN_FACTOR = 0.0001;
 const SAMPLE_COUNT = 2048;
 
@@ -60,7 +61,10 @@ class DispatchPlayer extends EventEmitter {
   }
 
   setVolume(volume) {
-    this.currentPlayer.setVolume(volume);
+    for (const player of this.players) {
+      player.setVolume(volume);
+    }
+    this.currentPlayer?.setVolume(volume);
   }
 
   seek(song, position) {
@@ -191,6 +195,7 @@ class MusicPlayerPlayer extends EventEmitter {
     this.musicPlayer = null;
     this.startTime = null;
     this.currentTimeInterval = null;
+    this.volume = DEFAULT_GAIN;
   }
 
   createContext(sampleRate) {
@@ -208,7 +213,7 @@ class MusicPlayerPlayer extends EventEmitter {
     ctx.fadeOutNode.connect(ctx.analyserNode);
 
     ctx.gainNode = ctx.createGain();
-    ctx.gainNode.gain.value = DEFAULT_GAIN * GAIN_FACTOR;
+    ctx.gainNode.gain.value = this.volume * GAIN_FACTOR;
     ctx.gainNode.connect(ctx.fadeOutNode);
 
     ctx.scriptNode = ctx.createScriptProcessor(SAMPLE_COUNT, 1, 2);
@@ -277,8 +282,9 @@ class MusicPlayerPlayer extends EventEmitter {
   }
 
   setVolume(volume) {
-    for (const ctx of this.ctxs) {
-      ctx.gainNode.gain.value = volume * GAIN_FACTOR;
+    this.volume = volume;
+    if (this.ctx) {
+      this.ctx.gainNode.gain.value = volume * GAIN_FACTOR;
     }
   }
 

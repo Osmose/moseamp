@@ -3,7 +3,7 @@ import path from 'path';
 import _ from 'lodash';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
-import player, { DEFAULT_GAIN } from 'moseamp/player';
+import player, { DEFAULT_GAIN, MAX_GAIN } from 'moseamp/player';
 import { getTypeForExt } from 'moseamp/filetypes';
 import { parseDurationString } from 'moseamp/utils';
 
@@ -32,6 +32,7 @@ function defaultState() {
     songCount: null,
     playing: false,
     volume: DEFAULT_GAIN,
+    prevVolume: DEFAULT_GAIN,
     currentTime: null,
     duration: null,
     currentTitle: null,
@@ -65,6 +66,7 @@ export default function reducer(state = defaultState(), action = {}) {
       return {
         ...state,
         volume: action.volume,
+        prevVolume: state.volume,
       };
     case SET_CURRENT_TIME:
       return {
@@ -191,12 +193,44 @@ export function pause() {
 }
 
 export function setVolume(volume) {
-  player.setVolume(volume);
-  setPref('volume', volume);
+  const boundedVolume = Math.min(Math.max(volume, 0), MAX_GAIN);
+  player.setVolume(boundedVolume);
+  setPref('volume', boundedVolume);
   return {
     type: SET_VOLUME,
-    volume,
+    volume: boundedVolume,
   };
+}
+
+export function increaseVolume() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const volume = getVolume(state);
+    const step = MAX_GAIN / 10;
+    dispatch(setVolume(volume + step));
+  };
+}
+
+export function decreaseVolume() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const volume = getVolume(state);
+    const step = MAX_GAIN / 10;
+    dispatch(setVolume(volume - step));
+  };
+}
+
+export function toggleMute() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const volume = getVolume(state);
+    if (volume !== 0) {
+      dispatch(setVolume(0));
+    } else {
+      const prevVolume = getPrevVolume(state);
+      dispatch(setVolume(prevVolume));
+    }
+  }
 }
 
 export function setCurrentTime(currentTime) {
@@ -264,6 +298,9 @@ export function loadNextEntry(automatic = false) {
   return async (dispatch, getState) => {
     const state = getState();
     const currentFilePath = getCurrentFilePath(state);
+    if (!currentFilePath) {
+      return;
+    }
 
     const loop = getLoop(state);
     if (automatic && loop) {
@@ -287,7 +324,7 @@ export function loadPrevEntry() {
     const currentFilePath = getCurrentFilePath(state);
 
     const playlist = getPlaylist(state);
-    if (playlist.length < 1) {
+    if (!currentFilePath || playlist.length < 1) {
       return;
     }
 
@@ -304,6 +341,32 @@ export function loadPrevEntry() {
   };
 }
 
+export function nextTrack() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const songCount = getSongCount(state);
+    const currentSong = getCurrentSong(state);
+    if (songCount <= 1 || currentSong >= songCount - 1) {
+      return;
+    }
+
+    dispatch(seek(currentSong + 1));
+  };
+}
+
+export function prevTrack() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const songCount = getSongCount(state);
+    const currentSong = getCurrentSong(state);
+    if (songCount <= 1 || currentSong < 1) {
+      return;
+    }
+
+    dispatch(seek(currentSong - 1));
+  };
+}
+
 // == Selectors
 
 export function getCurrentFilePath(state) {
@@ -316,6 +379,10 @@ export function getPlaying(state) {
 
 export function getVolume(state) {
   return state.player.volume;
+}
+
+export function getPrevVolume(state) {
+  return state.player.prevVolume;
 }
 
 export function getCurrentTime(state) {

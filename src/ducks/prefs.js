@@ -1,5 +1,7 @@
 import Store from 'electron-store';
 
+import player from 'moseamp/player';
+
 const prefs = new Store({
   accessPropertiesByDotNotation: false,
 });
@@ -11,9 +13,16 @@ export const LOAD_PREFS = 'prefs/LOAD_PREFS';
 // == Action Creators
 
 export function loadPrefs() {
-  return {
-    type: LOAD_PREFS,
-    prefs: prefs.store,
+  return async (dispatch, getState) => {
+    dispatch({
+      type: LOAD_PREFS,
+      prefs: prefs.store,
+    });
+    
+    // Volume needs to be set manually after loading the value from prefs
+    if (Number.isFinite(prefs.volume)) {
+      player.setVolume(prefs.volume);
+    }
   };
 }
 

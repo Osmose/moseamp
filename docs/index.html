@@ -21,12 +21,16 @@
         font-family: Fira sans, system-ui, sans-serif;
         font-size: 14px;
         line-height: 1.4em;
+        margin-bottom: 150px;
       }
 
       h1,
       h2 {
-        text-align: center;
         margin: 25px 0 15px;
+      }
+
+      h2:not(:first-child) {
+        margin-top: 50px;
       }
 
       a {
@@ -34,9 +38,32 @@
       }
 
       p {
-        max-width: 600px;
-        margin: 1.4em auto;
+        margin: 1.4em 0;
+      }
+
+      dt {
+        margin-top: 1em;
+      }
+
+      code {
+        background:hsl(0, 0%, 15%);
+        padding: 2px 5px;
+      }
+
+      pre.code {
+        background:hsl(0, 0%, 15%);
+        padding: 1em;
+      }
+
+      .cta {
         text-align: center;
+        max-width: 660px;
+        margin: 0 auto;
+      }
+
+      .info {
+        max-width: 660px;
+        margin: 0 auto;
       }
 
       .note {
@@ -62,8 +89,7 @@
       }
 
       ul {
-        margin: 15px auto;
-        max-width: 400px;
+        margin: 15px 0;
       }
 
       .format-list i {
@@ -73,7 +99,7 @@
 
       .download-buttons {
         text-align: center;
-        margin: 35px 0 10px;
+        margin: 35px 0 35px;
       }
 
       .download-buttons a {
@@ -121,37 +147,80 @@
         <h1>MoseAmp</h1>
       </header>
       <article>
-        <p>MoseAmp is a cross-platform, Electron-based audio player that specializes in playing music formats for video game consoles like the Playstation, Nintendo 64, and Sega Genesis.</p>
+        <section class="cta">
+          <p>MoseAmp is a cross-platform, Electron-based audio player that specializes in playing music formats for video game consoles like the Playstation, Nintendo 64, and Sega Genesis.</p>
 
-        <div class="download-buttons">
-          <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.dmg">Download for MacOS</a>
-          <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.zip">Download for Windows</a>
-        </div>
+          <div class="download-buttons">
+            <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.dmg">Download for MacOS</a>
+            <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.zip">Download for Windows</a>
+          </div>
 
-        <p class="note">Windows users will also need to install the <a href="https://aka.ms/vs/16/release/VC_redist.x64.exe">2019 Visual C++ Redistributable</a>.</p>
+          <p class="note">Windows users will also need to install the <a href="https://aka.ms/vs/16/release/VC_redist.x64.exe">2019 Visual C++ Redistributable</a>.</p>
+        </section>
 
-        <div><a href="screenshot.png"><img src="screenshot.png" class="screenshot"></a></div>
+        <a href="screenshot.png"><img src="screenshot.png" class="screenshot"></a>
 
-        <h2>Supported Formats</h2>
-        <ul class="format-list">
-            <li>Nintendo 64 (<i>.usf</i>, <i>.miniusf</i>)</li>
-            <li>Nintendo DS (<i>.2sf</i>, <i>.mini2sf</i>)</li>
-            <li>Playstation (<i>.psf</i>, <i>.minipsf</i>)</li>
-            <li>Playstation 2 (<i>.psf2</i>, <i>.minipsf2</i>)</li>
-            <li>Gameboy (<i>.gbs</i>)</li>
-            <li>Sega Genesis (<i>.gym</i>, <i>.vgz</i>)</li>
-            <li>Sega Game Gear (<i>.kss</i>)</li>
-            <li>Nintendo (NES) (<i>.nsf</i>, <i>.nsfe</i>)</li>
-            <li>Super Nintendo (<i>.spc</i>)</li>
-            <li>Gameboy Advance (<i>.gsf</i>, <i>.minigsf</i>)</li>
-            <li>Audio (<i>.mp3</i>, <i>.ogg</i>, <i>.wav</i>)</li>
-        </ul>
+        <section class="info">
+          <h2>Supported Formats</h2>
+          <ul class="format-list">
+              <li>Nintendo 64 (<i>.usf</i>, <i>.miniusf</i>)</li>
+              <li>Nintendo DS (<i>.2sf</i>, <i>.mini2sf</i>)</li>
+              <li>Playstation (<i>.psf</i>, <i>.minipsf</i>)</li>
+              <li>Playstation 2 (<i>.psf2</i>, <i>.minipsf2</i>)</li>
+              <li>Gameboy (<i>.gbs</i>)</li>
+              <li>Sega Genesis (<i>.gym</i>, <i>.vgz</i>)</li>
+              <li>Sega Game Gear (<i>.kss</i>)</li>
+              <li>Nintendo (NES) (<i>.nsf</i>, <i>.nsfe</i>)</li>
+              <li>Super Nintendo (<i>.spc</i>)</li>
+              <li>Gameboy Advance (<i>.gsf</i>, <i>.minigsf</i>)</li>
+              <li>Audio (<i>.mp3</i>, <i>.ogg</i>, <i>.wav</i>)</li>
+          </ul>
 
-        <h2>Thanks</h2>
-        <ul>
-          <li>Thanks to <a href="https://twitter.com/sasq64">@sasq64</a> for <a href="https://github.com/sasq64/musicplayer">musicplayer</a>.</li>
-          <li>Thanks to <a href="https://twitter.com/PixelTune/">@PixelTune</a> for game console icons.</li>
-        </ul>
+          <h2>Configuration</h2>
+          <p>MoseAmp stores preferences in a <a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON">JSON</a> file that can be opened with the <code>File -> Edit Config File</code> menu.</p>
+
+          <h2>Keyboard Shortcuts</h2>
+          <p>You can add global keyboard shortcuts by adding a <code>"keyboardShortcuts"</code> section to the config file:</p>
+<pre class="code">
+"keyboardShortcuts": {
+  "Command+Shift+Left": "load-prev-entry",
+  "Command+Shift+Right": "load-next-entry",
+  "Control+Shift+Left": "prev-track",
+  "Control+Shift+Right": "next-track",
+  "Command+Shift+Up": "increase-volume",
+  "Command+Shift+Down": "decrease-volume",
+  "Command+Shift+M": "toggle-mute"
+}
+</pre>
+          <p>The keys are <a href="https://www.electronjs.org/docs/api/accelerator">Electron keyboard shortcut accelerators</a>. The values are one of the following commands to run when pressing the given key:</p>
+          <dl>
+            <dt><code>load-prev-entry</code></dt>
+            <dd>Switch to the previously-played song.</dd>
+            
+            <dt><code>load-next-entry</code></dt>
+            <dd>Switch to the next song.</dd>
+
+            <dt><code>prev-track</code></dt>
+            <dd><b>Multi-track formats only (e.g. NSF):</b> Switch to the previous track within the current file.</dd>
+
+            <dt><code>next-track</code></dt>
+            <dd><b>Multi-track formats only (e.g. NSF):</b> Switch to the next track within the current file.</dd>
+
+            <dt><code>increase-volume</code></dt>
+            <dd>Increase the current volume level.</dd>
+
+            <dt><code>decrease-volume</code></dt>
+            <dd>Decrease the current volume level.</dd>
+
+            <dt><code>toggle-mute</code></dt>
+            <dd>Mute or unmute the volume.</dd>
+          </dl>
+          <h2>Thanks</h2>
+          <ul>
+            <li>Thanks to <a href="https://twitter.com/sasq64">@sasq64</a> for <a href="https://github.com/sasq64/musicplayer">musicplayer</a>.</li>
+            <li>Thanks to <a href="https://twitter.com/PixelTune/">@PixelTune</a> for game console icons.</li>
+          </ul>
+        </section>
       </article>
     </div>
   </body>

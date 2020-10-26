@@ -55,7 +55,13 @@ const template = [
             browserWindow.webContents.send('openDirectory', filePaths[0]);
           }
         }
-      }
+      },
+      {
+        label: 'Edit Config File',
+        click() {
+          store.openInEditor();
+        },
+      },
     ]
   },
   {
@@ -139,6 +145,7 @@ app.on('ready', async () => {
 
   const shortcutEvents = {
     MediaPlayPause: 'play-pause',
+    ...store.get('keyboardShortcuts', {}),
   };
   for (const [accelerator, eventName] of Object.entries(shortcutEvents)) {
     // eslint-disable-next-line no-loop-func

@@ -609,7 +609,7 @@ html, body {
 
 .player-volume-container .volume-icon {
   display: block;
-  flex: 0 0 auto;
+  flex: 0 0 21px;
   margin-right: 8px;
   font-size: 1.3rem;
 }
