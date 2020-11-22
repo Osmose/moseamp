@@ -1,7 +1,7 @@
 {
   "name": "moseamp",
   "productName": "MoseAmp",
-  "version": "5.9.2",
+  "version": "5.9.3",
   "description": "Music n' stuff.",
   "repository": "Osmose/moseamp",
   "main": "./build/main.js",
