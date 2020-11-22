@@ -73,7 +73,7 @@ const FILE_TYPES = [
     id: 'audio',
     name: 'Audio',
     playerId: 'webaudioplayer',
-    extensions: ['.mp3', '.ogg', '.wav'],
+    extensions: ['.mp3', '.ogg', '.wav', '.flac'],
     iconType: 'fa',
     iconCode: 'compact-disc',
   },
