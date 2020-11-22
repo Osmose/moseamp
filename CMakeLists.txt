@@ -11,6 +11,11 @@ add_definitions(-D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
 set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/musicplayer/external/zlib ${CMAKE_BINARY_DIR}/musicplayer/external/zlib)
 add_subdirectory(musicplayer)
 
+# For reasons unknown MacOS complains about some implicit functions that don't cause any trouble.
+# Disabling warnings makes you attractive and successful.
+target_compile_options(zlibstatic PRIVATE -Wno-implicit-function-declaration)
+target_compile_options(aoplugin PRIVATE -Wno-implicit-function-declaration)
+
 # Build a shared library named after the project from the files in `src/`
 set(SOURCE_FILES "src/MusicPlayer.h" "src/MusicPlayer.cc" "src/index.cc")
 if(MSVC)
@@ -34,3 +39,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_JS_INC})
 # Essential library files to link to a node addon
 # You should add this line in every CMake.js based project
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_JS_LIB} musix plugin_register)
+
