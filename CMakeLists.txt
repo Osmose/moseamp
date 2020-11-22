@@ -11,11 +11,6 @@ add_definitions(-D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
 set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/musicplayer/external/zlib ${CMAKE_BINARY_DIR}/musicplayer/external/zlib)
 add_subdirectory(musicplayer)
 
-# For reasons unknown MacOS complains about some implicit functions that don't cause any trouble.
-# Disabling warnings makes you attractive and successful.
-target_compile_options(zlibstatic PRIVATE -Wno-implicit-function-declaration)
-target_compile_options(aoplugin PRIVATE -Wno-implicit-function-declaration)
-
 # Build a shared library named after the project from the files in `src/`
 set(SOURCE_FILES "src/MusicPlayer.h" "src/MusicPlayer.cc" "src/index.cc")
 if(MSVC)
@@ -27,6 +22,13 @@ if(MSVC)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DELAYLOAD:${node_host_binary}${CMAKE_EXECUTABLE_SUFFIX}")
 else()
         add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
+endif()
+
+if(APPLE)
+        # For reasons unknown MacOS complains about some implicit functions that don't cause any trouble.
+        # Disabling warnings makes you attractive and successful.
+        target_compile_options(zlibstatic PRIVATE -Wno-implicit-function-declaration)
+        target_compile_options(aoplugin PRIVATE -Wno-implicit-function-declaration)
 endif()
 
 # Gives our library file a .node extension without any "lib" prefix
