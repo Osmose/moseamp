@@ -3,7 +3,7 @@ import path from 'path';
 import _ from 'lodash';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
-import player, { DEFAULT_GAIN, MAX_GAIN } from 'moseamp/player';
+import player, { DEFAULT_GAIN } from 'moseamp/player';
 import { getTypeForExt } from 'moseamp/filetypes';
 import { parseDurationString } from 'moseamp/utils';
 
@@ -193,21 +193,31 @@ export function pause() {
 }
 
 export function setVolume(volume) {
-  const boundedVolume = Math.min(Math.max(volume, 0), MAX_GAIN);
-  player.setVolume(boundedVolume);
-  setPref('volume', boundedVolume);
+  player.setVolume(volume);
+  setPref('volume', volume);
   return {
     type: SET_VOLUME,
-    volume: boundedVolume,
+    volume,
   };
+}
+
+const MAX_GAIN = 4;
+const GAIN_SCALE = 0.5;
+
+export function progressToGain(value) {
+  return (Math.pow(2, value * GAIN_SCALE) - 1) * MAX_GAIN;
+}
+
+export function gainToProgress(gain) {
+  return (Math.log2((gain / MAX_GAIN) + 1) / GAIN_SCALE);
 }
 
 export function increaseVolume() {
   return async (dispatch, getState) => {
     const state = getState();
     const volume = getVolume(state);
-    const step = MAX_GAIN / 10;
-    dispatch(setVolume(volume + step));
+    const newVolume = Math.min(MAX_GAIN, progressToGain(gainToProgress(volume) + 0.05));
+    dispatch(setVolume(newVolume));
   };
 }
 
@@ -215,8 +225,8 @@ export function decreaseVolume() {
   return async (dispatch, getState) => {
     const state = getState();
     const volume = getVolume(state);
-    const step = MAX_GAIN / 10;
-    dispatch(setVolume(volume - step));
+    const newVolume = Math.max(0, progressToGain(gainToProgress(volume) - 0.05));
+    dispatch(setVolume(newVolume));
   };
 }
 

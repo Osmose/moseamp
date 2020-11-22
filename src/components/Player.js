@@ -28,9 +28,11 @@ import {
   getCustomDuration,
   setUseCustomDuration,
   setCustomDuration,
+  progressToGain,
+  gainToProgress,
 } from 'moseamp/ducks/player';
 import { getTypeForExt } from 'moseamp/filetypes';
-import player, { DEFAULT_GAIN, MAX_GAIN } from 'moseamp/player';
+import player, { DEFAULT_GAIN } from 'moseamp/player';
 import Icon, { FontAwesome } from 'moseamp/components/Icon';
 import Tooltip from 'moseamp/components/Tooltip';
 import { formatDuration } from 'moseamp/utils';
@@ -439,8 +441,9 @@ class SongDuration extends React.Component {
 @autobind
 class VolumeControls extends React.Component {
   handleClick(event) {
-    const clickValue = (event.nativeEvent.offsetX / event.target.offsetWidth) * (MAX_GAIN);
-    this.props.setVolume(clickValue);
+    const relativeClickX = (event.nativeEvent.offsetX / event.target.offsetWidth);
+    const gain = progressToGain(relativeClickX);
+    this.props.setVolume(gain);
   }
 
   render() {
@@ -457,9 +460,8 @@ class VolumeControls extends React.Component {
         <FontAwesome code={iconCode} className="volume-icon" />
         <progress
           className="slider"
-          min={0}
-          max={MAX_GAIN}
-          value={volume}
+          max={1}
+          value={gainToProgress(volume)}
           onClick={this.handleClick}
         />
       </div>

@@ -10,8 +10,7 @@ import { getTypeForExt } from 'moseamp/filetypes';
 const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
-export const DEFAULT_GAIN = 0.7;
-export const MAX_GAIN = DEFAULT_GAIN * 2;
+export const DEFAULT_GAIN = 1;
 const GAIN_FACTOR = 0.0001;
 const SAMPLE_COUNT = 2048;
 
