@@ -18,10 +18,10 @@ export function loadPrefs() {
       type: LOAD_PREFS,
       prefs: prefs.store,
     });
-    
+
     // Volume needs to be set manually after loading the value from prefs
-    if (Number.isFinite(prefs.volume)) {
-      player.setVolume(prefs.volume);
+    if (Number.isFinite(prefs.store.volume)) {
+      player.setVolume(prefs.store.volume);
     }
   };
 }
