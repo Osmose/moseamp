@@ -395,6 +395,54 @@ html, body {
   );
 }
 
+.file-browser .search-bar {
+  flex: 0 0 34px;
+  background: linear-gradient(
+    180deg,
+    var(--gray-60) 1px,
+    var(--gray-40) 1px,
+    var(--gray-25) 33px,
+    var(--gray-15) 33px
+  );
+  display: flex;
+  flex-direction: row;
+}
+
+.file-browser .search-bar #search-input {
+  background: var(--gray-25);
+  box-shadow: inset 0 2px 4px var(--black-9), 0 1px var(--gray-40);
+  height: 26px;
+  border-radius: 26px;
+  border: 1px solid var(--black-9);
+  padding: 1px 8px 0;
+  flex: 1;
+  outline: none;
+  color: var(--white);
+  margin: 3px 4px 3px 8px;
+}
+
+.file-browser .search-bar .close-search {
+  flex: 0;
+  color: var(--white-83);
+  border: none;
+  font-size: 1.2em;
+  background: none;
+  font-weight: bold;
+  text-shadow: 0 1px 1px var(--black);
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 8px;
+}
+
+.file-browser .search-bar .close-search:hover {
+  color: var(--gray-60);
+}
+
+.file-browser .search-bar .close-search:active {
+  color: var(--gray-40);
+  outline: none;
+}
+
 .file-browser .entries {
   margin: 0;
   padding: 0;
@@ -712,6 +760,7 @@ html, body {
 
 .custom-duration-form label {
   display: block;
+  line-height: 1.7em;
 }
 
 .custom-duration-form label + label {
@@ -720,10 +769,19 @@ html, body {
 
 .custom-duration-form input[type="radio"] {
   margin-right: 5px;
+  vertical-align: -2px;
 }
 
 .custom-duration-form input[type="text"] {
-  width: 60px;
+  width: 80px;
+  background: var(--gray-25);
+  box-shadow: inset 0 2px 4px var(--black-9), 0 1px var(--gray-40);
+  height: 1.7em;
+  border-radius: 1.7em;
+  border: 1px solid var(--black-9);
+  color: var(--white);
+  padding-top: 4px;
+  padding-left: 4px;
 }
 
 .custom-duration-form input[type="text"]:invalid {

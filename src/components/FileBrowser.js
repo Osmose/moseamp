@@ -9,6 +9,8 @@ import {
   getEntries,
   loadEntries,
   getLoading,
+  getSearch,
+  setSearch,
 } from 'moseamp/ducks/filebrowser';
 import { openFile, getCurrentFilePath, getPlaying } from 'moseamp/ducks/player';
 import { getTypeForExt } from 'moseamp/filetypes';
@@ -19,10 +21,12 @@ export default
   state => ({
     pathSegments: getCurrentPathSegments(state),
     entries: getEntries(state),
+    search: getSearch(state),
   }),
   {
     changePath,
     loadEntries,
+    setSearch,
   },
 )
 @autobind
@@ -35,12 +39,32 @@ class FileBrowser extends React.Component {
     this.props.changePath(segment.path);
   }
 
+  handleChangeSearch(event) {
+    this.props.setSearch(event.target.value);
+  }
+
+  handleKeyDownSearch(event) {
+    console.log(event);
+    if (event.key === 'Escape') {
+      this.props.setSearch(null);
+    }
+  }
+
+  handleClickCloseSearch() {
+    this.props.setSearch(null);
+  }
+
   render() {
-    const { pathSegments, entries } = this.props;
+    const { pathSegments, entries, search } = this.props;
+
+    let searchedEntries = entries;
+    if (search) {
+      searchedEntries = searchedEntries.filter(entry => entry.name.toLowerCase().includes(search.toLowerCase()));
+    }
 
     const directories = [];
     const files = [];
-    for (const entry of entries) {
+    for (const entry of searchedEntries) {
       if (entry.type === 'directory') {
         directories.push(entry);
       } else if (getTypeForExt(entry.ext)) {
@@ -62,6 +86,21 @@ class FileBrowser extends React.Component {
             </React.Fragment>
           ))}
         </ol>
+        {search !== null && (
+          <div className="search-bar">
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={this.handleChangeSearch}
+              onKeyDown={this.handleKeyDownSearch}
+            />
+            <button className="close-search" onClick={this.handleClickCloseSearch}>
+              <FontAwesome code="times" />
+            </button>
+          </div>
+        )}
         <ol className="entries">
           {directories.map(directory => (
             <Entry entry={directory} key={directory.path} />

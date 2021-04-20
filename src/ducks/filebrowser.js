@@ -9,6 +9,7 @@ const CHANGE_PATH = 'filebrowser/CHANGE_PATH';
 const SET_ENTRIES = 'filebrowser/SET_ENTRIES';
 const HISTORY_BACK = 'filebrowser/HISTORY_BACK';
 const HISTORY_FORWARD = 'filebrowser/HISTORY_FORWARD';
+const SET_SEARCH = 'filebrowser/SET_SEARCH';
 
 // == Reducer
 
@@ -17,6 +18,7 @@ function defaultState() {
     currentPath: process.cwd(),
     entries: [],
     history: [],
+    search: null,
     forwardHistory: [],
     loading: false,
   };
@@ -59,8 +61,13 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
     case SET_ENTRIES:
       return {
         ...filebrowser,
-        entries: action.entries.map(entry => ({...entry})),
+        entries: action.entries.map(entry => ({ ...entry })),
         loading: false,
+      };
+    case SET_SEARCH:
+      return {
+        ...filebrowser,
+        search: action.search,
       };
     case LOAD_PREFS:
       return {
@@ -85,6 +92,10 @@ export function getLoading(state) {
 export function getRoot(state) {
   const parsed = path.parse(getCurrentPath(state));
   return parsed.root;
+}
+
+export function getSearch(state) {
+  return state.filebrowser.search;
 }
 
 export function getCurrentPathSegments(state) {
@@ -133,7 +144,7 @@ export function loadEntries() {
     const state = getState();
 
     const currentPath = getCurrentPath(state);
-    const dirEntries = await fs.promises.readdir(currentPath, {withFileTypes: true});
+    const dirEntries = await fs.promises.readdir(currentPath, { withFileTypes: true });
     const entries = dirEntries.map(dirEnt => {
       return {
         path: path.join(currentPath, dirEnt.name),
@@ -166,5 +177,12 @@ export function historyForward() {
       type: HISTORY_FORWARD,
     });
     dispatch(loadEntries());
+  };
+}
+
+export function setSearch(search) {
+  return {
+    type: SET_SEARCH,
+    search,
   };
 }

@@ -18,6 +18,8 @@ import {
 import {
   historyBack,
   historyForward,
+  setSearch,
+  getSearch,
 } from 'moseamp/ducks/filebrowser';
 
 const browserWindow = remote.getCurrentWindow();
@@ -82,4 +84,12 @@ browserWindow.on('swipe', (event, direction) => {
   } else if (direction === 'right') {
     forward();
   }
+});
+
+Mousetrap.bind(['meta+f', 'ctrl+f'], () => {
+  const state = store.getState();
+  if (getSearch(state) === null) {
+    store.dispatch(setSearch(''));
+  }
+  document.querySelector('#search-input')?.focus();
 });
