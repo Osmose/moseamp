@@ -111,6 +111,7 @@ class WindowsTitleBar extends React.Component {
   componentDidMount() {
     this.titlebar = new CustomTitleBar({
       backgroundColor: TitleBarColor.fromHex('#404040'),
+      overflow: 'hidden'
     });
   }
 
