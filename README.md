@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://www.mkelly.me/moseamp/moseamp.png" width="300">
+  <img src="resources/moseamp.png" width="300">
 </p>
 
 # MoseAmp
