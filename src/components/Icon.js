@@ -7,7 +7,7 @@ class Icon extends React.Component {
     const { iconId, className = '', size = 16, innerRef, ...restProps } = this.props;
 
     const staticIcon = STATIC_ICONS_MAP[iconId];
-    if (staticIcon.type === 'image') {
+    if (staticIcon?.type === 'image') {
       return (
         <img
           src={`img/${staticIcon.id}_${size}.png`}
@@ -17,11 +17,21 @@ class Icon extends React.Component {
           {...restProps}
         />
       );
+    } else if (staticIcon?.code) {
+      return (
+        <FontAwesome
+          code={staticIcon.code}
+          ref={innerRef}
+          className={className}
+          style={{fontSize: `${size}px`}}
+          {...restProps}
+        />
+      );
     }
 
     return (
       <FontAwesome
-        code={staticIcon.code}
+        code={iconId}
         ref={innerRef}
         className={className}
         style={{fontSize: `${size}px`}}

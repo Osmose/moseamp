@@ -26,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",
+    "@reduxjs/toolkit": "^1.5.1",
     "appdmg": "^0.6.0",
     "autobind-decorator": "^2.4.0",
     "bindings": "^1.5.0",
@@ -69,6 +70,7 @@
     "eslint-plugin-react": "^7.17.0",
     "nan": "^2.14.2",
     "node-addon-api": "^1.7.2",
+    "prettier": "^2.3.0",
     "webpack": "^5.38.1",
     "webpack-cli": "^3.3.10",
     "webpack-merge": "^4.2.2",

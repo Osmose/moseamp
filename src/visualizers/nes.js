@@ -97,7 +97,7 @@ export default {
 
   id: 'nes',
   name: 'NES',
-  icon: { code: 'folder' },
+  icon: { iconId: 'nes' },
   canRender: true,
 
   lastDrawTime: 0,
@@ -264,7 +264,7 @@ export default {
     }
   },
 
-  async render({ filePath, fps, duration, width, height, volume }) {
+  async render({ filePath, fps, duration, width, height, volume, onRenderFrame }) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -285,7 +285,6 @@ export default {
     const audioDestination = audioContext.createMediaStreamDestination();
     const gainNode = audioContext.createGain();
     gainNode.gain.value = volume * GAIN_FACTOR;
-    console.log(`Volume: ${volume}`);
     gainNode.connect(audioDestination);
     const scriptNode = audioContext.createScriptProcessor(SAMPLE_COUNT, 1, 2);
     scriptNode.onaudioprocess = (event) => {
@@ -298,8 +297,6 @@ export default {
       }
     };
     scriptNode.connect(gainNode);
-
-    console.log('Starting render...');
 
     const audioTrack = audioDestination.stream.getAudioTracks()[0];
     mediaStream.addTrack(audioTrack);
@@ -315,7 +312,7 @@ export default {
     mediaRecorder.start();
     mediaRecorder.pause();
 
-    for (let frame = 0; frame < fps * duration; frame++) {
+    for (let frameIndex = 0; frameIndex < fps * duration; frameIndex++) {
       const timer = wait(1000 / fps);
 
       mediaRecorder.resume();
@@ -327,7 +324,7 @@ export default {
 
       await timer;
       mediaRecorder.pause();
-      console.log(`Frame ${frame} rendered`);
+      onRenderFrame({ frameIndex });
     }
 
     videoTrack.stop();

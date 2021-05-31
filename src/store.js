@@ -6,6 +6,7 @@ import filebrowser from 'moseamp/ducks/filebrowser';
 import player from 'moseamp/ducks/player';
 import app from 'moseamp/ducks/app';
 import visualizer from 'moseamp/ducks/visualizer';
+import renderer from 'moseamp/slices/renderer';
 
 const store = createStore(
   combineReducers({
@@ -14,6 +15,7 @@ const store = createStore(
     favorites,
     app,
     visualizer,
+    renderer,
   }),
   compose(
     applyMiddleware(

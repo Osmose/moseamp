@@ -2,7 +2,7 @@ import path from 'path';
 
 import autobind from 'autobind-decorator';
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { remote } from 'electron';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
@@ -16,7 +16,7 @@ import {
   setEntryIconId,
 } from 'moseamp/ducks/favorites';
 import { changePath } from 'moseamp/ducks/filebrowser';
-import { setPluginId, setRenderModalVisible } from 'moseamp/ducks/visualizer';
+import { setPluginId as setVisualizerPluginId } from 'moseamp/ducks/visualizer';
 import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 import Tooltip from 'moseamp/components/Tooltip';
 import visualizerPlugins from 'moseamp/visualizers';
@@ -41,7 +41,7 @@ class Sidebar extends React.Component {
       <div className="sidebar">
         <Modes mode={mode} />
         {mode === MODE_FILEBROWSER && <Favorites />}
-        {mode === MODE_VISUALIZER && <VisualizerPlugins />}
+        {mode === MODE_VISUALIZER && <VisualizerPlugins plugins={visualizerPlugins} />}
       </div>
     );
   }
@@ -81,19 +81,32 @@ class Modes extends React.Component {
   }
 }
 
-@connect(
-  null,
-  { setPluginId, setRenderModalVisible }
-)
+function VisualizerPlugins() {
+  const dispatch = useDispatch();
+  const handleClickPlugin = (pluginId) => {
+    dispatch(setVisualizerPluginId(pluginId));
+  };
+
+  return (
+    <Plugins plugins={visualizerPlugins} onClickPlugin={handleClickPlugin} />
+  );
+}
+
+function RendererPlugins() {
+  const dispatch = useDispatch();
+  const handleClickPlugin = (pluginId) => {
+    dispatch(setVisualizerPluginId(pluginId));
+  };
+
+  return (
+    <Plugins plugins={visualizerPlugins.filter(plugin => plugin.canRender)} onClickPlugin={handleClickPlugin} />
+  );
+}
+
 @autobind
-class VisualizerPlugins extends React.Component {
+class Plugins extends React.Component {
   handleClickPlugin(pluginId) {
     this.props.setPluginId(pluginId);
-  }
-
-  handleClickRender(pluginId) {
-    this.props.setPluginId(pluginId);
-    this.props.setRenderModalVisible(true);
   }
 
   render() {
@@ -103,25 +116,15 @@ class VisualizerPlugins extends React.Component {
           <span>Plugins</span>
         </h2>
         <ul className="sidebar-list">
-          {visualizerPlugins.map(plugin => (
+          {this.props.plugins.map(plugin => (
             <li key={plugin.id} className="sidebar-entry">
-              {plugin.canRender && (
-                <button
-                  type="button"
-                  className="menu-button"
-                  onClick={() => this.handleClickRender(plugin.id)}
-                >
-                  <FontAwesome code="video" />
-                </button>
-              )}
-
               <span className="entry-icon">
-                <FontAwesome {...plugin.icon} />
+                <Icon {...plugin.icon} />
               </span>
               <a
                 href="#"
                 className="sidebar-link"
-                onClick={() => this.handleClickPlugin(plugin.id)}
+                onClick={() => this.props.onClickPlugin(plugin.id)}
               >
                 {plugin.name}
               </a>

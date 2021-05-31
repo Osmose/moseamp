@@ -1,48 +1,10 @@
 import autobind from 'autobind-decorator';
-import React, { useRef } from 'react';
-import { connect, useSelector, useDispatch } from 'react-redux';
+import React from 'react';
+import { connect } from 'react-redux';
 
-import { getPlaying, getCurrentFilePath, getVolume } from 'moseamp/ducks/player';
-import { getPlugin, getRenderModalVisible, setRenderModalVisible } from 'moseamp/ducks/visualizer';
+import { getPlaying } from 'moseamp/ducks/player';
+import { getPlugin } from 'moseamp/ducks/visualizer';
 import player from 'moseamp/player';
-import Modal from 'moseamp/components/Modal';
-
-export function RenderModal() {
-  const dispatch = useDispatch();
-  const renderModalVisible = useSelector(getRenderModalVisible);
-  const plugin = useSelector(getPlugin);
-  const currentFilePath = useSelector(getCurrentFilePath);
-  const volume = useSelector(getVolume);
-
-  const videoRef = useRef();
-
-  const handleDismiss = () => {
-    dispatch(setRenderModalVisible(false));
-  };
-  const handleClickStart = async () => {
-    const blob = await plugin.render({
-      filePath: currentFilePath,
-      fps: 60,
-      duration: 30,
-      width: 1024,
-      height: 768,
-      volume,
-    });
-    const blobUrl = URL.createObjectURL(blob);
-    videoRef.current.onloadedmetadata = () => {
-      console.log('video metadata loaded')
-      videoRef.current.play();
-    };
-    videoRef.current.src = blobUrl;
-  };
-
-  return (
-    <Modal visible={renderModalVisible} onDismiss={handleDismiss}>
-      <video ref={videoRef} width="1024" height="768" controls />
-      <button onClick={handleClickStart}>Start Render</button>
-    </Modal>
-  );
-}
 
 export default
 @connect(
