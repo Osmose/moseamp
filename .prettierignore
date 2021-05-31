@@ -2,3 +2,4 @@ build
 native_build
 musicplayer
 node_modules
+*.md

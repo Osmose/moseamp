@@ -209,7 +209,7 @@ export function progressToGain(value) {
 }
 
 export function gainToProgress(gain) {
-  return (Math.log2((gain / MAX_GAIN) + 1) / GAIN_SCALE);
+  return Math.log2(gain / MAX_GAIN + 1) / GAIN_SCALE;
 }
 
 export function increaseVolume() {
@@ -240,7 +240,7 @@ export function toggleMute() {
       const prevVolume = getPrevVolume(state);
       dispatch(setVolume(prevVolume));
     }
-  }
+  };
 }
 
 export function setCurrentTime(currentTime) {
@@ -322,7 +322,7 @@ export function loadNextEntry(automatic = false) {
     if (playlist.length < 1) {
       return;
     }
-    const currentPathIndex = playlist.findIndex(filePath => filePath === currentFilePath);
+    const currentPathIndex = playlist.findIndex((filePath) => filePath === currentFilePath);
     const nextPath = playlist[(currentPathIndex + 1) % playlist.length];
     dispatch(openFile(nextPath));
   };
@@ -338,7 +338,7 @@ export function loadPrevEntry() {
       return;
     }
 
-    const currentPathIndex = playlist.findIndex(filePath => filePath === currentFilePath);
+    const currentPathIndex = playlist.findIndex((filePath) => filePath === currentFilePath);
 
     let nextPathIndex;
     if (currentPathIndex < 1) {
@@ -448,11 +448,11 @@ export function getUseCustomDuration(state) {
 const filePathCompare = (a, b) => a.toLowerCase().localeCompare(b.toLowerCase());
 
 async function getPlayablePaths(directory, shuffle) {
-  const dirEntries = await fs.promises.readdir(directory, {withFileTypes: true});
+  const dirEntries = await fs.promises.readdir(directory, { withFileTypes: true });
   let playablePaths = dirEntries
-    .filter(entry => !entry.isDirectory())
-    .filter(entry => getTypeForExt(path.extname(entry.name)))
-    .map(entry => path.join(directory, entry.name));
+    .filter((entry) => !entry.isDirectory())
+    .filter((entry) => getTypeForExt(path.extname(entry.name)))
+    .map((entry) => path.join(directory, entry.name));
 
   if (shuffle) {
     playablePaths = _.shuffle(playablePaths);

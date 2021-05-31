@@ -80,7 +80,7 @@ const FILE_TYPES = [
 ];
 
 export function getTypeForExt(ext) {
-  return FILE_TYPES.find(fileType => fileType.extensions.includes(ext));
+  return FILE_TYPES.find((fileType) => fileType.extensions.includes(ext));
 }
 
 export const SUPPORTED_EXTENSIONS = [];

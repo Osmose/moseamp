@@ -39,7 +39,7 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
         return filebrowser;
       }
 
-      const backPath = filebrowser.history[filebrowser.history.length - 1]
+      const backPath = filebrowser.history[filebrowser.history.length - 1];
       return {
         ...filebrowser,
         currentPath: backPath,
@@ -51,7 +51,7 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
         return filebrowser;
       }
 
-      const forwardPath = filebrowser.forwardHistory[filebrowser.forwardHistory.length - 1]
+      const forwardPath = filebrowser.forwardHistory[filebrowser.forwardHistory.length - 1];
       return {
         ...filebrowser,
         currentPath: forwardPath,
@@ -61,7 +61,7 @@ export default function reducer(filebrowser = defaultState(), action = {}) {
     case SET_ENTRIES:
       return {
         ...filebrowser,
-        entries: action.entries.map(entry => ({ ...entry })),
+        entries: action.entries.map((entry) => ({ ...entry })),
         loading: false,
       };
     case SET_SEARCH:
@@ -101,17 +101,16 @@ export function getSearch(state) {
 export function getCurrentPathSegments(state) {
   const root = getRoot(state);
   const rootlessPath = getCurrentPath(state).slice(root.length);
-  const segments = (
-    path.normalize(rootlessPath)
-      .split(/[/\\]/)
-      .filter(name => name && name !== '.')
-      .map((name, index, segmentNames) => {
-        return {
-          name,
-          path: path.join(...[root, ...segmentNames.slice(0, index + 1)]),
-        };
-      })
-  );
+  const segments = path
+    .normalize(rootlessPath)
+    .split(/[/\\]/)
+    .filter((name) => name && name !== '.')
+    .map((name, index, segmentNames) => {
+      return {
+        name,
+        path: path.join(...[root, ...segmentNames.slice(0, index + 1)]),
+      };
+    });
 
   segments.unshift({
     name: root,
@@ -145,7 +144,7 @@ export function loadEntries() {
 
     const currentPath = getCurrentPath(state);
     const dirEntries = await fs.promises.readdir(currentPath, { withFileTypes: true });
-    const entries = dirEntries.map(dirEnt => {
+    const entries = dirEntries.map((dirEnt) => {
       return {
         path: path.join(currentPath, dirEnt.name),
         ext: path.extname(dirEnt.name),

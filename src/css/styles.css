@@ -1,5 +1,5 @@
 :root {
-  --white: #FFF;
+  --white: #fff;
   --white-83: hsl(0, 0%, 83%);
   --gray-60: hsl(0, 0%, 60%);
   --gray-40: hsl(0, 0%, 40%);
@@ -37,7 +37,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   background: var(--gray-15);
   color: var(--white);
   margin: 0;
@@ -70,7 +71,7 @@ html, body {
   pointer-events: visible;
 }
 
-.modal-container[data-visible="true"] {
+.modal-container[data-visible='true'] {
   visibility: visible;
 }
 
@@ -85,7 +86,8 @@ html, body {
   z-index: 100;
 }
 
-#app-container, .app {
+#app-container,
+.app {
   width: 100%;
   height: 100%;
 }
@@ -95,7 +97,8 @@ html, body {
   flex-direction: column;
 }
 
-.title-bar, .player-bar {
+.title-bar,
+.player-bar {
   background: linear-gradient(180deg, var(--gray-25), var(--gray-15));
   border-top: 1px solid var(--gray-40);
   border-bottom: 1px solid var(--black-9);
@@ -167,7 +170,7 @@ html, body {
   margin: 0 0 10px 10px;
   font-weight: normal;
   font-variant: small-caps;
-  color: var(--white-83)
+  color: var(--white-83);
 }
 
 .sidebar-list {
@@ -278,7 +281,7 @@ html, body {
   background: var(--gray-15);
   z-index: 100;
   width: 150px;
-  transition: all .1s linear;
+  transition: all 0.1s linear;
   box-shadow: 0px 5px 10px -3px var(--gray-15);
 }
 
@@ -365,13 +368,7 @@ html, body {
   display: flex;
   flex-direction: row;
   width: 100%;
-  background: linear-gradient(
-    180deg,
-    var(--gray-40) 1px,
-    var(--gray-25) 1px,
-    var(--gray-15) 29px,
-    var(--black-9) 29px
-  );
+  background: linear-gradient(180deg, var(--gray-40) 1px, var(--gray-25) 1px, var(--gray-15) 29px, var(--black-9) 29px);
   text-shadow: 0 1px 2px var(--black);
   flex: 0 0 30px;
   overflow: auto;
@@ -419,34 +416,18 @@ html, body {
 
 .file-browser .path-segments .separator:nth-last-child(3),
 .file-browser .path-segments .segment:nth-last-child(2) {
-  background: linear-gradient(
-    180deg,
-    var(--blue-75) 1px,
-    var(--blue-60) 1px,
-    var(--blue-40) 29px,
-    var(--blue-25) 29px
-  );
+  background: linear-gradient(180deg, var(--blue-75) 1px, var(--blue-60) 1px, var(--blue-40) 29px, var(--blue-25) 29px);
 }
 
 .file-browser .path-segments .separator:last-child::after {
   border-top: 1px solid var(--blue-75);
   outline: 1px solid var(--blue-25);
-  background: linear-gradient(
-    105deg,
-    var(--blue-60),
-    var(--blue-40)
-  );
+  background: linear-gradient(105deg, var(--blue-60), var(--blue-40));
 }
 
 .file-browser .search-bar {
   flex: 0 0 34px;
-  background: linear-gradient(
-    180deg,
-    var(--gray-60) 1px,
-    var(--gray-40) 1px,
-    var(--gray-25) 33px,
-    var(--gray-15) 33px
-  );
+  background: linear-gradient(180deg, var(--gray-60) 1px, var(--gray-40) 1px, var(--gray-25) 33px, var(--gray-15) 33px);
   display: flex;
   flex-direction: row;
 }
@@ -506,7 +487,7 @@ html, body {
   margin-right: 5px;
   width: 20px;
   text-align: center;
-  display: inline-block
+  display: inline-block;
 }
 
 .file-browser .entries .icon .fas {
@@ -557,7 +538,7 @@ html, body {
   display: grid;
   grid-template-columns: 47px 1fr;
   grid-template-rows: 1fr 1fr;
-  grid-template-areas: "icon title" "icon artist";
+  grid-template-areas: 'icon title' 'icon artist';
   padding: 10px 0;
 }
 
@@ -601,10 +582,18 @@ html, body {
 }
 
 @keyframes bounce-parent {
-  0% { left: 0; }
-  37% { left: 100%; }
-  50% { left: 100%; }
-  87% { left: 0%; }
+  0% {
+    left: 0;
+  }
+  37% {
+    left: 100%;
+  }
+  50% {
+    left: 100%;
+  }
+  87% {
+    left: 0%;
+  }
 }
 
 .hover-scroll:hover .hover-scroll-child {
@@ -615,10 +604,18 @@ html, body {
 }
 
 @keyframes bounce-child {
-  0% { right: 0%; }
-  37% { right: 100%; }
-  50% { right: 100%; }
-  87% { right: 0%; }
+  0% {
+    right: 0%;
+  }
+  37% {
+    right: 100%;
+  }
+  50% {
+    right: 100%;
+  }
+  87% {
+    right: 0%;
+  }
 }
 
 .player-controls {
@@ -746,9 +743,15 @@ html, body {
 }
 
 @keyframes indeterminate-slider {
-  0% { background-position: 200% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 200% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .seek-bar {
@@ -811,12 +814,12 @@ html, body {
   margin-top: 5px;
 }
 
-.custom-duration-form input[type="radio"] {
+.custom-duration-form input[type='radio'] {
   margin-right: 5px;
   vertical-align: -2px;
 }
 
-.custom-duration-form input[type="text"] {
+.custom-duration-form input[type='text'] {
   width: 80px;
   background: var(--gray-25);
   box-shadow: inset 0 2px 4px var(--black-9), 0 1px var(--gray-40);
@@ -828,7 +831,7 @@ html, body {
   padding-left: 4px;
 }
 
-.custom-duration-form input[type="text"]:invalid {
+.custom-duration-form input[type='text']:invalid {
   outline: red auto 5px;
   outline-offset: -2px;
 }

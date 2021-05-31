@@ -7,10 +7,10 @@ import Icon from 'moseamp/components/Icon';
 
 export default
 @connect(
-  state => ({
+  (state) => ({
     query: getSearchQuery(state),
   }),
-  { setSearchQuery },
+  { setSearchQuery }
 )
 @autobind
 class SearchField extends React.Component {
@@ -23,12 +23,7 @@ class SearchField extends React.Component {
     return (
       <div className="search-field-container">
         <Icon name="search" className="icon" />
-        <input
-          className="search-field"
-          type="search"
-          value={query}
-          onChange={this.handleChange}
-        />
+        <input className="search-field" type="search" value={query} onChange={this.handleChange} />
       </div>
     );
   }

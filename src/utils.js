@@ -17,7 +17,7 @@ export function formatDuration(duration) {
 
 export function parseDurationString(durationString) {
   try {
-    const segments = durationString.split(':').map(s => Number.parseInt(s, 10));
+    const segments = durationString.split(':').map((s) => Number.parseInt(s, 10));
     segments.reverse();
     if (segments.includes(NaN) || segments.length > 3) {
       throw new Error('Cannot parse');

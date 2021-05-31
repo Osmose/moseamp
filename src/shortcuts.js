@@ -15,12 +15,7 @@ import {
   decreaseVolume,
   toggleMute,
 } from 'moseamp/ducks/player';
-import {
-  historyBack,
-  historyForward,
-  setSearch,
-  getSearch,
-} from 'moseamp/ducks/filebrowser';
+import { historyBack, historyForward, setSearch, getSearch } from 'moseamp/ducks/filebrowser';
 
 // Play or pause on media key or space
 function playPause() {

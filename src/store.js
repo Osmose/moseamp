@@ -17,11 +17,7 @@ const store = createStore(
     visualizer,
     renderer,
   }),
-  compose(
-    applyMiddleware(
-      thunk,
-    ),
-  ),
+  compose(applyMiddleware(thunk))
 );
 
 window.store = store;

@@ -1,8 +1,5 @@
 module.exports = {
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-  ],
+  extends: ['eslint:recommended', 'plugin:react/recommended'],
   parser: 'babel-eslint',
   env: {
     browser: true,
@@ -33,7 +30,7 @@ module.exports = {
     'jsx-a11y/no-static-element-interactions': 'off',
     'jsx-a11y/no-noninteractive-element-interactions': 'off',
     'jsx-a11y/alt-text': 'off',
-    'jsx-a11y/click-events-have-key-events': "off",
+    'jsx-a11y/click-events-have-key-events': 'off',
     'arrow-body-style': 'off',
     'no-console': 'off',
     'no-use-before-define': 'off',

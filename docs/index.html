@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <title>MoseAmp</title>
 
-    <meta property="og:title" content="MoseAmp">
-    <meta property="og:url" content="https://www.mkelly.me/moseamp/">
-    <meta property="og:type" content="website">
-    <meta property="og:description" content="A cross-platform music player specializing in video game audio formats.">
-    <meta property="og:image" content="https://www.mkelly.me/moseamp/moseamp.png">
+    <meta property="og:title" content="MoseAmp" />
+    <meta property="og:url" content="https://www.mkelly.me/moseamp/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="A cross-platform music player specializing in video game audio formats." />
+    <meta property="og:image" content="https://www.mkelly.me/moseamp/moseamp.png" />
 
     <style>
       * {
@@ -46,12 +46,12 @@
       }
 
       code {
-        background:hsl(0, 0%, 15%);
+        background: hsl(0, 0%, 15%);
         padding: 2px 5px;
       }
 
       pre.code {
-        background:hsl(0, 0%, 15%);
+        background: hsl(0, 0%, 15%);
         padding: 1em;
       }
 
@@ -129,59 +129,127 @@
     </style>
 
     <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        (i[r] =
+          i[r] ||
+          function () {
+            (i[r].q = i[r].q || []).push(arguments);
+          }),
+          (i[r].l = 1 * new Date());
+        (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m);
+      })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
       ga('create', 'UA-48282608-1', 'auto');
       ga('send', 'pageview');
     </script>
   </head>
   <body>
-    <a href="https://github.com/Osmose/moseamp" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#fff; color:#151513; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <a href="https://github.com/Osmose/moseamp" class="github-corner" aria-label="View source on GitHub"
+      ><svg
+        width="80"
+        height="80"
+        viewBox="0 0 250 250"
+        style="fill: #fff; color: #151513; position: absolute; top: 0; border: 0; right: 0"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
 
     <div class="container">
       <header class="header">
-        <img src="moseamp.png" class="header-icon">
+        <img src="moseamp.png" class="header-icon" />
         <h1>MoseAmp</h1>
       </header>
       <article>
         <section class="cta">
-          <p>MoseAmp is a cross-platform, Electron-based audio player that specializes in playing music formats for video game consoles like the Playstation, Nintendo 64, and Sega Genesis.</p>
+          <p>
+            MoseAmp is a cross-platform, Electron-based audio player that specializes in playing music formats for video
+            game consoles like the Playstation, Nintendo 64, and Sega Genesis.
+          </p>
 
           <div class="download-buttons">
             <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.dmg">Download for MacOS</a>
             <a href="https://github.com/Osmose/moseamp/releases/latest/download/MoseAmp.zip">Download for Windows</a>
           </div>
 
-          <p class="note">Windows users will also need to install the <a href="https://aka.ms/vs/16/release/VC_redist.x64.exe">2019 Visual C++ Redistributable</a>.</p>
+          <p class="note">
+            Windows users will also need to install the
+            <a href="https://aka.ms/vs/16/release/VC_redist.x64.exe">2019 Visual C++ Redistributable</a>.
+          </p>
         </section>
 
-        <a href="screenshot.png"><img src="screenshot.png" class="screenshot"></a>
+        <a href="screenshot.png"><img src="screenshot.png" class="screenshot" /></a>
 
         <section class="info">
           <h2>Supported Formats</h2>
           <ul class="format-list">
-              <li>Nintendo 64 (<i>.usf</i>, <i>.miniusf</i>)</li>
-              <li>Nintendo DS (<i>.2sf</i>, <i>.mini2sf</i>)</li>
-              <li>Playstation (<i>.psf</i>, <i>.minipsf</i>)</li>
-              <li>Playstation 2 (<i>.psf2</i>, <i>.minipsf2</i>)</li>
-              <li>Gameboy (<i>.gbs</i>)</li>
-              <li>Sega Genesis (<i>.gym</i>, <i>.vgz</i>)</li>
-              <li>Sega Game Gear (<i>.kss</i>)</li>
-              <li>Nintendo (NES) (<i>.nsf</i>, <i>.nsfe</i>)</li>
-              <li>Super Nintendo (<i>.spc</i>)</li>
-              <li>Gameboy Advance (<i>.gsf</i>, <i>.minigsf</i>)</li>
-              <li>Audio (<i>.mp3</i>, <i>.ogg</i>, <i>.wav</i>, <i>.flac</i>)</li>
+            <li>Nintendo 64 (<i>.usf</i>, <i>.miniusf</i>)</li>
+            <li>Nintendo DS (<i>.2sf</i>, <i>.mini2sf</i>)</li>
+            <li>Playstation (<i>.psf</i>, <i>.minipsf</i>)</li>
+            <li>Playstation 2 (<i>.psf2</i>, <i>.minipsf2</i>)</li>
+            <li>Gameboy (<i>.gbs</i>)</li>
+            <li>Sega Genesis (<i>.gym</i>, <i>.vgz</i>)</li>
+            <li>Sega Game Gear (<i>.kss</i>)</li>
+            <li>Nintendo (NES) (<i>.nsf</i>, <i>.nsfe</i>)</li>
+            <li>Super Nintendo (<i>.spc</i>)</li>
+            <li>Gameboy Advance (<i>.gsf</i>, <i>.minigsf</i>)</li>
+            <li>Audio (<i>.mp3</i>, <i>.ogg</i>, <i>.wav</i>, <i>.flac</i>)</li>
           </ul>
 
           <h2>Configuration</h2>
-          <p>MoseAmp stores preferences in a <a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON">JSON</a> file that can be opened with the <code>File -> Edit Config File</code> menu.</p>
+          <p>
+            MoseAmp stores preferences in a
+            <a href="https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON">JSON</a> file that can be
+            opened with the <code>File -> Edit Config File</code> menu.
+          </p>
 
           <h2>Keyboard Shortcuts</h2>
-          <p>You can add global keyboard shortcuts by adding a <code>"keyboardShortcuts"</code> section to the config file:</p>
-<pre class="code">
+          <p>
+            You can add global keyboard shortcuts by adding a <code>"keyboardShortcuts"</code> section to the config
+            file:
+          </p>
+          <pre class="code">
 "keyboardShortcuts": {
   "Command+Shift+Left": "load-prev-entry",
   "Command+Shift+Right": "load-next-entry",
@@ -191,12 +259,17 @@
   "Command+Shift+Down": "decrease-volume",
   "Command+Shift+M": "toggle-mute"
 }
-</pre>
-          <p>The keys are <a href="https://www.electronjs.org/docs/api/accelerator">Electron keyboard shortcut accelerators</a>. The values are one of the following commands to run when pressing the given key:</p>
+</pre
+          >
+          <p>
+            The keys are
+            <a href="https://www.electronjs.org/docs/api/accelerator">Electron keyboard shortcut accelerators</a>. The
+            values are one of the following commands to run when pressing the given key:
+          </p>
           <dl>
             <dt><code>load-prev-entry</code></dt>
             <dd>Switch to the previously-played song.</dd>
-            
+
             <dt><code>load-next-entry</code></dt>
             <dd>Switch to the next song.</dd>
 
@@ -217,7 +290,10 @@
           </dl>
           <h2>Thanks</h2>
           <ul>
-            <li>Thanks to <a href="https://twitter.com/sasq64">@sasq64</a> for <a href="https://github.com/sasq64/musicplayer">musicplayer</a>.</li>
+            <li>
+              Thanks to <a href="https://twitter.com/sasq64">@sasq64</a> for
+              <a href="https://github.com/sasq64/musicplayer">musicplayer</a>.
+            </li>
             <li>Thanks to <a href="https://twitter.com/PixelTune/">@PixelTune</a> for game console icons.</li>
           </ul>
         </section>

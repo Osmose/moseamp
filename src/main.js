@@ -51,12 +51,12 @@ const template = [
           const { cancelled, filePaths } = await dialog.showOpenDialog({
             title: 'Open Directory',
             buttonLabel: 'Open',
-            properties: ['openDirectory']
+            properties: ['openDirectory'],
           });
           if (!cancelled && filePaths.length > 0) {
             browserWindow.webContents.send('openDirectory', filePaths[0]);
           }
-        }
+        },
       },
       {
         label: 'Edit Config File',
@@ -64,7 +64,7 @@ const template = [
           store.openInEditor();
         },
       },
-    ]
+    ],
   },
   {
     label: 'View',
@@ -82,10 +82,7 @@ const template = [
   },
   {
     label: 'Window',
-    submenu: [
-      { role: 'minimize' },
-      { role: 'close' },
-    ],
+    submenu: [{ role: 'minimize' }, { role: 'close' }],
   },
   {
     role: 'help',
@@ -171,11 +168,10 @@ app.on('ready', async () => {
       const { response } = await dialog.showMessageBox({
         type: 'warning',
         message: 'Enable accessibility access',
-        detail: (
+        detail:
           'To use media keys to control playback with MoseAmp, you must add and enable it in ' +
           'the list of trusted apps in System Preferences under Security & Privacy > Accessibility.' +
-          '\n\n MoseAmp must be restarted for changes to take effect.\n'
-        ),
+          '\n\n MoseAmp must be restarted for changes to take effect.\n',
         defaultId: 0,
         cancelId: 1,
         buttons: ['Turn on accessibility', 'Not now', 'Stop asking'],

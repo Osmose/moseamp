@@ -21,18 +21,12 @@ import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 import Tooltip from 'moseamp/components/Tooltip';
 import visualizerPlugins from 'moseamp/visualizers';
 
-const {
-  dialog,
-  getCurrentWindow,
-  Menu,
-} = remote;
+const { dialog, getCurrentWindow, Menu } = remote;
 
 export default
-@connect(
-  (state) => ({
-    mode: getMode(state),
-  })
-)
+@connect((state) => ({
+  mode: getMode(state),
+}))
 class Sidebar extends React.Component {
   render() {
     const { mode } = this.props;
@@ -47,10 +41,7 @@ class Sidebar extends React.Component {
   }
 }
 
-@connect(
-  null,
-  { setMode },
-)
+@connect(null, { setMode })
 class Modes extends React.Component {
   handleClickMode(mode) {
     this.props.setMode(mode);
@@ -87,9 +78,7 @@ function VisualizerPlugins() {
     dispatch(setVisualizerPluginId(pluginId));
   };
 
-  return (
-    <Plugins plugins={visualizerPlugins} onClickPlugin={handleClickPlugin} />
-  );
+  return <Plugins plugins={visualizerPlugins} onClickPlugin={handleClickPlugin} />;
 }
 
 function RendererPlugins() {
@@ -98,9 +87,7 @@ function RendererPlugins() {
     dispatch(setVisualizerPluginId(pluginId));
   };
 
-  return (
-    <Plugins plugins={visualizerPlugins.filter(plugin => plugin.canRender)} onClickPlugin={handleClickPlugin} />
-  );
+  return <Plugins plugins={visualizerPlugins.filter((plugin) => plugin.canRender)} onClickPlugin={handleClickPlugin} />;
 }
 
 @autobind
@@ -116,16 +103,12 @@ class Plugins extends React.Component {
           <span>Plugins</span>
         </h2>
         <ul className="sidebar-list">
-          {this.props.plugins.map(plugin => (
+          {this.props.plugins.map((plugin) => (
             <li key={plugin.id} className="sidebar-entry">
               <span className="entry-icon">
                 <Icon {...plugin.icon} />
               </span>
-              <a
-                href="#"
-                className="sidebar-link"
-                onClick={() => this.props.onClickPlugin(plugin.id)}
-              >
+              <a href="#" className="sidebar-link" onClick={() => this.props.onClickPlugin(plugin.id)}>
                 {plugin.name}
               </a>
             </li>
@@ -140,7 +123,7 @@ class Plugins extends React.Component {
   (state) => ({
     entries: getEntries(state),
   }),
-  { addEntry, removeEntry, changePath, reorderEntries },
+  { addEntry, removeEntry, changePath, reorderEntries }
 )
 @autobind
 class Favorites extends React.Component {
@@ -182,11 +165,7 @@ class Favorites extends React.Component {
         <DragDropContext onDragEnd={this.handleDragEnd}>
           <Droppable droppableId="favorites">
             {(provided) => (
-              <ul
-                className="sidebar-list"
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
+              <ul className="sidebar-list" {...provided.droppableProps} ref={provided.innerRef}>
                 {entries.map((entry, index) => (
                   <FavoritesEntry key={entry.id} entry={entry} index={index} />
                 ))}
@@ -228,10 +207,7 @@ const entryContextMenu = Menu.buildFromTemplate([
   },
 ]);
 
-@connect(
-  () => ({}),
-  { removeEntry, renameEntry, changePath },
-)
+@connect(() => ({}), { removeEntry, renameEntry, changePath })
 @autobind
 class FavoritesEntry extends React.Component {
   constructor(props) {
@@ -290,7 +266,6 @@ class FavoritesEntry extends React.Component {
             {...provided.draggableProps}
             style={provided.draggableProps.style}
           >
-
             <button type="button" className="menu-button" onClick={this.handleClickMenu}>
               <FontAwesome code="ellipsis-v" />
             </button>
@@ -298,27 +273,29 @@ class FavoritesEntry extends React.Component {
             <EntryIcon
               entryId={entry.id}
               iconId={entry.iconId}
-              ref={(component) => { this.iconComponent = component; }}
+              ref={(component) => {
+                this.iconComponent = component;
+              }}
             />
 
-            {renaming
-              ? (
-                <form onSubmit={this.handleSubmitRename} className="text-input-form">
-                  <input
-                    className="text-input"
-                    type="text"
-                    value={nameInputValue}
-                    onChange={this.handleNameChange}
-                    ref={(element) => { this.nameInput = element; }}
-                    size={nameInputValue.length + 1}
-                  />
-                </form>
-              )
-              : (
-                <a href="#" className="sidebar-link" onClick={this.handleClickName} {...provided.dragHandleProps}>
-                  {entry.name}
-                </a>
-              )}
+            {renaming ? (
+              <form onSubmit={this.handleSubmitRename} className="text-input-form">
+                <input
+                  className="text-input"
+                  type="text"
+                  value={nameInputValue}
+                  onChange={this.handleNameChange}
+                  ref={(element) => {
+                    this.nameInput = element;
+                  }}
+                  size={nameInputValue.length + 1}
+                />
+              </form>
+            ) : (
+              <a href="#" className="sidebar-link" onClick={this.handleClickName} {...provided.dragHandleProps}>
+                {entry.name}
+              </a>
+            )}
           </li>
         )}
       </Draggable>
@@ -326,12 +303,7 @@ class FavoritesEntry extends React.Component {
   }
 }
 
-@connect(
-  null,
-  { setEntryIconId },
-  null,
-  {forwardRef: true},
-)
+@connect(null, { setEntryIconId }, null, { forwardRef: true })
 @autobind
 class EntryIcon extends React.Component {
   constructor(props) {
@@ -373,11 +345,13 @@ class EntryIcon extends React.Component {
     return (
       <span
         className="entry-icon"
-        ref={(iconElement) => { this.iconElement = iconElement; }}
+        ref={(iconElement) => {
+          this.iconElement = iconElement;
+        }}
       >
         <Icon iconId={iconId} />
         <Tooltip visible={choosingIcon} position="bottom" className="icon-chooser">
-          {STATIC_ICONS.map(icon => (
+          {STATIC_ICONS.map((icon) => (
             <button
               key={icon.id}
               type="button"

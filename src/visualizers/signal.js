@@ -20,13 +20,13 @@ export default {
     ctx.lineWidth = 2;
     ctx.strokeStyle = 'hsl(217, 64%, 60%)';
     ctx.beginPath();
-    const sliceWidth = canvas.width * 1.0 / timeDomainData.length;
+    const sliceWidth = (canvas.width * 1.0) / timeDomainData.length;
     let x = 0;
-    for(let i = 0; i < timeDomainData.length; i++) {
+    for (let i = 0; i < timeDomainData.length; i++) {
       const v = timeDomainData[i] / 128.0;
-      const y = v * canvas.height / 2;
+      const y = (v * canvas.height) / 2;
 
-      if(i === 0) {
+      if (i === 0) {
         ctx.moveTo(x, y);
       } else {
         ctx.lineTo(x, y);
@@ -36,5 +36,5 @@ export default {
     }
     ctx.lineTo(canvas.width, canvas.height / 2);
     ctx.stroke();
-  }
+  },
 };

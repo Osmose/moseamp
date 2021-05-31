@@ -1,7 +1,7 @@
 import path from 'path';
 import bindings from 'bindings';
 
-const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
+const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 const NES_SLICE_UNITS = 200;
@@ -13,7 +13,7 @@ const SAMPLE_COUNT = 2048;
 const GAIN_FACTOR = 0.0001;
 
 function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 class NesOsc {
@@ -34,8 +34,8 @@ class NesOsc {
     const period = this.period(analysis);
     const freq = CPU_CLOCK / (16 * (period + 1));
     let fractionalNote = 0.0;
-    if (freq>1.0) {
-      fractionalNote = 12 * ( Math.log(freq) / LOG_2 - LOG2_440 ) + NOTE_440HZ + 0.5;
+    if (freq > 1.0) {
+      fractionalNote = 12 * (Math.log(freq) / LOG_2 - LOG2_440) + NOTE_440HZ + 0.5;
     }
 
     // Fractional note 69 == A0 in Famitracker, so we subtract 69 to make it 0
@@ -79,14 +79,10 @@ class NesDPCM extends NesOsc {
 }
 
 const keyPositions = [
-    4,   6,   8,  10,  12,  16,  18,  20,  22,  24,  26,  28,
-   32,  34,  36,  38,  40,  44,  46,  48,  50,  52,  54,  56,
-   60,  62,  64,  66,  68,  72,  74,  76,  78,  80,  82,  84,
-   88,  90,  92,  94,  96, 100, 102, 104, 106, 108, 110, 112,
-  116, 118, 120, 122, 124, 128, 130, 132, 134, 136, 138, 140,
-  144, 146, 148, 150, 152, 156, 158, 160, 162, 164, 166, 168,
-  172, 174, 176, 178, 180, 184, 186, 188, 190, 192, 194, 196,
-  200, 202, 204, 206, 208, 212, 214, 216, 218, 220, 222, 224
+  4, 6, 8, 10, 12, 16, 18, 20, 22, 24, 26, 28, 32, 34, 36, 38, 40, 44, 46, 48, 50, 52, 54, 56, 60, 62, 64, 66, 68, 72,
+  74, 76, 78, 80, 82, 84, 88, 90, 92, 94, 96, 100, 102, 104, 106, 108, 110, 112, 116, 118, 120, 122, 124, 128, 130, 132,
+  134, 136, 138, 140, 144, 146, 148, 150, 152, 156, 158, 160, 162, 164, 166, 168, 172, 174, 176, 178, 180, 184, 186,
+  188, 190, 192, 194, 196, 200, 202, 204, 206, 208, 212, 214, 216, 218, 220, 222, 224,
 ];
 
 export default {
@@ -171,9 +167,9 @@ export default {
       this.WHITE_WIDTH + sliceWidth,
       0,
       canvas.width,
-      canvas.height,
+      canvas.height
     );
-    ctx.globalCompositeOperation = 'source-over'
+    ctx.globalCompositeOperation = 'source-over';
 
     // Draw keys
     ctx.drawImage(pianoCanvas, 0, 0);
@@ -207,9 +203,9 @@ export default {
     if (volume > 0) {
       // Roll bar
       const height = Math.ceil((volume / 16) * keyHeight);
-      const yMod = osc.hasFinePitch() ? Math.floor(((fractionalNote - pianoNote) - 0.5) * keyHeight) : 0;
+      const yMod = osc.hasFinePitch() ? Math.floor((fractionalNote - pianoNote - 0.5) * keyHeight) : 0;
       ctx.fillStyle = osc.color;
-      ctx.fillRect(this.WHITE_WIDTH, Math.ceil(midPointY + yMod - (height / 2)), sliceWidth, height);
+      ctx.fillRect(this.WHITE_WIDTH, Math.ceil(midPointY + yMod - height / 2), sliceWidth, height);
 
       // Key fill
       const keyWidth = keyColor === 'black' ? this.BLACK_WIDTH : this.WHITE_WIDTH;
@@ -227,7 +223,7 @@ export default {
     const isBlackNote = [1, 3, 6, 8, 10].includes(octaveNote);
 
     const heightUnit = Math.ceil(this.keyHeight(canvas) / 4);
-    const y = canvas.height - (keyPositions[note] * heightUnit);
+    const y = canvas.height - keyPositions[note] * heightUnit;
     return {
       y,
       midPointY: y + Math.floor(heightUnit * 2),
@@ -242,7 +238,7 @@ export default {
     for (let octave = 0; octave < 8; octave++) {
       // White notes first so they don't cover the black ones
       for (const octaveNote of [0, 2, 4, 5, 7, 9, 11]) {
-        const note = octaveNote + (octave * 12);
+        const note = octaveNote + octave * 12;
         const { y } = this.keyInfo(canvas, note);
         ctx.fillStyle = '#FFF';
         ctx.fillRect(0, y, this.WHITE_WIDTH, keyHeight);
@@ -256,7 +252,7 @@ export default {
 
       // Black notes
       for (const octaveNote of [1, 3, 6, 8, 10]) {
-        const note = octaveNote + (octave * 12);
+        const note = octaveNote + octave * 12;
         const { y } = this.keyInfo(canvas, note);
         ctx.fillStyle = '#000';
         ctx.fillRect(0, y, this.BLACK_WIDTH, keyHeight);
@@ -281,7 +277,7 @@ export default {
     await videoTrack.applyConstraints({ frameRate: fps });
 
     const audioMusicPlayer = new MusicPlayer(filePath);
-    const audioContext = new AudioContext({sampleRate});
+    const audioContext = new AudioContext({ sampleRate });
     const audioDestination = audioContext.createMediaStreamDestination();
     const gainNode = audioContext.createGain();
     gainNode.gain.value = volume * GAIN_FACTOR;
@@ -293,7 +289,7 @@ export default {
       const samples = audioMusicPlayer.play(SAMPLE_COUNT * 2);
       for (let k = 0; k < SAMPLE_COUNT; k++) {
         left[k] = samples[k * 2];
-        right[k] = samples[(k * 2) + 1];
+        right[k] = samples[k * 2 + 1];
       }
     };
     scriptNode.connect(gainNode);
@@ -303,7 +299,7 @@ export default {
     const mediaRecorder = new MediaRecorder(mediaStream, {
       mimeType: 'video/webm; codecs=vp9',
     });
-    const recordedDataPromise = new Promise(resolve =>
+    const recordedDataPromise = new Promise((resolve) =>
       mediaRecorder.addEventListener('dataavailable', (event) => {
         resolve(event.data);
       })
@@ -318,7 +314,7 @@ export default {
       mediaRecorder.resume();
 
       videoMusicPlayer.play(samplesPerFrame * 2);
-      const analysis = {nes: videoMusicPlayer.nesAnalysis(), playing: true};
+      const analysis = { nes: videoMusicPlayer.nesAnalysis(), playing: true };
       this.drawFrame(canvas, analysis, pianoCanvas);
       videoTrack.requestFrame();
 
@@ -333,9 +329,9 @@ export default {
 
     const recordedData = await recordedDataPromise;
     const blob = new Blob([recordedData], {
-      type: "video/webm"
+      type: 'video/webm',
     });
     console.log('render complete');
     return blob;
-  }
+  },
 };

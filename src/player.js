@@ -7,7 +7,7 @@ import * as musicMetadata from 'music-metadata';
 
 import { getTypeForExt } from 'moseamp/filetypes';
 
-const {loadPlugins, MusicPlayer} = bindings('musicplayer_node');
+const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 export const DEFAULT_GAIN = 1;
@@ -19,10 +19,7 @@ class DispatchPlayer extends EventEmitter {
   constructor() {
     super();
     this.currentPlayer = null;
-    this.players = [
-      new MusicPlayerPlayer(),
-      new WebAudioPlayer(),
-    ];
+    this.players = [new MusicPlayerPlayer(), new WebAudioPlayer()];
 
     // Forward timeupdate events.
     for (const player of this.players) {
@@ -46,7 +43,7 @@ class DispatchPlayer extends EventEmitter {
   async load(filePath) {
     const extension = path.extname(filePath);
     const fileType = getTypeForExt(extension);
-    const player = this.players.find(p => p.id === fileType.playerId);
+    const player = this.players.find((p) => p.id === fileType.playerId);
 
     if (this.currentPlayer) {
       await this.currentPlayer.pause();
@@ -116,7 +113,7 @@ class WebAudioPlayer extends EventEmitter {
 
   async load(filePath) {
     this.audio = new Audio();
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       this.audio.addEventListener('canplaythrough', resolve);
       this.audio.src = filePath;
     });
@@ -129,7 +126,6 @@ class WebAudioPlayer extends EventEmitter {
     this.audio.addEventListener('ended', () => {
       this.emit('ended');
     });
-
 
     const metadata = {
       title: path.basename(filePath),
@@ -198,7 +194,7 @@ class MusicPlayerPlayer extends EventEmitter {
   }
 
   createContext(sampleRate) {
-    const ctx = new AudioContext({sampleRate});
+    const ctx = new AudioContext({ sampleRate });
     ctx.suspend();
 
     ctx.analyserNode = ctx.createAnalyser();
@@ -232,11 +228,10 @@ class MusicPlayerPlayer extends EventEmitter {
     return {
       timeDomainData: this.ctx.timeDomainBuffer,
       frequencyData: this.ctx.frequencyBuffer,
-      nes: (
+      nes:
         this.musicPlayer &&
         ['Nintendo NES', 'Famicom'].includes(this.musicPlayer.getMeta('format')) &&
-        this.musicPlayer.nesAnalysis()
-      ),
+        this.musicPlayer.nesAnalysis(),
     };
   }
 
@@ -250,7 +245,7 @@ class MusicPlayerPlayer extends EventEmitter {
     const samples = this.musicPlayer.play(SAMPLE_COUNT * 2);
     for (let k = 0; k < SAMPLE_COUNT; k++) {
       left[k] = samples[k * 2];
-      right[k] = samples[(k * 2) + 1];
+      right[k] = samples[k * 2 + 1];
     }
   }
 
@@ -272,15 +267,8 @@ class MusicPlayerPlayer extends EventEmitter {
     }, 1000);
 
     return {
-      title: (
-        this.musicPlayer.getMeta('title')
-        || this.musicPlayer.getMeta('sub_title')
-        || path.basename(filePath)
-      ),
-      artist: (
-        this.musicPlayer.getMeta('game')
-        || '---'
-      ),
+      title: this.musicPlayer.getMeta('title') || this.musicPlayer.getMeta('sub_title') || path.basename(filePath),
+      artist: this.musicPlayer.getMeta('game') || '---',
       songs: this.musicPlayer.getMetaInt('songs'),
       duration: Infinity,
     };

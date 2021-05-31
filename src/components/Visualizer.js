@@ -7,12 +7,10 @@ import { getPlugin } from 'moseamp/ducks/visualizer';
 import player from 'moseamp/player';
 
 export default
-@connect(
-  (state) => ({
-    plugin: getPlugin(state),
-    playing: getPlaying(state),
-  }),
-)
+@connect((state) => ({
+  plugin: getPlugin(state),
+  playing: getPlaying(state),
+}))
 @autobind
 class Visualizer extends React.Component {
   constructor(props) {
@@ -54,11 +52,14 @@ class Visualizer extends React.Component {
 
     const { canvas, canvasContainer } = this;
     const analysis = {
-      ...(player.getAnalysis()),
+      ...player.getAnalysis(),
       playing: this.props.playing,
     };
 
-    if (canvasContainer && (canvasContainer.clientWidth !== canvas.width || canvasContainer.clientHeight !== canvas.height)) {
+    if (
+      canvasContainer &&
+      (canvasContainer.clientWidth !== canvas.width || canvasContainer.clientHeight !== canvas.height)
+    ) {
       canvas.width = canvasContainer.clientWidth;
       canvas.height = canvasContainer.clientHeight;
       this.props.plugin.onResize?.(canvas);
@@ -70,7 +71,7 @@ class Visualizer extends React.Component {
 
   render() {
     return (
-      <div className="visualizer" ref={(canvasContainer) => this.canvasContainer = canvasContainer}>
+      <div className="visualizer" ref={(canvasContainer) => (this.canvasContainer = canvasContainer)}>
         <canvas className="visualizer-canvas" ref={this.setCanvas} />
       </div>
     );

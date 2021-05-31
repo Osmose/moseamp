@@ -15,10 +15,9 @@ import {
 import { openFile, getCurrentFilePath, getPlaying } from 'moseamp/ducks/player';
 import { getTypeForExt } from 'moseamp/filetypes';
 
-
 export default
 @connect(
-  state => ({
+  (state) => ({
     pathSegments: getCurrentPathSegments(state),
     entries: getEntries(state),
     search: getSearch(state),
@@ -27,7 +26,7 @@ export default
     changePath,
     loadEntries,
     setSearch,
-  },
+  }
 )
 @autobind
 class FileBrowser extends React.Component {
@@ -59,7 +58,7 @@ class FileBrowser extends React.Component {
 
     let searchedEntries = entries;
     if (search) {
-      searchedEntries = searchedEntries.filter(entry => entry.name.toLowerCase().includes(search.toLowerCase()));
+      searchedEntries = searchedEntries.filter((entry) => entry.name.toLowerCase().includes(search.toLowerCase()));
     }
 
     const directories = [];
@@ -75,7 +74,7 @@ class FileBrowser extends React.Component {
     return (
       <div className="file-browser">
         <ol className="path-segments">
-          {pathSegments.map(segment => (
+          {pathSegments.map((segment) => (
             <React.Fragment key={segment.path}>
               <li className="segment" onClick={() => this.handleClickSegment(segment)}>
                 {segment.name}
@@ -102,10 +101,10 @@ class FileBrowser extends React.Component {
           </div>
         )}
         <ol className="entries">
-          {directories.map(directory => (
+          {directories.map((directory) => (
             <Entry entry={directory} key={directory.path} />
           ))}
-          {files.map(file => (
+          {files.map((file) => (
             <Entry entry={file} key={file.path} />
           ))}
         </ol>
@@ -115,7 +114,7 @@ class FileBrowser extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     loading: getLoading(state),
     currentFilePath: getCurrentFilePath(state),
     playing: getPlaying(state),
@@ -123,7 +122,7 @@ class FileBrowser extends React.Component {
   {
     changePath,
     openFile,
-  },
+  }
 )
 @autobind
 class Entry extends React.Component {
@@ -140,17 +139,9 @@ class Entry extends React.Component {
 
     const isCurrentFile = currentFilePath === entry.path;
     return (
-      <li
-        className={`entry ${isCurrentFile ? 'current-entry' : ''}`}
-        onClick={() => this.handleClickEntry(entry)}
-      >
+      <li className={`entry ${isCurrentFile ? 'current-entry' : ''}`} onClick={() => this.handleClickEntry(entry)}>
         <span className="icon">
-          <EntryIcon
-            entry={entry}
-            loading={loading}
-            isCurrentFile={isCurrentFile}
-            playing={playing}
-          />
+          <EntryIcon entry={entry} loading={loading} isCurrentFile={isCurrentFile} playing={playing} />
         </span>
         <span>{entry.name}</span>
       </li>

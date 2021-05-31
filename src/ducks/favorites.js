@@ -29,7 +29,7 @@ export default function reducer(favorites = defaultState(), action = {}) {
     case REMOVE_ENTRY:
       return {
         ...favorites,
-        entries: favorites.entries.filter(entry => entry.id !== action.entryId),
+        entries: favorites.entries.filter((entry) => entry.id !== action.entryId),
       };
     case REORDER_ENTRIES:
       const reorderedEntries = [...favorites.entries];
@@ -42,7 +42,7 @@ export default function reducer(favorites = defaultState(), action = {}) {
     case RENAME_ENTRY:
       return {
         ...favorites,
-        entries: favorites.entries.map(entry => {
+        entries: favorites.entries.map((entry) => {
           if (entry.id === action.entryId) {
             return {
               ...entry,
@@ -56,7 +56,7 @@ export default function reducer(favorites = defaultState(), action = {}) {
     case SET_ICON_ID:
       return {
         ...favorites,
-        entries: favorites.entries.map(entry => {
+        entries: favorites.entries.map((entry) => {
           if (entry.id === action.entryId) {
             return {
               ...entry,
@@ -84,7 +84,7 @@ export function getEntries(state) {
 }
 
 export function getEntryIcon(state, entryId) {
-  return state.favorites.entries.find(entry => entry.id === entryId)?.icon;
+  return state.favorites.entries.find((entry) => entry.id === entryId)?.icon;
 }
 
 // == Action Creators

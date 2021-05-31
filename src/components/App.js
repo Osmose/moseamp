@@ -29,7 +29,7 @@ export default
     setCurrentTime,
     loadNextEntry,
     changePath,
-  },
+  }
 )
 @autobind
 class App extends React.Component {
@@ -70,7 +70,7 @@ class App extends React.Component {
       if (this.fadeOutStart === null && currentTime >= customDurationSeconds) {
         player.fadeOut(FADEOUT_DURATION);
         this.fadeOutStart = currentTime;
-      } else if (this.fadeOutStart !== null && currentTime >= (this.fadeOutStart + FADEOUT_DURATION)) {
+      } else if (this.fadeOutStart !== null && currentTime >= this.fadeOutStart + FADEOUT_DURATION) {
         player.stop();
       }
     }
@@ -111,7 +111,7 @@ class WindowsTitleBar extends React.Component {
   componentDidMount() {
     this.titlebar = new CustomTitleBar({
       backgroundColor: TitleBarColor.fromHex('#404040'),
-      overflow: 'hidden'
+      overflow: 'hidden',
     });
   }
 
@@ -128,9 +128,7 @@ class MacTitleBar extends React.Component {
   render() {
     return (
       <div className="title-bar">
-        <div className="title">
-          MoseAmp
-        </div>
+        <div className="title">MoseAmp</div>
       </div>
     );
   }

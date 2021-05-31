@@ -32,7 +32,7 @@ export function getPluginId(state) {
 
 export function getPlugin(state) {
   const pluginId = getPluginId(state);
-  return visualizerPlugins.find(plugin => plugin.id === pluginId);
+  return visualizerPlugins.find((plugin) => plugin.id === pluginId);
 }
 
 // == Action Creators

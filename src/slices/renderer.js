@@ -1,8 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
 
 import visualizerPlugins from 'moseamp/visualizers';
 
-const rendererPlugins = visualizerPlugins.filter(plugin => plugin.canRender);
+const rendererPlugins = visualizerPlugins.filter((plugin) => plugin.canRender);
 
 const rendererSlice = createSlice({
   name: 'renderer',
@@ -14,7 +14,7 @@ const rendererSlice = createSlice({
       state.selectedPluginId = action.payload;
     },
   },
-})
+});
 
 export function getSelectedPluginId(state) {
   return state.renderer.selectedPluginId;

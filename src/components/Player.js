@@ -50,7 +50,7 @@ export default class Player extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     playing: getPlaying(state),
     currentSong: getCurrentSong(state),
     songCount: getSongCount(state),
@@ -60,7 +60,7 @@ export default class Player extends React.Component {
   }),
   {
     seek,
-  },
+  }
 )
 @autobind
 class PlayerControls extends React.Component {
@@ -77,56 +77,34 @@ class PlayerControls extends React.Component {
     return (
       <div className="player-controls">
         <div className="player-controls-buttons">
-          {songCount > 1
-            ? (
-              <button
-                type="button"
-                className="control-button"
-                disabled={currentSong < 1}
-                onClick={this.handleClickPrev}
-              >
-                <FontAwesome code="angle-left" />
-              </button>
-            )
-            : (
-              <div className="spacer" />
-            )
-          }
+          {songCount > 1 ? (
+            <button type="button" className="control-button" disabled={currentSong < 1} onClick={this.handleClickPrev}>
+              <FontAwesome code="angle-left" />
+            </button>
+          ) : (
+            <div className="spacer" />
+          )}
           <ShuffleButton />
           <PrevButton />
-          {
-            playing
-              ? <PauseButton />
-              : <PlayButton />
-          }
+          {playing ? <PauseButton /> : <PlayButton />}
           <NextButton />
           <LoopButton />
-          {songCount > 1
-            ? (
-              <button
-                type="button"
-                className="control-button"
-                disabled={currentSong >= songCount - 1}
-                onClick={this.handleClickNext}
-              >
-                <FontAwesome code="angle-right" />
-              </button>
-            )
-            : (
-              <div className="spacer" />
-            )
-          }
+          {songCount > 1 ? (
+            <button
+              type="button"
+              className="control-button"
+              disabled={currentSong >= songCount - 1}
+              onClick={this.handleClickNext}
+            >
+              <FontAwesome code="angle-right" />
+            </button>
+          ) : (
+            <div className="spacer" />
+          )}
         </div>
         <div className="seek-bar">
-          <div className="current-time">
-            {currentFilePath && formatDuration(currentTime)}
-          </div>
-          <SeekBar
-            currentTime={currentTime}
-            duration={duration}
-            empty={!currentFilePath}
-            playing={playing}
-          />
+          <div className="current-time">{currentFilePath && formatDuration(currentTime)}</div>
+          <SeekBar currentTime={currentTime} duration={duration} empty={!currentFilePath} playing={playing} />
           <SongDuration />
         </div>
       </div>
@@ -142,9 +120,7 @@ class SeekBar extends React.Component {
       return;
     }
 
-    const clickValue = Math.floor(
-      (event.nativeEvent.offsetX / event.target.offsetWidth) * duration,
-    );
+    const clickValue = Math.floor((event.nativeEvent.offsetX / event.target.offsetWidth) * duration);
     player.seek(null, clickValue);
   }
 
@@ -170,24 +146,20 @@ class HoverScroll extends React.Component {
     return (
       <div className="hover-scroll">
         <div className="hover-scroll-parent">
-          <div className="hover-scroll-child">
-            {this.props.children}
-          </div>
+          <div className="hover-scroll-child">{this.props.children}</div>
         </div>
       </div>
     );
   }
 }
 
-@connect(
-  state => ({
-    currentTitle: getCurrentTitle(state),
-    currentArtist: getCurrentArtist(state),
-    currentFilePath: getCurrentFilePath(state),
-    currentSong: getCurrentSong(state),
-    songCount: getSongCount(state),
-  }),
-)
+@connect((state) => ({
+  currentTitle: getCurrentTitle(state),
+  currentArtist: getCurrentArtist(state),
+  currentFilePath: getCurrentFilePath(state),
+  currentSong: getCurrentSong(state),
+  songCount: getSongCount(state),
+}))
 class CurrentSong extends React.Component {
   render() {
     const { currentFilePath, currentTitle, currentArtist, currentSong, songCount } = this.props;
@@ -203,9 +175,7 @@ class CurrentSong extends React.Component {
           </HoverScroll>
         </div>
         <div className="current-song-artist">
-          <HoverScroll>
-            {currentArtist}
-          </HoverScroll>
+          <HoverScroll>{currentArtist}</HoverScroll>
         </div>
       </div>
     );
@@ -213,10 +183,10 @@ class CurrentSong extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     currentFilePath: getCurrentFilePath(state),
   }),
-  { play },
+  { play }
 )
 @autobind
 class PlayButton extends React.Component {
@@ -288,10 +258,10 @@ class NextButton extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     shuffle: getShuffle(state),
   }),
-  { setShuffle },
+  { setShuffle }
 )
 @autobind
 class ShuffleButton extends React.Component {
@@ -310,10 +280,10 @@ class ShuffleButton extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     loop: getLoop(state),
   }),
-  { setLoop },
+  { setLoop }
 )
 @autobind
 class LoopButton extends React.Component {
@@ -333,7 +303,7 @@ class LoopButton extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     duration: getDuration(state),
     currentFilePath: getCurrentFilePath(state),
     useCustomDuration: getUseCustomDuration(state),
@@ -342,7 +312,7 @@ class LoopButton extends React.Component {
   {
     setUseCustomDuration,
     setCustomDuration,
-  },
+  }
 )
 @autobind
 class SongDuration extends React.Component {
@@ -386,7 +356,9 @@ class SongDuration extends React.Component {
     return (
       <div
         className={`duration ${duration === Infinity ? 'infinite' : ''}`}
-        ref={(durationElement) => { this.durationElement = durationElement; }}
+        ref={(durationElement) => {
+          this.durationElement = durationElement;
+        }}
       >
         {currentFilePath && (
           <>
@@ -433,15 +405,15 @@ class SongDuration extends React.Component {
 }
 
 @connect(
-  state => ({
+  (state) => ({
     volume: getVolume(state),
   }),
-  { setVolume },
+  { setVolume }
 )
 @autobind
 class VolumeControls extends React.Component {
   handleClick(event) {
-    const relativeClickX = (event.nativeEvent.offsetX / event.target.offsetWidth);
+    const relativeClickX = event.nativeEvent.offsetX / event.target.offsetWidth;
     const gain = progressToGain(relativeClickX);
     this.props.setVolume(gain);
   }
@@ -458,12 +430,7 @@ class VolumeControls extends React.Component {
     return (
       <div className="player-volume-container">
         <FontAwesome code={iconCode} className="volume-icon" />
-        <progress
-          className="slider"
-          max={1}
-          value={gainToProgress(volume)}
-          onClick={this.handleClick}
-        />
+        <progress className="slider" max={1} value={gainToProgress(volume)} onClick={this.handleClick} />
       </div>
     );
   }

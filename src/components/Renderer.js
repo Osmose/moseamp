@@ -28,7 +28,7 @@ export default function Renderer() {
     });
     const blobUrl = URL.createObjectURL(blob);
     videoRef.current.onloadedmetadata = () => {
-      console.log('video metadata loaded')
+      console.log('video metadata loaded');
       videoRef.current.play();
     };
     videoRef.current.src = blobUrl;

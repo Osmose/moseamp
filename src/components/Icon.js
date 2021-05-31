@@ -23,7 +23,7 @@ class Icon extends React.Component {
           code={staticIcon.code}
           ref={innerRef}
           className={className}
-          style={{fontSize: `${size}px`}}
+          style={{ fontSize: `${size}px` }}
           {...restProps}
         />
       );
@@ -34,7 +34,7 @@ class Icon extends React.Component {
         code={iconId}
         ref={innerRef}
         className={className}
-        style={{fontSize: `${size}px`}}
+        style={{ fontSize: `${size}px` }}
         {...restProps}
       />
     );
@@ -43,18 +43,14 @@ class Icon extends React.Component {
 
 export const FontAwesome = React.forwardRef((props, ref) => {
   const { className, code, ...restProps } = props;
-  return (
-    <i className={`${className} fas fa-${code}`} ref={ref} {...restProps} />
-  );
+  return <i className={`${className} fas fa-${code}`} ref={ref} {...restProps} />;
 });
 FontAwesome.displayName = 'FontAwesome';
 
-export default React.forwardRef((props, ref) => (
-  <Icon innerRef={ref} {...props} />
-));
+export default React.forwardRef((props, ref) => <Icon innerRef={ref} {...props} />);
 
 export const STATIC_ICONS = [
-  ...FILE_TYPES.map(fileType => ({
+  ...FILE_TYPES.map((fileType) => ({
     id: fileType.id,
     name: fileType.name,
     type: fileType.iconType,
