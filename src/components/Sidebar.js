@@ -16,10 +16,10 @@ import {
   setEntryIconId,
 } from 'moseamp/ducks/favorites';
 import { changePath } from 'moseamp/ducks/filebrowser';
-import { setPluginId } from 'moseamp/ducks/visualizer';
+import { setPluginId, setRenderModalVisible } from 'moseamp/ducks/visualizer';
 import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 import Tooltip from 'moseamp/components/Tooltip';
-import visualizerPlugins from 'moseamp/visualizer-plugins';
+import visualizerPlugins from 'moseamp/visualizers';
 
 const {
   dialog,
@@ -83,7 +83,7 @@ class Modes extends React.Component {
 
 @connect(
   null,
-  { setPluginId }
+  { setPluginId, setRenderModalVisible }
 )
 @autobind
 class VisualizerPlugins extends React.Component {
@@ -91,13 +91,30 @@ class VisualizerPlugins extends React.Component {
     this.props.setPluginId(pluginId);
   }
 
+  handleClickRender(pluginId) {
+    this.props.setPluginId(pluginId);
+    this.props.setRenderModalVisible(true);
+  }
+
   render() {
     return (
       <div className="visualizer-plugins">
-        <h2 className="sidebar-heading">Plugins</h2>
+        <h2 className="sidebar-heading">
+          <span>Plugins</span>
+        </h2>
         <ul className="sidebar-list">
           {visualizerPlugins.map(plugin => (
             <li key={plugin.id} className="sidebar-entry">
+              {plugin.canRender && (
+                <button
+                  type="button"
+                  className="menu-button"
+                  onClick={() => this.handleClickRender(plugin.id)}
+                >
+                  <FontAwesome code="video" />
+                </button>
+              )}
+
               <span className="entry-icon">
                 <FontAwesome {...plugin.icon} />
               </span>

@@ -6,10 +6,29 @@
 #include <coreutils/ptr.h>
 
 #include "gme/gme.h"
+#include "gme/Nsf_Emu.h"
 
 #include <set>
 
 namespace musix {
+
+struct nesAnalysis {
+  int square1Period;
+  int square1Volume;
+  int square2Period;
+  int square2Volume;
+  int trianglePeriod;
+  int triangleCounter;
+  int noiseRate;
+  int noiseVolume;
+  bool dpcmPlaying;
+  int vrc6Square1Period;
+  int vrc6Square1Volume;
+  int vrc6Square2Period;
+  int vrc6Square2Volume;
+  int vrc6SawPeriod;
+  int vrc6SawVolume;
+};
 
 class GMEPlayer : public ChipPlayer
 {
@@ -73,6 +92,33 @@ public:
         }
         if (seconds >= 0) gme_seek(emu.get(), seconds);
         return true;
+    }
+
+    nesAnalysis getNesAnalysis()
+    {
+      Nsf_Emu *nsfEmu = dynamic_cast<Nsf_Emu*>(emu.get());
+      nesAnalysis analysis;
+
+      // 2A03
+      analysis.square1Period = nsfEmu->apu_()->square1.period();
+      analysis.square1Volume = nsfEmu->apu_()->square1.volume();
+      analysis.square2Period = nsfEmu->apu_()->square2.period();
+      analysis.square2Volume = nsfEmu->apu_()->square2.volume();
+      analysis.trianglePeriod = nsfEmu->apu_()->triangle.period();
+      analysis.triangleCounter = nsfEmu->apu_()->triangle.linear_counter;
+      analysis.noiseRate = nsfEmu->apu_()->noise.rate();
+      analysis.noiseVolume = nsfEmu->apu_()->noise.volume();
+      analysis.dpcmPlaying = !nsfEmu->apu_()->dmc.silence;
+
+      // VRC6
+      analysis.vrc6Square1Period = nsfEmu->vrc6_apu_()->getOsc(0).period();
+      analysis.vrc6Square1Volume = nsfEmu->vrc6_apu_()->getOsc(0).volume();
+      analysis.vrc6Square2Period = nsfEmu->vrc6_apu_()->getOsc(1).period();
+      analysis.vrc6Square2Volume = nsfEmu->vrc6_apu_()->getOsc(1).volume();
+      analysis.vrc6SawPeriod = nsfEmu->vrc6_apu_()->getOsc(2).period();
+      analysis.vrc6SawVolume = nsfEmu->vrc6_apu_()->getOsc(2).volume();
+
+      return analysis;
     }
 
 private:

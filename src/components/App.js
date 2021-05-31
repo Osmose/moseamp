@@ -7,7 +7,7 @@ import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-elect
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
 import Sidebar from 'moseamp/components/Sidebar';
-import Visualizer from 'moseamp/components/Visualizer';
+import Visualizer, { RenderModal } from 'moseamp/components/Visualizer';
 import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER } from 'moseamp/ducks/app';
 import { loadEntries, changePath } from 'moseamp/ducks/filebrowser';
 import { setCurrentTime, loadNextEntry, getUseCustomDuration, getCustomDurationSeconds } from 'moseamp/ducks/player';
@@ -85,6 +85,8 @@ class App extends React.Component {
 
     return (
       <div className="app">
+        <RenderModal />
+
         <TitleBar />
         <div className="main-container">
           <Sidebar />

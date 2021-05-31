@@ -1,4 +1,4 @@
-#include <nan.h>
+#include <napi.h>
 #include "MusicPlayer.h"
 
 #include "../musicplayer/plugins/plugins.h"
@@ -6,25 +6,18 @@
 using musix::ChipPlayer;
 using musix::ChipPlugin;
 
-void loadPlugins(const Nan::FunctionCallbackInfo<v8::Value>& args) {
+static void loadPlugins(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   printf("LOADING PLUGINS\n");
-  v8::String::Utf8Value dataDir(args[0]->ToString());
-  std::string strDataDir = std::string(*dataDir);
-  ChipPlugin::createPlugins(strDataDir);
+  std::string dataDir = info[0].As<Napi::String>().Utf8Value();
+  ChipPlugin::createPlugins(dataDir);
 }
 
-void initModule(v8::Local<v8::Object> exports) {
-  v8::Local<v8::Context> context = exports->CreationContext();
-
-  // Export MusicPlayer
-  MusicPlayer::init(exports);
-
-  // export loadPlugins
-  exports->Set(
-    context,
-    Nan::New("loadPlugins").ToLocalChecked(),
-    Nan::New<v8::FunctionTemplate>(loadPlugins)->GetFunction(context).ToLocalChecked()
-  );
+static Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  MusicPlayer::Init(env, exports);
+  exports.Set(Napi::String::New(env, "loadPlugins"),
+              Napi::Function::New(env, loadPlugins));
+  return exports;
 }
 
-NODE_MODULE(musicplayer_node, initModule)
+NODE_API_MODULE(musicplayer_node, Init)

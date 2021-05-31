@@ -1,33 +1,27 @@
+#include <napi.h>
 #include <vector>
 
 #include "MusicPlayer.h"
+#include "../musicplayer/plugins/gmeplugin/GMEPlugin.cpp"
 
-NAN_MODULE_INIT(MusicPlayer::init) {
-  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(MusicPlayer::New);
-  tpl->SetClassName(Nan::New("MusicPlayer").ToLocalChecked());
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-  Nan::SetPrototypeMethod(tpl, "getMeta", getMeta);
-  Nan::SetPrototypeMethod(tpl, "getMetaInt", getMetaInt);
-  Nan::SetPrototypeMethod(tpl, "seek", seek);
-  Nan::SetPrototypeMethod(tpl, "freePlayer", freePlayer);
-  Nan::SetPrototypeMethod(tpl, "play", play);
-
-  constructor().Reset(Nan::GetFunction(tpl).ToLocalChecked());
-  Nan::Set(
-    target,
-    Nan::New("MusicPlayer").ToLocalChecked(),
-    Nan::GetFunction(tpl).ToLocalChecked()
-  );
+Napi::Object MusicPlayer::Init(Napi::Env env, Napi::Object exports) {
+    // This method is used to hook the accessor and method callbacks
+    Napi::Function func = DefineClass(env, "MusicPlayer", {
+        InstanceMethod("getMeta", &MusicPlayer::getMeta),
+        InstanceMethod("getMetaInt", &MusicPlayer::getMetaInt),
+        InstanceMethod("seek", &MusicPlayer::seek),
+        InstanceMethod("freePlayer", &MusicPlayer::freePlayer),
+        InstanceMethod("play", &MusicPlayer::play),
+        InstanceMethod("nesAnalysis", &MusicPlayer::nesAnalysis),
+    });
+    exports.Set("MusicPlayer", func);
+    return exports;
 }
 
-NAN_METHOD(MusicPlayer::New) {
-  // create a new instance and wrap our javascript instance
-  MusicPlayer* musicPlayer = new MusicPlayer();
-  musicPlayer->Wrap(info.Holder());
+MusicPlayer::MusicPlayer(const Napi::CallbackInfo& info) : Napi::ObjectWrap<MusicPlayer>(info) {
+  Napi::Env env = info.Env();
 
-  v8::String::Utf8Value utfName(info[0]->ToString());
-  std::string strName = std::string(*utfName);
+  std::string strName = info[0].As<Napi::String>().Utf8Value();
   const char *name = strName.c_str();
 
   // Load chipplayer instance
@@ -43,63 +37,71 @@ NAN_METHOD(MusicPlayer::New) {
   }
 
   if(!chipPlayer) {
-    return Nan::ThrowError(Nan::New("MusicPlayer::New - no plugin could handle file").ToLocalChecked());
+    Napi::Error::New(env, "MusicPlayer: no plugin could handle file").ThrowAsJavaScriptException();
+    return;
   }
 
-  musicPlayer->chipPlayer = chipPlayer;
-
-  // return the wrapped javascript instance
-  info.GetReturnValue().Set(info.Holder());
+  this->chipPlayer = chipPlayer;
 }
 
-NAN_METHOD(MusicPlayer::getMeta) {
-  v8::Isolate* isolate = info.GetIsolate();
-  MusicPlayer* self = Nan::ObjectWrap::Unwrap<MusicPlayer>(info.This());
-
-  v8::String::Utf8Value utfMetaName(info[0]->ToString());
-  std::string strMetaName = std::string(*utfMetaName);
-
-  std::string result = self->chipPlayer->getMeta(strMetaName);
-
-  info.GetReturnValue().Set(Nan::New(result).ToLocalChecked());
+Napi::Value MusicPlayer::getMeta(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
+    std::string metaName = info[0].As<Napi::String>().Utf8Value();
+    std::string result = this->chipPlayer->getMeta(metaName);
+    return Napi::String::New(env, result);
 }
 
-NAN_METHOD(MusicPlayer::getMetaInt) {
-  MusicPlayer* self = Nan::ObjectWrap::Unwrap<MusicPlayer>(info.This());
-
-  v8::String::Utf8Value utfMetaName(info[0]->ToString());
-  std::string strMetaName = std::string(*utfMetaName);
-
-  int result = self->chipPlayer->getMetaInt(strMetaName);
-
-  info.GetReturnValue().Set(result);
+Napi::Value MusicPlayer::getMetaInt(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
+    std::string metaName = info[0].As<Napi::String>().Utf8Value();
+    int result = this->chipPlayer->getMetaInt(metaName);
+    return Napi::Number::New(env, result);
 }
 
-NAN_METHOD(MusicPlayer::seek) {
-  MusicPlayer* self = Nan::ObjectWrap::Unwrap<MusicPlayer>(info.This());
+Napi::Value MusicPlayer::nesAnalysis(const Napi::CallbackInfo& info){
+    Napi::Env env = info.Env();
+    Napi::Object returnValue = Napi::Object::New(env);
 
-  int song = info[0]->IntegerValue();
-  self->chipPlayer->seekTo(song, 0);
+    musix::GMEPlayer* gmePlayer = dynamic_cast<musix::GMEPlayer*>(this->chipPlayer);
+    musix::nesAnalysis result = gmePlayer->getNesAnalysis();
+
+    returnValue.Set("square1Period", result.square1Period);
+    returnValue.Set("square1Volume", result.square1Volume);
+    returnValue.Set("square2Period", result.square2Period);
+    returnValue.Set("square2Volume", result.square2Volume);
+    returnValue.Set("trianglePeriod", result.trianglePeriod);
+    returnValue.Set("triangleCounter", result.triangleCounter);
+    returnValue.Set("noiseRate", result.noiseRate);
+    returnValue.Set("noiseVolume", result.noiseVolume);
+    returnValue.Set("dpcmPlaying", result.dpcmPlaying);
+
+    returnValue.Set("vrc6Square1Period", result.vrc6Square1Period);
+    returnValue.Set("vrc6Square1Volume", result.vrc6Square1Volume);
+    returnValue.Set("vrc6Square2Period", result.vrc6Square2Period);
+    returnValue.Set("vrc6Square2Volume", result.vrc6Square2Volume);
+    returnValue.Set("vrc6SawPeriod", result.vrc6SawPeriod);
+    returnValue.Set("vrc6SawVolume", result.vrc6SawVolume);
+
+    return returnValue;
 }
 
-NAN_METHOD(MusicPlayer::freePlayer) {
-  MusicPlayer* self = Nan::ObjectWrap::Unwrap<MusicPlayer>(info.This());
-
-  delete self->chipPlayer;
+void MusicPlayer::seek(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    int song = info[0].As<Napi::Number>().Uint32Value();
+    this->chipPlayer->seekTo(song, 0);
 }
 
-NAN_METHOD(MusicPlayer::play) {
-  MusicPlayer* self = Nan::ObjectWrap::Unwrap<MusicPlayer>(info.This());
+void MusicPlayer::freePlayer(const Napi::CallbackInfo& info) {
+    delete this->chipPlayer;
+}
 
-  int size = info[0]->IntegerValue();
-  std::vector<int16_t> samples(size, 0);
+Napi::Value MusicPlayer::play(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  self->chipPlayer->getSamples(&samples[0], size);
+  int size = info[0].As<Napi::Number>().Uint32Value();
+  Napi::Int16Array samples = Napi::Int16Array::New(env, size);
 
-  v8::Local<v8::Array> returnSamples = Nan::New<v8::Array>(size);
-  for (int i = 0; i < size; i++) {
-    Nan::Set(returnSamples, i, Nan::New(samples.at(i)));
-  }
+  this->chipPlayer->getSamples(reinterpret_cast<int16_t *>(samples.Data()), size);
 
-  info.GetReturnValue().Set(returnSamples);
+  return samples;
 }

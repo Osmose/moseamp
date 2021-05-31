@@ -232,6 +232,11 @@ class MusicPlayerPlayer extends EventEmitter {
     return {
       timeDomainData: this.ctx.timeDomainBuffer,
       frequencyData: this.ctx.frequencyBuffer,
+      nes: (
+        this.musicPlayer &&
+        ['Nintendo NES', 'Famicom'].includes(this.musicPlayer.getMeta('format')) &&
+        this.musicPlayer.nesAnalysis()
+      ),
     };
   }
 
@@ -251,6 +256,7 @@ class MusicPlayerPlayer extends EventEmitter {
 
   async load(filePath) {
     this.musicPlayer = new MusicPlayer(filePath);
+    console.log(this.musicPlayer.getMeta('format'));
 
     if (this.musicPlayer.getMeta('format') === 'Playstation2') {
       this.ctx = this.createContext(48000);

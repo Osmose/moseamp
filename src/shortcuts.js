@@ -1,4 +1,4 @@
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import Mousetrap from 'mousetrap';
 
 import store from 'moseamp/store';
@@ -21,8 +21,6 @@ import {
   setSearch,
   getSearch,
 } from 'moseamp/ducks/filebrowser';
-
-const browserWindow = remote.getCurrentWindow();
 
 // Play or pause on media key or space
 function playPause() {
@@ -78,13 +76,6 @@ function forward() {
 Mousetrap.bind('backspace', back);
 Mousetrap.bind('meta+left', back);
 Mousetrap.bind('meta+right', forward);
-browserWindow.on('swipe', (event, direction) => {
-  if (direction === 'left') {
-    back();
-  } else if (direction === 'right') {
-    forward();
-  }
-});
 
 Mousetrap.bind(['meta+f', 'ctrl+f'], () => {
   const state = store.getState();
