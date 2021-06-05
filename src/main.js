@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, globalShortcut, Menu, shell, systemPreferences } = require('electron');
+const { app, BrowserWindow, dialog, globalShortcut, Menu, shell, systemPreferences, ipcMain } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const Store = require('electron-store');
 
@@ -154,6 +154,15 @@ app.on('ready', async () => {
       }
     });
   }
+
+  ipcMain.handle('getRenderSavePath', async (event, defaultPath) => {
+    return dialog.showSaveDialog(browserWindow, {
+      title: 'Save rendered video',
+      buttonLabel: 'Save',
+      defaultPath,
+      properties: 'showOverwriteConfirmation',
+    });
+  });
 
   // Request media keys access if necessary
   // Thanks to SoundCleod for sharing how to do this

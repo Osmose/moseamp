@@ -2,6 +2,7 @@
 
 export const MODE_FILEBROWSER = 'filebrowser';
 export const MODE_VISUALIZER = 'visualizer';
+export const MODE_RENDERER = 'renderer';
 
 // == Actions
 

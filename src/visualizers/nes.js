@@ -1,5 +1,10 @@
 import path from 'path';
 import bindings from 'bindings';
+import tmp from 'tmp';
+import fs from 'fs';
+import wav from 'wav';
+
+import { asyncExec } from 'moseamp/utils';
 
 const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
@@ -9,12 +14,6 @@ const LOG2_440 = 8.7813597135246596040696824762152;
 const LOG_2 = 0.69314718055994530941723212145818;
 const NOTE_440HZ = 0x69;
 const CPU_CLOCK = 1789773;
-const SAMPLE_COUNT = 2048;
-const GAIN_FACTOR = 0.0001;
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 class NesOsc {
   constructor(name, color) {
@@ -150,6 +149,7 @@ export default {
 
   drawFrame(canvas, analysis, pianoCanvas) {
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
     const { playing, nes } = analysis;
 
     if (!playing || !nes) {
@@ -158,24 +158,26 @@ export default {
 
     const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / this.SLICE_UNITS);
     ctx.globalCompositeOperation = 'copy';
-    ctx.drawImage(
-      canvas,
-      this.WHITE_WIDTH,
-      0,
-      canvas.width,
-      canvas.height,
-      this.WHITE_WIDTH + sliceWidth,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    // ctx.drawImage(
+    //   canvas,
+    //   this.WHITE_WIDTH,
+    //   0,
+    //   canvas.width - sliceWidth - this.WHITE_WIDTH,
+    //   canvas.height,
+    //   this.WHITE_WIDTH + sliceWidth,
+    //   0,
+    //   canvas.width - sliceWidth - this.WHITE_WIDTH,
+    //   canvas.height
+    // );
+    ctx.drawImage(canvas, sliceWidth, 0);
     ctx.globalCompositeOperation = 'source-over';
+
+    // Fill in gap for new notes
+    ctx.fillStyle = 'hsl(0, 0%, 15%)';
+    ctx.fillRect(this.WHITE_WIDTH, 0, sliceWidth, canvas.height);
 
     // Draw keys
     ctx.drawImage(pianoCanvas, 0, 0);
-
-    ctx.fillStyle = 'hsl(0, 0%, 15%)';
-    ctx.fillRect(canvas.width - sliceWidth, 0, sliceWidth, canvas.height);
 
     for (const oscName of [
       'dpcm',
@@ -193,25 +195,27 @@ export default {
   },
 
   drawOsc(canvas, ctx, analysis, osc) {
+    const volume = osc.volume(analysis);
+    if (!volume || volume <= 0) {
+      return;
+    }
+
     const fractionalNote = osc.fractionalNote(analysis);
     const pianoNote = Math.floor(fractionalNote);
     const { midPointY, y, keyColor } = this.keyInfo(canvas, pianoNote);
     const keyHeight = this.keyHeight(canvas);
     const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / this.SLICE_UNITS);
 
-    const volume = osc.volume(analysis);
-    if (volume > 0) {
-      // Roll bar
-      const height = Math.ceil((volume / 16) * keyHeight);
-      const yMod = osc.hasFinePitch() ? Math.floor((fractionalNote - pianoNote - 0.5) * keyHeight) : 0;
-      ctx.fillStyle = osc.color;
-      ctx.fillRect(this.WHITE_WIDTH, Math.ceil(midPointY + yMod - height / 2), sliceWidth, height);
+    // Roll bar
+    const height = Math.ceil((volume / 16) * keyHeight);
+    const yMod = osc.hasFinePitch() ? Math.floor((fractionalNote - pianoNote - 0.5) * keyHeight) : 0;
+    ctx.fillStyle = osc.color;
+    ctx.fillRect(this.WHITE_WIDTH, Math.ceil(midPointY + yMod - height / 2), sliceWidth, height);
 
-      // Key fill
-      const keyWidth = keyColor === 'black' ? this.BLACK_WIDTH : this.WHITE_WIDTH;
-      const fillWidth = 16;
-      ctx.fillRect(keyWidth - (fillWidth + 1), y + 1, fillWidth, keyHeight - 2);
-    }
+    // Key fill
+    const keyWidth = keyColor === 'black' ? this.BLACK_WIDTH : this.WHITE_WIDTH;
+    const fillWidth = 16;
+    ctx.fillRect(keyWidth - (fillWidth + 1), y + 1, fillWidth, keyHeight - 2);
   },
 
   keyHeight(canvas) {
@@ -260,7 +264,7 @@ export default {
     }
   },
 
-  async render({ filePath, fps, duration, width, height, volume, onRenderFrame }) {
+  async render({ filePath, song, outputPath, fps, duration, width, height, ffmpegPath, onRenderFrame }) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -271,67 +275,44 @@ export default {
     const pianoCanvas = this.makePianoCanvas(canvas);
     this.clearCanvas(canvas);
 
-    const videoMusicPlayer = new MusicPlayer(filePath);
-    const mediaStream = canvas.captureStream(0);
-    const videoTrack = mediaStream.getVideoTracks()[0];
-    await videoTrack.applyConstraints({ frameRate: fps });
+    const musicPlayer = new MusicPlayer(filePath);
+    musicPlayer.seek(song);
 
-    const audioMusicPlayer = new MusicPlayer(filePath);
-    const audioContext = new AudioContext({ sampleRate });
-    const audioDestination = audioContext.createMediaStreamDestination();
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = volume * GAIN_FACTOR;
-    gainNode.connect(audioDestination);
-    const scriptNode = audioContext.createScriptProcessor(SAMPLE_COUNT, 1, 2);
-    scriptNode.onaudioprocess = (event) => {
-      const left = event.outputBuffer.getChannelData(0);
-      const right = event.outputBuffer.getChannelData(1);
-      const samples = audioMusicPlayer.play(SAMPLE_COUNT * 2);
-      for (let k = 0; k < SAMPLE_COUNT; k++) {
-        left[k] = samples[k * 2];
-        right[k] = samples[k * 2 + 1];
-      }
-    };
-    scriptNode.connect(gainNode);
-
-    const audioTrack = audioDestination.stream.getAudioTracks()[0];
-    mediaStream.addTrack(audioTrack);
-    const mediaRecorder = new MediaRecorder(mediaStream, {
-      mimeType: 'video/webm; codecs=vp9',
+    const directory = tmp.dirSync({ unsafeCleanup: true });
+    const audioPath = path.join(directory.name, 'sound.wav');
+    const audioOutputStream = new wav.FileWriter(audioPath, {
+      sampleRate,
+      channels: 2,
+      bitDepth: 16,
     });
-    const recordedDataPromise = new Promise((resolve) =>
-      mediaRecorder.addEventListener('dataavailable', (event) => {
-        resolve(event.data);
-      })
-    );
-
-    mediaRecorder.start();
-    mediaRecorder.pause();
 
     for (let frameIndex = 0; frameIndex < fps * duration; frameIndex++) {
-      const timer = wait(1000 / fps);
-
-      mediaRecorder.resume();
-
-      videoMusicPlayer.play(samplesPerFrame * 2);
-      const analysis = { nes: videoMusicPlayer.nesAnalysis(), playing: true };
+      const samples = musicPlayer.play(samplesPerFrame * 2);
+      audioOutputStream.write(Buffer.from(samples.buffer));
+      const analysis = { nes: musicPlayer.nesAnalysis(), playing: true };
+      console.log(analysis.vrc6Square1Volume);
       this.drawFrame(canvas, analysis, pianoCanvas);
-      videoTrack.requestFrame();
-
-      await timer;
-      mediaRecorder.pause();
+      const canvasBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+      const buffer = Buffer.from(await canvasBlob.arrayBuffer());
+      await new Promise((resolve) =>
+        fs.writeFile(path.join(directory.name, `${frameIndex}.png`), buffer, { encoding: 'binary' }, resolve)
+      );
       onRenderFrame({ frameIndex });
     }
+    audioOutputStream.end();
 
-    videoTrack.stop();
-    audioTrack.stop();
-    mediaRecorder.stop();
-
-    const recordedData = await recordedDataPromise;
-    const blob = new Blob([recordedData], {
-      type: 'video/webm',
-    });
-    console.log('render complete');
-    return blob;
+    const imagePattern = path.join(directory.name, '%d.png');
+    await asyncExec(
+      [
+        `${ffmpegPath} -y`,
+        `-framerate ${fps} -r ${fps}`,
+        `-i "${imagePattern}"`,
+        `-i ${audioPath}`,
+        '-c:v h264 -c:a aac',
+        outputPath,
+      ].join(' ')
+    );
+    directory.removeCallback();
+    musicPlayer.freePlayer();
   },
 };

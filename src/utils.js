@@ -1,3 +1,5 @@
+import { exec } from 'child_process';
+
 export function formatDuration(duration) {
   if (duration === Infinity) {
     return '∞';
@@ -33,4 +35,12 @@ export function parseDurationString(durationString) {
   } catch (err) {
     return null;
   }
+}
+
+export function asyncExec(command, options) {
+  return new Promise((resolve) => {
+    const subprocess = exec(command, options, () => {
+      resolve(subprocess);
+    });
+  });
 }

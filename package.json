@@ -46,7 +46,10 @@
     "react-redux": "^7.2.4",
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0",
-    "uuid": "^3.3.3"
+    "styled-components": "^5.3.0",
+    "tmp": "^0.1.0",
+    "uuid": "^3.3.3",
+    "wav": "^1.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
@@ -56,6 +59,7 @@
     "@babel/preset-react": "^7.7.4",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
+    "babel-plugin-styled-components": "^1.12.0",
     "bestzip": "^2.1.5",
     "cmake-js": "^6.0.0",
     "concurrently": "^6.2.0",

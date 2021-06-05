@@ -100,23 +100,34 @@ public:
       nesAnalysis analysis;
 
       // 2A03
-      analysis.square1Period = nsfEmu->apu_()->square1.period();
-      analysis.square1Volume = nsfEmu->apu_()->square1.volume();
-      analysis.square2Period = nsfEmu->apu_()->square2.period();
-      analysis.square2Volume = nsfEmu->apu_()->square2.volume();
-      analysis.trianglePeriod = nsfEmu->apu_()->triangle.period();
-      analysis.triangleCounter = nsfEmu->apu_()->triangle.linear_counter;
-      analysis.noiseRate = nsfEmu->apu_()->noise.rate();
-      analysis.noiseVolume = nsfEmu->apu_()->noise.volume();
-      analysis.dpcmPlaying = !nsfEmu->apu_()->dmc.silence;
+      Nes_Apu* apu = nsfEmu->apu_();
+      analysis.square1Period = apu->square1.period();
+      analysis.square1Volume = apu->square1.volume();
+      analysis.square2Period = apu->square2.period();
+      analysis.square2Volume = apu->square2.volume();
+      analysis.trianglePeriod = apu->triangle.period();
+      analysis.triangleCounter = apu->triangle.linear_counter;
+      analysis.noiseRate = apu->noise.rate();
+      analysis.noiseVolume = apu->noise.volume();
+      analysis.dpcmPlaying = !apu->dmc.silence;
 
       // VRC6
-      analysis.vrc6Square1Period = nsfEmu->vrc6_apu_()->getOsc(0).period();
-      analysis.vrc6Square1Volume = nsfEmu->vrc6_apu_()->getOsc(0).volume();
-      analysis.vrc6Square2Period = nsfEmu->vrc6_apu_()->getOsc(1).period();
-      analysis.vrc6Square2Volume = nsfEmu->vrc6_apu_()->getOsc(1).volume();
-      analysis.vrc6SawPeriod = nsfEmu->vrc6_apu_()->getOsc(2).period();
-      analysis.vrc6SawVolume = nsfEmu->vrc6_apu_()->getOsc(2).volume();
+      Nes_Vrc6_Apu* vrc6_apu = nsfEmu->vrc6_apu_();
+      if (vrc6_apu != NULL) {
+        analysis.vrc6Square1Period = vrc6_apu->getOsc(0).period();
+        analysis.vrc6Square1Volume = vrc6_apu->getOsc(0).volume();
+        analysis.vrc6Square2Period = vrc6_apu->getOsc(1).period();
+        analysis.vrc6Square2Volume = vrc6_apu->getOsc(1).volume();
+        analysis.vrc6SawPeriod = vrc6_apu->getOsc(2).period();
+        analysis.vrc6SawVolume = vrc6_apu->getOsc(2).volume();
+      } else {
+        analysis.vrc6Square1Period = 0;
+        analysis.vrc6Square1Volume = 0;
+        analysis.vrc6Square2Period = 0;
+        analysis.vrc6Square2Volume = 0;
+        analysis.vrc6SawPeriod = 0;
+        analysis.vrc6SawVolume = 0;
+      }
 
       return analysis;
     }

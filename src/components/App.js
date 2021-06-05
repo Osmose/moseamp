@@ -3,16 +3,19 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { ipcRenderer } from 'electron';
 import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-electron-titlebar';
+import { ThemeProvider } from 'styled-components';
 
 import FileBrowser from 'moseamp/components/FileBrowser';
 import Player from 'moseamp/components/Player';
 import Sidebar from 'moseamp/components/Sidebar';
 import Visualizer from 'moseamp/components/Visualizer';
-import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER } from 'moseamp/ducks/app';
+import Renderer from 'moseamp/components/Renderer';
+import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER, MODE_RENDERER } from 'moseamp/ducks/app';
 import { loadEntries, changePath } from 'moseamp/ducks/filebrowser';
 import { setCurrentTime, loadNextEntry, getUseCustomDuration, getCustomDurationSeconds } from 'moseamp/ducks/player';
 import { loadPrefs } from 'moseamp/ducks/prefs';
 import player from 'moseamp/player';
+import theme from 'moseamp/theme';
 
 const FADEOUT_DURATION = 5;
 
@@ -84,15 +87,18 @@ class App extends React.Component {
     const { mode } = this.props;
 
     return (
-      <div className="app">
-        <TitleBar />
-        <div className="main-container">
-          <Sidebar />
-          {mode === MODE_FILEBROWSER && <FileBrowser />}
-          {mode === MODE_VISUALIZER && <Visualizer />}
+      <ThemeProvider theme={theme}>
+        <div className="app">
+          <TitleBar />
+          <div className="main-container">
+            <Sidebar />
+            {mode === MODE_FILEBROWSER && <FileBrowser />}
+            {mode === MODE_VISUALIZER && <Visualizer />}
+            {mode === MODE_RENDERER && <Renderer />}
+          </div>
+          <Player />
         </div>
-        <Player />
-      </div>
+      </ThemeProvider>
     );
   }
 }

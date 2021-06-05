@@ -6,7 +6,7 @@ import { connect, useDispatch } from 'react-redux';
 import { remote } from 'electron';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER, setMode } from 'moseamp/ducks/app';
+import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER, setMode, MODE_RENDERER } from 'moseamp/ducks/app';
 import {
   addEntry,
   getEntries,
@@ -17,9 +17,10 @@ import {
 } from 'moseamp/ducks/favorites';
 import { changePath } from 'moseamp/ducks/filebrowser';
 import { setPluginId as setVisualizerPluginId } from 'moseamp/ducks/visualizer';
+import { setSelectedPluginId as setRendererPluginId } from 'moseamp/slices/renderer';
 import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 import Tooltip from 'moseamp/components/Tooltip';
-import visualizerPlugins from 'moseamp/visualizers';
+import visualizerPlugins, { rendererPlugins } from 'moseamp/visualizers';
 
 const { dialog, getCurrentWindow, Menu } = remote;
 
@@ -35,7 +36,8 @@ class Sidebar extends React.Component {
       <div className="sidebar">
         <Modes mode={mode} />
         {mode === MODE_FILEBROWSER && <Favorites />}
-        {mode === MODE_VISUALIZER && <VisualizerPlugins plugins={visualizerPlugins} />}
+        {mode === MODE_VISUALIZER && <VisualizerPlugins />}
+        {mode === MODE_RENDERER && <RendererPlugins />}
       </div>
     );
   }
@@ -67,6 +69,13 @@ class Modes extends React.Component {
           <FontAwesome code="film" />
           <span className="label">Visualizer</span>
         </a>
+        <a
+          className={`renderer-link sidebar-mode ${mode === MODE_RENDERER ? 'selected' : ''}`}
+          onClick={() => this.handleClickMode(MODE_RENDERER)}
+        >
+          <FontAwesome code="video" />
+          <span className="label">Renderer</span>
+        </a>
       </div>
     );
   }
@@ -84,10 +93,10 @@ function VisualizerPlugins() {
 function RendererPlugins() {
   const dispatch = useDispatch();
   const handleClickPlugin = (pluginId) => {
-    dispatch(setVisualizerPluginId(pluginId));
+    dispatch(setRendererPluginId(pluginId));
   };
 
-  return <Plugins plugins={visualizerPlugins.filter((plugin) => plugin.canRender)} onClickPlugin={handleClickPlugin} />;
+  return <Plugins plugins={rendererPlugins} onClickPlugin={handleClickPlugin} />;
 }
 
 @autobind
