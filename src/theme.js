@@ -1,7 +1,10 @@
 export default {
   white: '#fff',
   white83: 'hsl(0, 0%, 83%)',
+  gray75: 'hsl(0, 0%, 75%)',
+  gray70: 'hsl(0, 0%, 70%)',
   gray60: 'hsl(0, 0%, 60%)',
+  gray50: 'hsl(0, 0%, 50%)',
   gray40: 'hsl(0, 0%, 40%)',
   gray25: 'hsl(0, 0%, 25%)',
   gray15: 'hsl(0, 0%, 15%)',
@@ -9,9 +12,18 @@ export default {
   black: '#000',
 
   blue75: 'hsl(217, 64%, 75%)',
+  blue70: 'hsl(217, 64%, 70%)',
   blue60: 'hsl(217, 64%, 60%)',
+  blue50: 'hsl(217, 64%, 50%)',
   blue40: 'hsl(217, 64%, 40%)',
   blue25: 'hsl(217, 64%, 25%)',
+
+  red75: 'hsl(0, 64%, 75%)',
+  red70: 'hsl(0, 64%, 70%)',
+  red60: 'hsl(0, 64%, 60%)',
+  red50: 'hsl(0, 64%, 50%)',
+  red40: 'hsl(0, 64%, 40%)',
+  red25: 'hsl(0, 64%, 25%)',
 
   orange75: 'hsl(43, 100%, 75%)',
   orange60: 'hsl(43, 100%, 60%)',

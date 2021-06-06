@@ -156,11 +156,19 @@ app.on('ready', async () => {
   }
 
   ipcMain.handle('getRenderSavePath', async (event, defaultPath) => {
-    return dialog.showSaveDialog(browserWindow, {
+    return await dialog.showSaveDialog(browserWindow, {
       title: 'Save rendered video',
       buttonLabel: 'Save',
       defaultPath,
       properties: 'showOverwriteConfirmation',
+    });
+  });
+
+  ipcMain.handle('getFFmpegPath', async () => {
+    return await dialog.showOpenDialog(browserWindow, {
+      title: 'Select FFmpeg executable',
+      buttonLabel: 'Select',
+      properties: ['openFile'],
     });
   });
 

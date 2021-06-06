@@ -4,6 +4,7 @@
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
     "@babel/plugin-proposal-object-rest-spread",
     "@babel/plugin-proposal-optional-chaining",
-    "styled-components"
+    "styled-components",
+    "@babel/plugin-proposal-do-expressions"
   ]
 }

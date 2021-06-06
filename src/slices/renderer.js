@@ -2,7 +2,17 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 import { rendererPlugins } from 'moseamp/visualizers';
-import { asyncExec } from 'moseamp/utils';
+import { asyncExec, ORIENTATION } from 'moseamp/utils';
+
+const DEFAULT_SETTINGS = {
+  renderLength: 30,
+  fps: 60,
+  width: 1024,
+  height: 768,
+  ffmpegPath: '',
+  sliceUnits: 175,
+  orientation: ORIENTATION.LEFT_TO_RIGHT,
+};
 
 export const checkFFmpegInPath = createAsyncThunk('renderer/checkFFmpegInPath', async () => {
   const subprocess = await asyncExec('ffmpeg -version');
@@ -14,13 +24,7 @@ const rendererSlice = createSlice({
   initialState: {
     selectedPluginId: rendererPlugins[0].id,
     ffmpegInPath: false,
-    settings: {
-      renderLength: 30,
-      fps: 60,
-      width: 1024,
-      height: 768,
-      ffmpegPath: '',
-    },
+    settings: {},
   },
   reducers: {
     setSelectedPluginId(state, action) {
@@ -59,7 +63,7 @@ export function getSelectedPlugin(state) {
 }
 
 export function getRendererSettings(state) {
-  return state.renderer.settings;
+  return { ...DEFAULT_SETTINGS, ...state.renderer.settings };
 }
 
 export function getFFmpegInPath(state) {

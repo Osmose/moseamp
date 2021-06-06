@@ -4,7 +4,7 @@ import tmp from 'tmp';
 import fs from 'fs';
 import wav from 'wav';
 
-import { asyncExec } from 'moseamp/utils';
+import { asyncExec, ORIENTATION } from 'moseamp/utils';
 
 const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
@@ -143,11 +143,11 @@ export default {
 
     while (ts - this.lastDrawTime > this.MS_PER_SLICE) {
       this.lastDrawTime += this.MS_PER_SLICE;
-      this.drawFrame(canvas, analysis, this.pianoCanvas);
+      this.drawFrame(canvas, analysis, this.pianoCanvas, this.SLICE_UNITS);
     }
   },
 
-  drawFrame(canvas, analysis, pianoCanvas) {
+  drawFrame(canvas, analysis, pianoCanvas, sliceUnits) {
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     const { playing, nes } = analysis;
@@ -156,19 +156,8 @@ export default {
       return;
     }
 
-    const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / this.SLICE_UNITS);
+    const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / sliceUnits);
     ctx.globalCompositeOperation = 'copy';
-    // ctx.drawImage(
-    //   canvas,
-    //   this.WHITE_WIDTH,
-    //   0,
-    //   canvas.width - sliceWidth - this.WHITE_WIDTH,
-    //   canvas.height,
-    //   this.WHITE_WIDTH + sliceWidth,
-    //   0,
-    //   canvas.width - sliceWidth - this.WHITE_WIDTH,
-    //   canvas.height
-    // );
     ctx.drawImage(canvas, sliceWidth, 0);
     ctx.globalCompositeOperation = 'source-over';
 
@@ -190,11 +179,11 @@ export default {
       'vrc6Saw',
     ]) {
       const osc = this.oscs[oscName];
-      this.drawOsc(canvas, ctx, analysis, osc);
+      this.drawOsc(canvas, ctx, analysis, osc, sliceWidth);
     }
   },
 
-  drawOsc(canvas, ctx, analysis, osc) {
+  drawOsc(canvas, ctx, analysis, osc, sliceWidth) {
     const volume = osc.volume(analysis);
     if (!volume || volume <= 0) {
       return;
@@ -204,7 +193,6 @@ export default {
     const pianoNote = Math.floor(fractionalNote);
     const { midPointY, y, keyColor } = this.keyInfo(canvas, pianoNote);
     const keyHeight = this.keyHeight(canvas);
-    const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / this.SLICE_UNITS);
 
     // Roll bar
     const height = Math.ceil((volume / 16) * keyHeight);
@@ -264,10 +252,31 @@ export default {
     }
   },
 
-  async render({ filePath, song, outputPath, fps, duration, width, height, ffmpegPath, onRenderFrame }) {
+  async render({
+    filePath,
+    song,
+    outputPath,
+    fps,
+    renderLength,
+    width,
+    height,
+    ffmpegPath,
+    onRenderFrame,
+    cancelToken,
+    sliceUnits,
+    orientation,
+  }) {
+    let cancelled = false;
+    cancelToken.cancel = () => (cancelled = true);
+
     const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
+    if (orientation === ORIENTATION.TOP_TO_BOTTOM || orientation === ORIENTATION.BOTTOM_TO_TOP) {
+      canvas.width = height;
+      canvas.height = width;
+    } else {
+      canvas.width = width;
+      canvas.height = height;
+    }
 
     const sampleRate = 44100;
     const samplesPerFrame = sampleRate / fps;
@@ -286,20 +295,41 @@ export default {
       bitDepth: 16,
     });
 
-    for (let frameIndex = 0; frameIndex < fps * duration; frameIndex++) {
+    for (let frameIndex = 0; frameIndex < fps * renderLength; frameIndex++) {
+      if (cancelled) {
+        directory.removeCallback();
+        musicPlayer.freePlayer();
+        return false;
+      }
+
       const samples = musicPlayer.play(samplesPerFrame * 2);
       audioOutputStream.write(Buffer.from(samples.buffer));
+
       const analysis = { nes: musicPlayer.nesAnalysis(), playing: true };
-      console.log(analysis.vrc6Square1Volume);
-      this.drawFrame(canvas, analysis, pianoCanvas);
+      this.drawFrame(canvas, analysis, pianoCanvas, sliceUnits);
+
       const canvasBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       const buffer = Buffer.from(await canvasBlob.arrayBuffer());
       await new Promise((resolve) =>
         fs.writeFile(path.join(directory.name, `${frameIndex}.png`), buffer, { encoding: 'binary' }, resolve)
       );
+
       onRenderFrame({ frameIndex });
     }
     audioOutputStream.end();
+
+    let orientationArgs = '';
+    switch (orientation) {
+      case ORIENTATION.RIGHT_TO_LEFT:
+        orientationArgs = '-vf hflip';
+        break;
+      case ORIENTATION.TOP_TO_BOTTOM:
+        orientationArgs = '-vf transpose=1';
+        break;
+      case ORIENTATION.BOTTOM_TO_TOP:
+        orientationArgs = '-vf transpose=2';
+        break;
+    }
 
     const imagePattern = path.join(directory.name, '%d.png');
     await asyncExec(
@@ -308,6 +338,7 @@ export default {
         `-framerate ${fps} -r ${fps}`,
         `-i "${imagePattern}"`,
         `-i ${audioPath}`,
+        orientationArgs,
         '-c:v h264 -c:a aac',
         outputPath,
       ].join(' ')
