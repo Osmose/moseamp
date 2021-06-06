@@ -8,6 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_definitions(-DNAPI_VERSION=3)
 
+add_compile_definitions(_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
+add_definitions(-D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
+add_definitions(-DNAPI_DISABLE_CPP_EXCEPTIONS)
+
+
 set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/musicplayer/external/zlib ${CMAKE_BINARY_DIR}/musicplayer/external/zlib)
 add_subdirectory(musicplayer)
 
@@ -50,7 +55,3 @@ execute_process(COMMAND node -p "require('node-addon-api').include"
 string(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 string(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${NODE_ADDON_API_DIR})
-
-add_compile_definitions(_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
-add_definitions(-D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
-add_definitions(-DNAPI_DISABLE_CPP_EXCEPTIONS)
