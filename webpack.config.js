@@ -1,6 +1,5 @@
 const path = require('path');
 
-const nodeExternals = require('webpack-node-externals');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
@@ -36,7 +35,7 @@ module.exports = {
   node: {
     __dirname: false,
   },
-  externals: [nodeExternals()],
+  externals: [{ musicplayer_node: 'commonjs2 ./musicplayer_node.node' }],
   module: {
     rules: [
       {

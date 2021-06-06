@@ -1,5 +1,4 @@
 import path from 'path';
-import bindings from 'bindings';
 import tmp from 'tmp';
 import fs from 'fs';
 import wav from 'wav';
@@ -7,7 +6,7 @@ import wav from 'wav';
 import { asyncExec } from 'moseamp/utils';
 import { DEFAULT_RENDERER_SETTINGS, ORIENTATION, FFMPEG_PRESETS } from 'moseamp/constants';
 
-const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
+import { loadPlugins, MusicPlayer } from 'musicplayer_node';
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 const NES_SLICE_UNITS = 200;

@@ -2,12 +2,11 @@ import autobind from 'autobind-decorator';
 import path from 'path';
 import EventEmitter from 'events';
 
-import bindings from 'bindings';
 import * as musicMetadata from 'music-metadata';
 
 import { getTypeForExt } from 'moseamp/filetypes';
 
-const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
+import { loadPlugins, MusicPlayer } from 'musicplayer_node';
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
 export const DEFAULT_GAIN = 1;

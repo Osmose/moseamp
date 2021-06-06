@@ -16,6 +16,7 @@ pushd $TMP_DIR
 popd
 pushd $BASE_DIR
   ./node_modules/.bin/electron-packager $TMP_DIR MoseAmp \
+    --asar \
     --platform=darwin \
     --icon=resources/mac/icon.icns \
     --out=dist \
