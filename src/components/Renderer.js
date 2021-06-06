@@ -12,7 +12,7 @@ import {
   checkFFmpegInPath,
   getFFmpegInPath,
 } from 'moseamp/slices/renderer';
-import { ORIENTATION } from 'moseamp/utils';
+import { ORIENTATION, FFMPEG_PRESETS } from 'moseamp/constants';
 
 const Cover = styled.div`
   position: fixed;
@@ -56,6 +56,11 @@ const SettingsGroup = styled.div`
 const GroupTitle = styled.h2`
   margin: 0 0 15px;
   font-size: 18px;
+`;
+
+const GroupSubTitle = styled.h3`
+  margin: 0 0 15px;
+  font-size: 14px;
 `;
 
 const Controls = styled.div`
@@ -225,29 +230,48 @@ function SettingInput({ name, children, ...props }) {
   );
 }
 
+function ContainedPopover(props) {
+  // Only worried about the right side for now, this could be more generic.
+  const [right, setRight] = useState(undefined);
+  const el = useRef();
+
+  useEffect(() => {
+    if (el.current) {
+      const bounds = el.current.getBoundingClientRect();
+      const elRight = bounds.left + bounds.width;
+      if (elRight > window.innerWidth) {
+        setRight('0');
+      }
+    }
+  }, [el.current]);
+
+  return <Popover style={{ right }} ref={el} {...props} />;
+}
+
 const ColorSwatch = styled.div`
-  border: 5px solid ${(p) => p.theme.gray75};
-  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid ${(p) => p.theme.gray40};
+  border-radius: 2px;
   width: 36px;
-  height: 16px;
+  height: 24px;
   background: ${(p) => p.color};
 `;
 
-function ColorInput({ name }) {
+function ColorSettingInput({ name }) {
   const dispatch = useDispatch();
   const settings = useSelector(getRendererSettings);
   const [pickerVisible, setPickerVisible] = useState(false);
 
   return (
-    <>
+    <div css="flex: 1;">
       <ColorSwatch color={settings[name]} onClick={() => setPickerVisible((v) => !v)} />
       {pickerVisible && (
-        <Popover>
-          <Cover />
-          <SketchPicker color={settings[name]} onChange={(color) => dispatch(setRendererSetting(name, color.rgb))} />
-        </Popover>
+        <ContainedPopover>
+          <Cover onClick={() => setPickerVisible(false)} />
+          <SketchPicker color={settings[name]} onChange={(color) => dispatch(setRendererSetting(name, color.hex))} />
+        </ContainedPopover>
       )}
-    </>
+    </div>
   );
 }
 
@@ -266,7 +290,7 @@ function FFmpegSettings() {
   return (
     <div>
       {ffmpegInPath ? (
-        <p css="margin-bottom: 0;">FFmpeg was found in your PATH.</p>
+        <p>FFmpeg was found in your PATH.</p>
       ) : (
         <>
           <p>FFmpeg could not be found automatically, enter the path to the executable.</p>
@@ -278,6 +302,13 @@ function FFmpegSettings() {
           </Setting>
         </>
       )}
+      <Setting>
+        <SettingLabel>FFmpeg Output</SettingLabel>
+        <SettingInput as="select" name="ffmpegPreset">
+          <option value="h264mkv">H.264 / AAC (mkv)</option>
+          <option value="vp8webm">VP8 / Vorbis (webm)</option>
+        </SettingInput>
+      </Setting>
     </div>
   );
 }
@@ -325,7 +356,60 @@ function Settings() {
           </Setting>
         </SettingsGroup>
       </SettingsColumn>
-      <SettingsColumn></SettingsColumn>
+
+      <SettingsColumn>
+        <SettingsGroup>
+          <GroupTitle>Colors</GroupTitle>
+          <Setting>
+            <SettingLabel>Background</SettingLabel>
+            <ColorSettingInput name="backgroundColor" />
+          </Setting>
+          <Setting>
+            <SettingLabel>White keys</SettingLabel>
+            <ColorSettingInput name="whiteKeyColor" />
+          </Setting>
+          <Setting>
+            <SettingLabel>Black keys</SettingLabel>
+            <ColorSettingInput name="blackKeyColor" />
+          </Setting>
+
+          <GroupSubTitle>2A03</GroupSubTitle>
+          <Setting>
+            <SettingLabel>Pulse 1</SettingLabel>
+            <ColorSettingInput name="square1Color" />
+          </Setting>
+          <Setting>
+            <SettingLabel>Pulse 2</SettingLabel>
+            <ColorSettingInput name="square2Color" />
+          </Setting>
+          <Setting>
+            <SettingLabel>Triangle</SettingLabel>
+            <ColorSettingInput name="triangleColor" />
+          </Setting>
+          <Setting>
+            <SettingLabel>Noise</SettingLabel>
+            <ColorSettingInput name="noiseColor" />
+          </Setting>
+          <Setting>
+            <SettingLabel>DPCM</SettingLabel>
+            <ColorSettingInput name="dpcmColor" />
+          </Setting>
+
+          <GroupSubTitle>VRC6</GroupSubTitle>
+          <Setting>
+            <SettingLabel>Pulse 1</SettingLabel>
+            <ColorSettingInput name="vrc6Square1Color" />
+          </Setting>
+          <Setting>
+            <SettingLabel>Pulse 2</SettingLabel>
+            <ColorSettingInput name="vrc6Square2Color" />
+          </Setting>
+          <Setting>
+            <SettingLabel>Saw</SettingLabel>
+            <ColorSettingInput name="vrc6SawColor" />
+          </Setting>
+        </SettingsGroup>
+      </SettingsColumn>
     </>
   );
 }
@@ -346,7 +430,11 @@ export default function Renderer() {
   const cancelToken = useRef();
 
   const handleClickStart = async () => {
-    const { canceled, filePath: outputPath } = await ipcRenderer.invoke('getRenderSavePath', 'render.mkv');
+    const preset = FFMPEG_PRESETS[settings.ffmpegPreset];
+    const { canceled, filePath: outputPath } = await ipcRenderer.invoke(
+      'getRenderSavePath',
+      `render.${preset.extension}`
+    );
     if (canceled) {
       return;
     }
@@ -357,12 +445,13 @@ export default function Renderer() {
 
     const ffmpegPath = ffmpegInPath ? 'ffmpeg' : settings.ffmpegPath;
     await plugin.render({
-      ...settings,
       filePath: currentFilePath,
       song: currentSong,
       outputPath,
       ffmpegPath,
       volume,
+
+      settings,
 
       cancelToken: cancelToken.current,
       onRenderFrame({ frameIndex }) {

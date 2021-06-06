@@ -1,12 +1,5 @@
 import { exec } from 'child_process';
 
-export const ORIENTATION = {
-  LEFT_TO_RIGHT: 'left_to_right',
-  RIGHT_TO_LEFT: 'right_to_left',
-  TOP_TO_BOTTOM: 'top_to_bottom',
-  BOTTOM_TO_TOP: 'bottom_to_top',
-};
-
 export function formatDuration(duration) {
   if (duration === Infinity) {
     return '∞';
@@ -46,8 +39,8 @@ export function parseDurationString(durationString) {
 
 export function asyncExec(command, options) {
   return new Promise((resolve) => {
-    const subprocess = exec(command, options, () => {
-      resolve(subprocess);
+    exec(command, options, (error, stdout, stderr) => {
+      resolve({ error, stdout, stderr });
     });
   });
 }

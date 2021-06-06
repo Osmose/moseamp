@@ -4,7 +4,8 @@ import tmp from 'tmp';
 import fs from 'fs';
 import wav from 'wav';
 
-import { asyncExec, ORIENTATION } from 'moseamp/utils';
+import { asyncExec } from 'moseamp/utils';
+import { DEFAULT_RENDERER_SETTINGS, ORIENTATION, FFMPEG_PRESETS } from 'moseamp/constants';
 
 const { loadPlugins, MusicPlayer } = bindings('musicplayer_node');
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
@@ -15,10 +16,26 @@ const LOG_2 = 0.69314718055994530941723212145818;
 const NOTE_440HZ = 0x69;
 const CPU_CLOCK = 1789773;
 
+export const DEFAULT_SETTINGS = {
+  renderLength: 30,
+  fps: 60,
+  width: 1024,
+  height: 768,
+  ffmpegPath: '',
+  sliceUnits: 175,
+  orientation: ORIENTATION.LEFT_TO_RIGHT,
+
+  whiteKeyColor: '#fff',
+  blackKeyColor: '#000',
+};
+
 class NesOsc {
-  constructor(name, color) {
+  constructor(name) {
     this.name = name;
-    this.color = color;
+  }
+
+  color(settings) {
+    return settings[`${this.name}Color`];
   }
 
   hasFinePitch() {
@@ -98,35 +115,35 @@ export default {
   lastDrawTime: 0,
   analysisInterval: null,
   oscs: {
-    square1: new NesOsc('square1', 'hsl(217, 64%, 60%)'),
-    square2: new NesOsc('square2', 'hsl(167, 64%, 60%)'),
-    triangle: new NesTriangle('triangle', 'hsl(27, 48%, 60%)'),
-    noise: new NesNoise('noise', 'hsl(230, 0%, 90%)'),
-    dpcm: new NesDPCM('dpcm', 'hsl(230, 0%, 60%)'),
+    square1: new NesOsc('square1'),
+    square2: new NesOsc('square2'),
+    triangle: new NesTriangle('triangle'),
+    noise: new NesNoise('noise'),
+    dpcm: new NesDPCM('dpcm'),
 
-    vrc6Square1: new NesOsc('vrc6Square1', 'hsl(247, 64%, 60%)'),
-    vrc6Square2: new NesOsc('vrc6Square2', 'hsl(197, 64%, 60%)'),
-    vrc6Saw: new NesOsc('vrc6Saw', 'hsl(117, 64%, 60%)'),
+    vrc6Square1: new NesOsc('vrc6Square1'),
+    vrc6Square2: new NesOsc('vrc6Square2'),
+    vrc6Saw: new NesOsc('vrc6Saw'),
   },
   pianoCanvas: null,
 
   onMount(canvas) {
-    this.pianoCanvas = this.makePianoCanvas(canvas);
-    this.clearCanvas(canvas);
+    this.pianoCanvas = this.makePianoCanvas(canvas, DEFAULT_RENDERER_SETTINGS);
+    this.clearCanvas(canvas, DEFAULT_RENDERER_SETTINGS);
     this.lastDrawTime = performance.now();
   },
 
-  clearCanvas(canvas) {
+  clearCanvas(canvas, settings) {
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'hsl(0, 0%, 15%)';
+    ctx.fillStyle = settings.backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   },
 
-  makePianoCanvas(canvas) {
+  makePianoCanvas(canvas, settings) {
     const pianoCanvas = document.createElement('canvas');
     pianoCanvas.width = this.WHITE_WIDTH;
     pianoCanvas.height = canvas.height;
-    this.drawKeys(pianoCanvas);
+    this.drawKeys(pianoCanvas, settings);
     return pianoCanvas;
   },
 
@@ -143,11 +160,11 @@ export default {
 
     while (ts - this.lastDrawTime > this.MS_PER_SLICE) {
       this.lastDrawTime += this.MS_PER_SLICE;
-      this.drawFrame(canvas, analysis, this.pianoCanvas, this.SLICE_UNITS);
+      this.drawFrame(canvas, analysis, this.pianoCanvas, DEFAULT_RENDERER_SETTINGS);
     }
   },
 
-  drawFrame(canvas, analysis, pianoCanvas, sliceUnits) {
+  drawFrame(canvas, analysis, pianoCanvas, settings) {
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     const { playing, nes } = analysis;
@@ -156,13 +173,13 @@ export default {
       return;
     }
 
-    const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / sliceUnits);
+    const sliceWidth = Math.ceil((canvas.width - this.WHITE_WIDTH) / settings.sliceUnits);
     ctx.globalCompositeOperation = 'copy';
     ctx.drawImage(canvas, sliceWidth, 0);
     ctx.globalCompositeOperation = 'source-over';
 
     // Fill in gap for new notes
-    ctx.fillStyle = 'hsl(0, 0%, 15%)';
+    ctx.fillStyle = settings.backgroundColor;
     ctx.fillRect(this.WHITE_WIDTH, 0, sliceWidth, canvas.height);
 
     // Draw keys
@@ -179,11 +196,11 @@ export default {
       'vrc6Saw',
     ]) {
       const osc = this.oscs[oscName];
-      this.drawOsc(canvas, ctx, analysis, osc, sliceWidth);
+      this.drawOsc(canvas, ctx, analysis, osc, sliceWidth, settings);
     }
   },
 
-  drawOsc(canvas, ctx, analysis, osc, sliceWidth) {
+  drawOsc(canvas, ctx, analysis, osc, sliceWidth, settings) {
     const volume = osc.volume(analysis);
     if (!volume || volume <= 0) {
       return;
@@ -197,7 +214,7 @@ export default {
     // Roll bar
     const height = Math.ceil((volume / 16) * keyHeight);
     const yMod = osc.hasFinePitch() ? Math.floor((fractionalNote - pianoNote - 0.5) * keyHeight) : 0;
-    ctx.fillStyle = osc.color;
+    ctx.fillStyle = osc.color(settings);
     ctx.fillRect(this.WHITE_WIDTH, Math.ceil(midPointY + yMod - height / 2), sliceWidth, height);
 
     // Key fill
@@ -223,7 +240,7 @@ export default {
     };
   },
 
-  drawKeys(canvas) {
+  drawKeys(canvas, settings) {
     const ctx = canvas.getContext('2d');
     const keyHeight = this.keyHeight(canvas);
 
@@ -232,12 +249,12 @@ export default {
       for (const octaveNote of [0, 2, 4, 5, 7, 9, 11]) {
         const note = octaveNote + octave * 12;
         const { y } = this.keyInfo(canvas, note);
-        ctx.fillStyle = '#FFF';
+        ctx.fillStyle = settings.whiteKeyColor;
         ctx.fillRect(0, y, this.WHITE_WIDTH, keyHeight);
 
         if (octaveNote === 0) {
           ctx.font = '8px sans-serif';
-          ctx.fillStyle = '#000';
+          ctx.fillStyle = settings.blackKeyColor;
           ctx.fillText(`C${Math.floor(note / 12)}`, this.WHITE_WIDTH - 12, y + 12, 12);
         }
       }
@@ -246,26 +263,15 @@ export default {
       for (const octaveNote of [1, 3, 6, 8, 10]) {
         const note = octaveNote + octave * 12;
         const { y } = this.keyInfo(canvas, note);
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = settings.blackKeyColor;
         ctx.fillRect(0, y, this.BLACK_WIDTH, keyHeight);
       }
     }
   },
 
-  async render({
-    filePath,
-    song,
-    outputPath,
-    fps,
-    renderLength,
-    width,
-    height,
-    ffmpegPath,
-    onRenderFrame,
-    cancelToken,
-    sliceUnits,
-    orientation,
-  }) {
+  async render({ filePath, song, outputPath, onRenderFrame, cancelToken, ffmpegPath, settings }) {
+    const { fps, renderLength, width, height, orientation } = settings;
+
     let cancelled = false;
     cancelToken.cancel = () => (cancelled = true);
 
@@ -281,8 +287,8 @@ export default {
     const sampleRate = 44100;
     const samplesPerFrame = sampleRate / fps;
 
-    const pianoCanvas = this.makePianoCanvas(canvas);
-    this.clearCanvas(canvas);
+    const pianoCanvas = this.makePianoCanvas(canvas, settings);
+    this.clearCanvas(canvas, settings);
 
     const musicPlayer = new MusicPlayer(filePath);
     musicPlayer.seek(song);
@@ -306,7 +312,7 @@ export default {
       audioOutputStream.write(Buffer.from(samples.buffer));
 
       const analysis = { nes: musicPlayer.nesAnalysis(), playing: true };
-      this.drawFrame(canvas, analysis, pianoCanvas, sliceUnits);
+      this.drawFrame(canvas, analysis, pianoCanvas, settings);
 
       const canvasBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       const buffer = Buffer.from(await canvasBlob.arrayBuffer());
@@ -332,18 +338,25 @@ export default {
     }
 
     const imagePattern = path.join(directory.name, '%d.png');
-    await asyncExec(
-      [
-        `${ffmpegPath} -y`,
-        `-framerate ${fps} -r ${fps}`,
-        `-i "${imagePattern}"`,
-        `-i ${audioPath}`,
-        orientationArgs,
-        '-c:v h264 -c:a aac',
-        outputPath,
-      ].join(' ')
-    );
-    directory.removeCallback();
+    const preset = FFMPEG_PRESETS[settings.ffmpegPreset];
+    const command = [
+      `${ffmpegPath} -y`,
+      `-framerate ${fps} -r ${fps}`,
+      `-i "${imagePattern}"`,
+      `-i ${audioPath}`,
+      orientationArgs,
+      preset.args,
+      outputPath,
+    ].join(' ');
+    console.log(command);
+    const { error, stderr } = await asyncExec(command);
+
+    if (error?.code) {
+      window.alert(`ffmpeg failed: ${stderr}`);
+      console.log(stderr);
+    }
+
+    // directory.removeCallback();
     musicPlayer.freePlayer();
   },
 };
