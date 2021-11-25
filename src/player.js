@@ -9,6 +9,10 @@ import { getTypeForExt } from 'moseamp/filetypes';
 import { loadPlugins, MusicPlayer } from 'musicplayer_node';
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
+import musicPlayerWorkletCode from 'moseamp/musicPlayer.worklet.js';
+const musicPlayerWorkletBlob = new Blob([musicPlayerWorkletCode.toString()], { type: 'text/javascript' });
+const musicPlayerWorkletURL = URL.createObjectURL(musicPlayerWorkletBlob);
+
 export const DEFAULT_GAIN = 1;
 const GAIN_FACTOR = 0.0001;
 const SAMPLE_COUNT = 2048;
@@ -192,7 +196,7 @@ class MusicPlayerPlayer extends EventEmitter {
     this.volume = DEFAULT_GAIN;
   }
 
-  createContext(sampleRate) {
+  async createContext(sampleRate) {
     const ctx = new AudioContext({ sampleRate });
     ctx.suspend();
 
@@ -210,9 +214,9 @@ class MusicPlayerPlayer extends EventEmitter {
     ctx.gainNode.gain.value = this.volume * GAIN_FACTOR;
     ctx.gainNode.connect(ctx.fadeOutNode);
 
-    ctx.scriptNode = ctx.createScriptProcessor(SAMPLE_COUNT, 1, 2);
-    ctx.scriptNode.onaudioprocess = this.handleAudioProcess.bind(this);
-    ctx.scriptNode.connect(ctx.gainNode);
+    await ctx.audioWorklet.addModule(musicPlayerWorkletURL);
+    ctx.musicPlayerWorkletNode = new AudioWorkletNode(ctx, 'music-player', { outputChannelCount: [2] });
+    ctx.musicPlayerWorkletNode.connect(ctx.gainNode);
 
     return ctx;
   }
@@ -234,30 +238,22 @@ class MusicPlayerPlayer extends EventEmitter {
     };
   }
 
-  handleAudioProcess(event) {
-    if (!this.musicPlayer) {
-      return;
-    }
-
-    const left = event.outputBuffer.getChannelData(0);
-    const right = event.outputBuffer.getChannelData(1);
-    const samples = this.musicPlayer.play(SAMPLE_COUNT * 2);
-    for (let k = 0; k < SAMPLE_COUNT; k++) {
-      left[k] = samples[k * 2];
-      right[k] = samples[k * 2 + 1];
-    }
-  }
-
   async load(filePath) {
     this.musicPlayer = new MusicPlayer(filePath);
     console.log(this.musicPlayer.getMeta('format'));
 
     if (this.musicPlayer.getMeta('format') === 'Playstation2') {
-      this.ctx = this.createContext(48000);
+      this.ctx = await this.createContext(48000);
     } else {
-      this.ctx = this.createContext(44100);
+      this.ctx = await this.createContext(44100);
     }
 
+    this.ctx.musicPlayerWorkletNode.port.postMessage({
+      type: 'open',
+      filePath,
+      musicPlayerPath: path.resolve(__dirname, 'musicplayer_node'),
+      pluginPath: path.resolve(__dirname, 'musicplayer_data'),
+    });
     this.ctx.fadeOutNode.gain.value = 1.0;
 
     this.startTime = this.ctx.currentTime;
@@ -290,11 +286,14 @@ class MusicPlayerPlayer extends EventEmitter {
 
   seek(song) {
     if (song !== null) {
-      this.musicPlayer.seek(song);
+      this.ctx.musicPlayerWorkletNode.port.postMessage({ type: 'seek', song });
     }
   }
 
   tidy() {
+    if (this.ctx) {
+      this.ctx.musicPlayerWorkletNode.port.postMessage({ type: 'free' });
+    }
     if (this.musicPlayer) {
       this.musicPlayer.freePlayer();
     }
