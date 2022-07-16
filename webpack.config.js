@@ -14,23 +14,25 @@ module.exports = {
   },
   target: 'electron-renderer',
   plugins: [
-    new CopyWebpackPlugin([
-      { from: './src/main.js', to: 'main.js' },
-      { from: './src/index.html', to: 'index.html' },
-      { from: './src/css/*', to: 'css/[name].[ext]' },
-      { from: './src/img/*', to: 'img/[name].[ext]' },
-      {
-        from: './node_modules/@fortawesome/fontawesome-free/css/all.css',
-        to: 'css/fontawesome.css',
-      },
-      {
-        from: './node_modules/@fortawesome/fontawesome-free/webfonts/*',
-        to: 'webfonts/[name].[ext]',
-      },
-      { from: './musicplayer/data', to: 'musicplayer_data' },
-      { from: './native_build/Release/musicplayer_node.node', to: 'musicplayer_node.node' },
-      { from: './native_build/Release/musicplayer_node.node', to: 'musicplayer_node.node' },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: './src/main.js', to: 'main.js' },
+        { from: './src/index.html', to: 'index.html' },
+        { from: './src/css/*', to: 'css/[name].[ext]' },
+        { from: './src/img/*', to: 'img/[name].[ext]' },
+        {
+          from: './node_modules/@fortawesome/fontawesome-free/css/all.css',
+          to: 'css/fontawesome.css',
+        },
+        {
+          from: './node_modules/@fortawesome/fontawesome-free/webfonts/*',
+          to: 'webfonts/[name].[ext]',
+        },
+        { from: './musicplayer/data', to: 'musicplayer_data' },
+        { from: './native_build/Release/musicplayer_node.node', to: 'musicplayer_node.node' },
+        { from: './native_build/Release/musicplayer_node.node', to: 'musicplayer_node.node' },
+      ],
+    }),
   ],
   node: {
     __dirname: false,

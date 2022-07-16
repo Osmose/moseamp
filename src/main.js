@@ -156,6 +156,44 @@ app.on('ready', async () => {
     });
   }
 
+  ipcMain.handle('showEntryContextMenu', async () => {
+    return new Promise((resolve) => {
+      const entryContextMenu = Menu.buildFromTemplate([
+        {
+          label: 'Change icon...',
+          click() {
+            resolve('changeIcon');
+          },
+        },
+        {
+          label: 'Rename...',
+          click() {
+            resolve('rename');
+          },
+        },
+        {
+          label: 'Remove',
+          click() {
+            resolve('remove');
+          },
+        },
+      ]);
+      entryContextMenu.popup({
+        callback() {
+          resolve('cancelled');
+        },
+      });
+    });
+  });
+
+  ipcMain.handle('getFavoriteDirectoryPath', async () => {
+    return await dialog.showOpenDialog(browserWindow, {
+      title: 'Add Favorite Directory',
+      buttonLabel: 'Add Favorite',
+      properties: ['openDirectory', 'createDirectory', 'multiSelections'],
+    });
+  });
+
   ipcMain.handle('getRenderSavePath', async (event, defaultPath) => {
     return await dialog.showSaveDialog(browserWindow, {
       title: 'Save rendered video',

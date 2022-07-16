@@ -3,7 +3,7 @@ import path from 'path';
 import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect, useDispatch } from 'react-redux';
-import { remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER, setMode, MODE_RENDERER } from 'moseamp/ducks/app';
@@ -21,8 +21,6 @@ import { setSelectedPluginId as setRendererPluginId } from 'moseamp/slices/rende
 import Icon, { FontAwesome, STATIC_ICONS } from 'moseamp/components/Icon';
 import Tooltip from 'moseamp/components/Tooltip';
 import visualizerPlugins, { rendererPlugins } from 'moseamp/visualizers';
-
-const { dialog, getCurrentWindow, Menu } = remote;
 
 export default
 @connect((state) => ({
@@ -137,12 +135,7 @@ class Plugins extends React.Component {
 @autobind
 class Favorites extends React.Component {
   async handleClickAdd() {
-    const result = await dialog.showOpenDialog(getCurrentWindow(), {
-      title: 'Add Favorite Directory',
-      buttonLabel: 'Add Favorite',
-      properties: ['openDirectory', 'createDirectory', 'multiSelections'],
-    });
-
+    const result = await ipcRenderer.invoke('getFavoriteDirectoryPath');
     if (result.cancelled) {
       return;
     }
@@ -187,35 +180,6 @@ class Favorites extends React.Component {
   }
 }
 
-let activeContextEntry = null;
-const entryContextMenu = Menu.buildFromTemplate([
-  {
-    label: 'Change icon...',
-    click() {
-      if (activeContextEntry) {
-        activeContextEntry.iconComponent.showIconPicker();
-      }
-    },
-  },
-  {
-    label: 'Rename...',
-    click() {
-      if (activeContextEntry) {
-        activeContextEntry.startRename();
-      }
-    },
-  },
-  {
-    label: 'Remove',
-    click() {
-      if (activeContextEntry) {
-        const { props } = activeContextEntry;
-        props.removeEntry(props.entry.id);
-      }
-    },
-  },
-]);
-
 @connect(() => ({}), { removeEntry, renameEntry, changePath })
 @autobind
 class FavoritesEntry extends React.Component {
@@ -235,13 +199,22 @@ class FavoritesEntry extends React.Component {
     }
   }
 
-  handleClickMenu() {
-    activeContextEntry = this;
-    entryContextMenu.popup({
-      callback() {
-        activeContextEntry = null;
-      },
-    });
+  async handleClickMenu() {
+    const { props } = this;
+
+    const result = await ipcRenderer.invoke('showEntryContextMenu');
+    switch (result) {
+      case 'changeIcon':
+        this.iconComponent.showIconPicker();
+        break;
+      case 'rename':
+        this.startRename();
+        break;
+      case 'remove': {
+        props.removeEntry(props.entry.id);
+        break;
+      }
+    }
   }
 
   handleClickName() {
