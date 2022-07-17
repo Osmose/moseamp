@@ -1,0 +1,13 @@
+prefix=/Users/osmose/Projects/emsdk/upstream/emscripten/cache/sysroot
+exec_prefix=/Users/osmose/Projects/emsdk/upstream/emscripten/cache/sysroot
+libdir=/Users/osmose/Projects/emsdk/upstream/emscripten/cache/sysroot/lib
+sharedlibdir=/Users/osmose/Projects/emsdk/upstream/emscripten/cache/sysroot/lib
+includedir=/Users/osmose/Projects/emsdk/upstream/emscripten/cache/sysroot/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.11
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}

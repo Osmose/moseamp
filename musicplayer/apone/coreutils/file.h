@@ -73,7 +73,10 @@ public:
 #else
 #    ifdef __APPLE__
 #    else
-#        include <linux/limits.h>
+#        ifdef __EMSCRIPTEN__
+#        else
+#            include <linux/limits.h>
+#        endif
 #    endif
     static const char SLASH = '/';
     static const char DIR_SEPARATOR = '/';

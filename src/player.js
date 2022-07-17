@@ -9,13 +9,12 @@ import { getTypeForExt } from 'moseamp/filetypes';
 import { loadPlugins, MusicPlayer } from 'musicplayer_node';
 loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
 
-import musicPlayerWorkletCode from 'moseamp/musicPlayer.worklet.js';
-const musicPlayerWorkletBlob = new Blob([musicPlayerWorkletCode.toString()], { type: 'text/javascript' });
-const musicPlayerWorkletURL = URL.createObjectURL(musicPlayerWorkletBlob);
+// import musicPlayerWorkletCode from 'moseamp/musicPlayer.worklet.js';
+// const musicPlayerWorkletBlob = new Blob([musicPlayerWorkletCode.toString()], { type: 'text/javascript' });
+// const musicPlayerWorkletURL = URL.createObjectURL(musicPlayerWorkletBlob);
 
 export const DEFAULT_GAIN = 1;
 const GAIN_FACTOR = 0.0001;
-const SAMPLE_COUNT = 2048;
 
 @autobind
 class DispatchPlayer extends EventEmitter {
@@ -214,7 +213,7 @@ class MusicPlayerPlayer extends EventEmitter {
     ctx.gainNode.gain.value = this.volume * GAIN_FACTOR;
     ctx.gainNode.connect(ctx.fadeOutNode);
 
-    await ctx.audioWorklet.addModule(musicPlayerWorkletURL);
+    await ctx.audioWorklet.addModule('libmusicplayer_lib.js');
     ctx.musicPlayerWorkletNode = new AudioWorkletNode(ctx, 'music-player', { outputChannelCount: [2] });
     ctx.musicPlayerWorkletNode.connect(ctx.gainNode);
 

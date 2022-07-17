@@ -51,6 +51,9 @@ public:
 	bool quit;
 	//Fifo fifo;
 
+	// Dummy, we don't use this anyway
+	void play(std::function<void(int16_t*, int)> cb) { }
+	void set_volume(int volume) { }
 };
 
 #endif // AUDIOPLAYER_SDL_H

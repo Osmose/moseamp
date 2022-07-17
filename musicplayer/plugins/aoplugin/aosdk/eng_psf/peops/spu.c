@@ -5,7 +5,7 @@
     copyright            : (C) 2002 by Pete Bernert
     email                : BlackDove@addcom.de
  ***************************************************************************/
-                       
+
 /***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -15,7 +15,7 @@
  *   additional informations.                                              *
  *                                                                         *
  ***************************************************************************/
-                           
+
 //*************************************************************************//
 // History of changes:
 //
@@ -85,6 +85,8 @@
 #include "../peops/registers.h"
 #include "../peops/spu.h"
 
+extern void spu_update(unsigned char* pSound,long lBytes);
+
 void SPUirq(void) ;
 
 //#include "PsxMem.h"
@@ -102,9 +104,9 @@ static u8 * spuMemC;
 static u8 * pSpuIrq=0;
 static u8 * pSpuBuffer;
 
-// user settings          
+// user settings
 static int             iVolume;
-                               
+
 // MAIN infos struct for each channel
 
 static SPUCHAN         s_chan[MAXCHAN+1];                     // channel + 1 infos (1 is security for fmod handling)
@@ -114,17 +116,17 @@ static u32   dwNoiseVal=1;                          // global noise generator
 
 static u16  spuCtrl=0;                             // some vars to store psx reg infos
 static u16  spuStat=0;
-static u16  spuIrq=0;             
+static u16  spuIrq=0;
 static u32  spuAddr=0xffffffff;                    // address into spu mem
 static int  bSPUIsOpen=0;
 
-static const int f[5][2] = {   
+static const int f[5][2] = {
 			{    0,  0  },
                         {   60,  0  },
                         {  115, -52 },
                         {   98, -55 },
                         {  122, -60 } };
-s16 * pS;
+extern s16 * pS;
 static s32 ttemp;
 
 ////////////////////////////////////////////////////////////////////////
@@ -133,7 +135,7 @@ static s32 ttemp;
 
 // dirty inline func includes
 
-#include "../peops/reverb.c"        
+#include "../peops/reverb.c"
 #include "../peops/adsr.c"
 
 // Try this to increase speed.
@@ -159,13 +161,13 @@ static INLINE void StartSound(int ch)
  StartADSR(ch);
 
  s_chan[ch].pCurr=s_chan[ch].pStart;                   // set sample start
-                         
+
  s_chan[ch].s_1=0;                                     // init mixing vars
  s_chan[ch].s_2=0;
  s_chan[ch].iSBPos=28;
 
  s_chan[ch].bNew=0;                                    // init channel flags
- s_chan[ch].bStop=0;                                   
+ s_chan[ch].bStop=0;
  s_chan[ch].bOn=1;
 
  s_chan[ch].SB[29]=0;                                  // init our interpolation helpers
@@ -222,7 +224,7 @@ int SPUasync(u32 cycles)
 
    temp--;
    //--------------------------------------------------//
-   //- main channel loop                              -// 
+   //- main channel loop                              -//
    //--------------------------------------------------//
     {
      for(ch=0;ch<MAXCHAN;ch++)                         // loop em all.
@@ -263,14 +265,14 @@ int SPUasync(u32 cycles)
              s_1=s_chan[ch].s_1;
              s_2=s_chan[ch].s_2;
 
-             predict_nr=(int)*start;start++;           
+             predict_nr=(int)*start;start++;
              shift_factor=predict_nr&0xf;
              predict_nr >>= 4;
              flags=(int)*start;start++;
 
-             // -------------------------------------- // 
+             // -------------------------------------- //
 	     // Decode new samples into s_chan[ch].SB[0 through 27]
-             for (nSample=0;nSample<28;start++)      
+             for (nSample=0;nSample<28;start++)
               {
                d=(int)*start;
                s=((d&0xf)<<12);
@@ -284,12 +286,12 @@ int SPUasync(u32 cycles)
                s_chan[ch].SB[nSample++]=fa;
 
                if(s&0x8000) s|=0xffff0000;
-               fa=(s>>shift_factor);              
+               fa=(s>>shift_factor);
                fa=fa + ((s_1 * f[predict_nr][0])>>6) + ((s_2 * f[predict_nr][1])>>6);
                s_2=s_1;s_1=fa;
 
                s_chan[ch].SB[nSample++]=fa;
-              }     
+              }
 
              //////////////////////////////////////////// irq check
 
@@ -297,8 +299,8 @@ int SPUasync(u32 cycles)
               {
                if((pSpuIrq >  start-16 &&              // irq address reached?
                    pSpuIrq <= start) ||
-                  ((flags&1) &&                        // special: irq on looping addr, when stop/loop flag is set 
-                   (pSpuIrq >  s_chan[ch].pLoop-16 && 
+                  ((flags&1) &&                        // special: irq on looping addr, when stop/loop flag is set
+                   (pSpuIrq >  s_chan[ch].pLoop-16 &&
                     pSpuIrq <= s_chan[ch].pLoop)))
                {
 		 //extern s32 spuirqvoodoo;
@@ -312,7 +314,7 @@ int SPUasync(u32 cycles)
 		 //}
                 }
               }
-      
+
              //////////////////////////////////////////// flag handler
 
              if((flags&4) && (!s_chan[ch].bIgnoreLoop))
@@ -334,7 +336,7 @@ int SPUasync(u32 cycles)
 
              s_chan[ch].pCurr=start;                   // store values for next cycle
              s_chan[ch].s_1=s_1;
-             s_chan[ch].s_2=s_2;      
+             s_chan[ch].s_2=s_2;
 
              ////////////////////////////////////////////
             }
@@ -373,11 +375,11 @@ int SPUasync(u32 cycles)
            // mmm... depending on the noise freq we allow bigger/smaller changes to the previous val
            fa=s_chan[ch].iOldNoise+((fa-s_chan[ch].iOldNoise)/((0x001f-((spuCtrl&0x3f00)>>9))+1));
            if(fa>32767L)  fa=32767L;
-           if(fa<-32767L) fa=-32767L;              
+           if(fa<-32767L) fa=-32767L;
            s_chan[ch].iOldNoise=fa;
 
           }                                            //----------------------------------------
-         else                                         // NO NOISE (NORMAL SAMPLE DATA) HERE 
+         else                                         // NO NOISE (NORMAL SAMPLE DATA) HERE
           {
              int vl, vr, gpos;
              vl = (s_chan[ch].spos >> 6) & ~3;
@@ -397,8 +399,8 @@ int SPUasync(u32 cycles)
 
            if(NP>0x3fff) NP=0x3fff;
            if(NP<0x1)    NP=0x1;
-                                                        
-	   // mmmm... if I do this, all is screwed              
+
+	   // mmmm... if I do this, all is screwed
 	  //           s_chan[ch+1].iRawPitch=NP;
 
            NP=(44100L*NP)/(4096L);                     // calc frequency
@@ -411,9 +413,9 @@ int SPUasync(u32 cycles)
 		// mmmm... set up freq decoding positions?
 		//           s_chan[ch+1].iSBPos=28;
 		//           s_chan[ch+1].spos=0x10000L;
-          }                    
+          }
          else
-          {                                          
+          {
            //////////////////////////////////////////////
            // ok, left/right sound volume (psx volume goes from 0 ... 0x3fff)
 	   int tmpl,tmpr;
@@ -436,10 +438,10 @@ int SPUasync(u32 cycles)
 	   }
           }
 
-         s_chan[ch].spos += s_chan[ch].sinc;             
- ENDX:   ;                                                      
+         s_chan[ch].spos += s_chan[ch].sinc;
+ ENDX:   ;
       }
-    }                                                         
+    }
 
   ///////////////////////////////////////////////////////
   // mix all channels (including reverb) into one buffer
@@ -451,7 +453,7 @@ int SPUasync(u32 cycles)
    if(decaybegin!=~0) // Is anyone REALLY going to be playing a song
 		      // for 13 hours?
    {
-    if(sampcount>=decayend) 
+    if(sampcount>=decayend)
     {
 //       	    ao_song_done = 1;
 	    return(0);
@@ -469,7 +471,7 @@ int SPUasync(u32 cycles)
   //{
   // static double asl=0;
   // static double asr=0;
-   
+
   // asl+=(sl-asl)/5;
   // asr+=(sl-asr)/5;
 
@@ -497,7 +499,7 @@ void SPU_flushboot(void)
     spu_update((u8*)pSpuBuffer,(u8*)pS-(u8*)pSpuBuffer);
     pS=(s16 *)pSpuBuffer;
    }
-}   
+}
 
 #ifdef TIMEO
 static u64 begintime;
@@ -520,7 +522,7 @@ static u64 gettime64(void)
 ////////////////////////////////////////////////////////////////////////
 // SPUINIT: this func will be called first by the main emu
 ////////////////////////////////////////////////////////////////////////
-              
+
 int SPUinit(void)
 {
  spuMemC=(u8*)spuMem;                      // just small setup
@@ -541,7 +543,7 @@ int SPUinit(void)
 ////////////////////////////////////////////////////////////////////////
 
 void SetupStreams(void)
-{ 
+{
  int i;
 
  pSpuBuffer=(u8*)malloc(32768);            // alloc mixing buffer
@@ -562,7 +564,7 @@ void SetupStreams(void)
 ////////////////////////////////////////////////////////////////////////
 
 void RemoveStreams(void)
-{ 
+{
  free(pSpuBuffer);                                     // free mixing buffer
  pSpuBuffer=NULL;
 
@@ -582,17 +584,17 @@ void RemoveStreams(void)
 ////////////////////////////////////////////////////////////////////////
 // SPUOPEN: called by main emu after init
 ////////////////////////////////////////////////////////////////////////
-   
+
 int SPUopen(void)
 {
  if(bSPUIsOpen) return 0;                              // security for some stupid main emus
- spuIrq=0;                       
+ spuIrq=0;
 
  spuStat=spuCtrl=0;
  spuAddr=0xffffffff;
  dwNoiseVal=1;
 
- spuMemC=(u8*)spuMem;      
+ spuMemC=(u8*)spuMem;
  memset((void *)s_chan,0,(MAXCHAN+1)*sizeof(SPUCHAN));
  pSpuIrq=0;
 

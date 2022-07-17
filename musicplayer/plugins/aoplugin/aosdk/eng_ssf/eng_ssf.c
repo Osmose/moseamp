@@ -74,6 +74,7 @@ Sega driver commands:
 #include "corlett.h"
 #include "sat_hw.h"
 #include "scsp.h"
+#include "m68k.h"
 
 #define DEBUG_LOADER	(0)
 
@@ -107,14 +108,14 @@ int32 ssf_start(uint8 *buffer, uint32 length)
 	#endif
 
 	// Get the library file, if any
-	for (i=0; i<9; i++) 
+	for (i=0; i<9; i++)
 	{
 		libfile = i ? c->libaux[i-1] : c->lib;
 		if (libfile[0] != 0)
 		{
 			uint64 tmp_length;
-	
-			#if DEBUG_LOADER	
+
+			#if DEBUG_LOADER
 			printf("Loading library: %s\n", c->lib);
 			#endif
 			if (ao_get_lib(libfile, &lib_raw_file, &tmp_length) != AO_SUCCESS)
@@ -122,13 +123,13 @@ int32 ssf_start(uint8 *buffer, uint32 length)
 				return AO_FAIL;
 			}
 			lib_raw_length = tmp_length;
-		
+
 			if (corlett_decode(lib_raw_file, lib_raw_length, &lib_decoded, &lib_len, &lib) != AO_SUCCESS)
 			{
 				free(lib_raw_file);
 				return AO_FAIL;
 			}
-				
+
 			// Free up raw file
 			free(lib_raw_file);
 
@@ -159,7 +160,7 @@ int32 ssf_start(uint8 *buffer, uint32 length)
 	memcpy(&sat_ram[offset], file+4, file_len-4);
 
 	free(file);
-	
+
 	// Finally, set psfby tag
 	strcpy(psfby, "n/a");
 	if (c)
@@ -220,7 +221,7 @@ int32 ssf_start(uint8 *buffer, uint32 length)
 }
 
 int32 ssf_gen(int16 *buffer, uint32 samples)
-{	
+{
 	int i;
 	int16 output[65536], output2[65536];
 	int16 *stereo[2];
@@ -234,7 +235,7 @@ int32 ssf_gen(int16 *buffer, uint32 samples)
 		stereo[0] = &output[opos];
 		stereo[1] = &output2[opos];
 		SCSP_Update(NULL, NULL, stereo, 1);
-		opos++;		
+		opos++;
 	}
 
 	for (i = 0; i < samples; i++)
@@ -281,7 +282,7 @@ int32 ssf_command(int32 command, int32 parameter)
 	{
 		case COMMAND_RESTART:
 			return AO_SUCCESS;
-		
+
 	}
 	return AO_FAIL;
 }
@@ -290,13 +291,13 @@ int32 ssf_fill_info(ao_display_info *info)
 {
 	if (c == NULL)
 		return AO_FAIL;
-		
+
 	strcpy(info->title[1], "Name: ");
 	sprintf(info->info[1], "%s", c->inf_title);
 
 	strcpy(info->title[2], "Game: ");
 	sprintf(info->info[2], "%s", c->inf_game);
-	
+
 	strcpy(info->title[3], "Artist: ");
 	sprintf(info->info[3], "%s", c->inf_artist);
 

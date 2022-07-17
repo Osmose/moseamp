@@ -8,6 +8,7 @@ module.exports = {
   },
   globals: {
     ResizeObserver: true,
+    Module: true,
   },
   settings: {
     'import/resolver': {
