@@ -1,4 +1,9 @@
 import { exec } from 'child_process';
+import path from 'path';
+import fs from 'fs';
+import m3u8 from 'm3u-file-parser';
+
+import { getTypeForExt } from 'moseamp/filetypes';
 
 export function formatDuration(duration) {
   if (duration === Infinity) {
@@ -43,4 +48,62 @@ export function asyncExec(command, options) {
       resolve({ error, stdout, stderr });
     });
   });
+}
+
+export async function getEntriesForPath(currentPath) {
+  let entries;
+
+  // Playlists vs directories
+  if (currentPath.endsWith('m3u')) {
+    const parser = m3u8.createStream();
+    const file = fs.createReadStream(currentPath);
+    const playlist = await new Promise((resolve, reject) => {
+      parser.on('m3u', (m3u) => {
+        resolve(m3u);
+      });
+      parser.on('error', (error) => {
+        console.error(error);
+        reject(error);
+      });
+      file.pipe(parser);
+    });
+
+    entries = [];
+    for (const item of playlist.items.PlaylistItem) {
+      const itemPath = path.resolve(currentPath, '..', item.get('uri'));
+
+      // Skip nonexistant paths
+      try {
+        await fs.promises.access(itemPath);
+      } catch (err) {
+        console.warn(err);
+        continue;
+      }
+
+      entries.push({
+        path: itemPath,
+        ext: path.extname(itemPath),
+        name: path.basename(itemPath),
+        playlistPath: currentPath,
+        type: 'file',
+      });
+    }
+  } else {
+    const dirEntries = await fs.promises.readdir(currentPath, { withFileTypes: true });
+    entries = dirEntries.map((dirEnt) => {
+      return {
+        path: path.join(currentPath, dirEnt.name),
+        ext: path.extname(dirEnt.name),
+        name: dirEnt.name,
+        playlistPath: currentPath,
+        type: dirEnt.isDirectory() ? 'directory' : 'file',
+      };
+    });
+  }
+
+  // Remove non-openable files and sort
+  entries = entries.filter((entry) => entry.type === 'directory' || entry.ext === '.m3u' || getTypeForExt(entry.ext));
+  entries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+  return entries;
 }

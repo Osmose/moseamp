@@ -1,7 +1,7 @@
 import path from 'path';
-import fs from 'fs';
 
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
+import { getEntriesForPath } from 'moseamp/utils';
 
 // == Actions
 
@@ -141,19 +141,8 @@ export function changePath(newPath) {
 export function loadEntries() {
   return async (dispatch, getState) => {
     const state = getState();
-
     const currentPath = getCurrentPath(state);
-    const dirEntries = await fs.promises.readdir(currentPath, { withFileTypes: true });
-    const entries = dirEntries.map((dirEnt) => {
-      return {
-        path: path.join(currentPath, dirEnt.name),
-        ext: path.extname(dirEnt.name),
-        name: dirEnt.name,
-        type: dirEnt.isDirectory() ? 'directory' : 'file',
-      };
-    });
-    entries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-
+    const entries = await getEntriesForPath(currentPath);
     dispatch({
       type: SET_ENTRIES,
       entries,

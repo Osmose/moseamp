@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { setPref, LOAD_PREFS } from 'moseamp/ducks/prefs';
 import player, { DEFAULT_GAIN } from 'moseamp/player';
 import { getTypeForExt } from 'moseamp/filetypes';
-import { parseDurationString } from 'moseamp/utils';
+import { parseDurationString, getEntriesForPath } from 'moseamp/utils';
 
 // == Actions
 
@@ -135,7 +135,14 @@ export default function reducer(state = defaultState(), action = {}) {
 
 // == Action Creators
 
-export function openFile(filePath) {
+/**
+ * Load and start playback of a music file
+ * @param filePath Path to file to play
+ * @param playlistPath
+ *   Path to the directory to use for building a playlist (e.g. if played from an m3u playlist,
+ *   the file path will differ from the path being viewed in the file browser).
+ */
+export function openFile(filePath, playlistPath) {
   return async (dispatch, getState) => {
     try {
       const meta = await player.load(filePath);
@@ -147,7 +154,11 @@ export function openFile(filePath) {
       const state = getState();
       const playlist = getPlaylist(state);
       if (!playlist.includes(filePath)) {
-        const newPlaylist = await getPlayablePaths(path.dirname(filePath), getShuffle(state));
+        // TODO: m3u playlists can make this fail
+        let newPlaylist = (await getEntriesForPath(playlistPath)).map((entry) => entry.path);
+        if (getShuffle(state)) {
+          newPlaylist = _.shuffle(newPlaylist);
+        }
         dispatch({
           type: SET_PLAYLIST,
           playlist: newPlaylist,

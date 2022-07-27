@@ -66,7 +66,7 @@ class FileBrowser extends React.Component {
     for (const entry of searchedEntries) {
       if (entry.type === 'directory') {
         directories.push(entry);
-      } else if (getTypeForExt(entry.ext)) {
+      } else {
         files.push(entry);
       }
     }
@@ -127,10 +127,10 @@ class FileBrowser extends React.Component {
 @autobind
 class Entry extends React.Component {
   handleClickEntry(entry) {
-    if (entry.type === 'directory') {
+    if (entry.type === 'directory' || entry.ext === '.m3u') {
       this.props.changePath(entry.path);
     } else {
-      this.props.openFile(entry.path);
+      this.props.openFile(entry.path, entry.playlistPath);
     }
   }
 
@@ -167,7 +167,7 @@ class EntryIcon extends React.Component {
 class FileIcon extends React.Component {
   render() {
     const { entry } = this.props;
-    if (entry.type === 'directory') {
+    if (entry.type === 'directory' || entry.ext === '.m3u') {
       return <FontAwesome code="folder-open" />;
     }
 
