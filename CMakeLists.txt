@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
+IF(APPLE)
+        SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
+ENDIF(APPLE)
+
 # Name of the project (will be the name of the plugin)
 project(musicplayer_node)
 
@@ -12,12 +16,12 @@ add_compile_definitions(_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
 add_definitions(-D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
 add_definitions(-DNAPI_DISABLE_CPP_EXCEPTIONS)
 
-
 set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/musicplayer/external/zlib ${CMAKE_BINARY_DIR}/musicplayer/external/zlib)
 add_subdirectory(musicplayer)
 
 # Build a shared library named after the project from the files in `src/`
 set(SOURCE_FILES "src/MusicPlayer.h" "src/MusicPlayer.cc" "src/index.cc")
+
 if(MSVC)
         message(STATUS "It's MSVC, enable win_delay_load_hook")
         set(node_host_binary node)
@@ -51,7 +55,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_JS_LIB} musix plugin_regist
 execute_process(COMMAND node -p "require('node-addon-api').include"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         OUTPUT_VARIABLE NODE_ADDON_API_DIR
-        )
+)
 string(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 string(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${NODE_ADDON_API_DIR})
