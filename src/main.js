@@ -1,4 +1,15 @@
-const { app, BrowserWindow, dialog, globalShortcut, Menu, shell, systemPreferences, ipcMain } = require('electron');
+/* global MAIN_WINDOW_WEBPACK_ENTRY */
+const {
+  app,
+  BrowserWindow,
+  dialog,
+  globalShortcut,
+  Menu,
+  shell,
+  systemPreferences,
+  ipcMain,
+  session,
+} = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const Store = require('electron-store');
 
@@ -32,7 +43,7 @@ function createWindow() {
   browserWindow.once('ready-to-show', () => {
     browserWindow.show();
   });
-  browserWindow.loadFile('build/index.html');
+  browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   browserWindow.on('closed', () => {
     browserWindow = null;
@@ -140,6 +151,19 @@ if (process.platform === 'darwin') {
 const menu = Menu.buildFromTemplate(template);
 
 app.on('ready', async () => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': ["default-src * self blob: data: gap: 'unsafe-inline' 'unsafe-eval';"],
+      },
+    });
+  });
+
+  ipcMain.on('get-app-path', (e) => {
+    e.returnValue = app.getAppPath();
+  });
+
   Menu.setApplicationMenu(menu);
   createWindow();
 

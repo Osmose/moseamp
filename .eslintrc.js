@@ -8,6 +8,7 @@ module.exports = {
   },
   globals: {
     ResizeObserver: true,
+    __non_webpack_require__: true,
   },
   settings: {
     'import/resolver': {

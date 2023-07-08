@@ -5,9 +5,10 @@ import EventEmitter from 'events';
 import * as musicMetadata from 'music-metadata';
 
 import { getTypeForExt } from 'moseamp/filetypes';
+import { fromAppPath } from 'moseamp/utils';
 
-import { loadPlugins, MusicPlayer } from 'musicplayer_node';
-loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
+const { loadPlugins, MusicPlayer } = __non_webpack_require__(fromAppPath('musicplayer_node'));
+loadPlugins(fromAppPath('musicplayer_data'));
 
 import musicPlayerWorkletCode from 'moseamp/musicPlayer.worklet.js';
 const musicPlayerWorkletBlob = new Blob([musicPlayerWorkletCode.toString()], { type: 'text/javascript' });
@@ -251,8 +252,8 @@ class MusicPlayerPlayer extends EventEmitter {
     this.ctx.musicPlayerWorkletNode.port.postMessage({
       type: 'open',
       filePath,
-      musicPlayerPath: path.resolve(__dirname, 'musicplayer_node'),
-      pluginPath: path.resolve(__dirname, 'musicplayer_data'),
+      musicPlayerPath: fromAppPath('musicplayer_node'),
+      pluginPath: fromAppPath('musicplayer_data'),
     });
     this.ctx.fadeOutNode.gain.value = 1.0;
 

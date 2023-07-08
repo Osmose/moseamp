@@ -1,3 +1,6 @@
+import 'moseamp/css/styles.css';
+import '@fortawesome/fontawesome-free/js/all';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';

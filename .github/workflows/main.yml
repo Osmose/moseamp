@@ -16,12 +16,11 @@ jobs:
           node-version: '16.x'
       - run: npm install
       - run: npm run compile
-      - run: npm run build:prod
-      - run: npm run package:macos
-      - uses: actions/upload-artifact@v1
+      - run: npm run make
+      - uses: actions/upload-artifact@v3
         with:
           name: MoseAmp.dmg
-          path: dist/MoseAmp.dmg
+          path: out/make/MoseAmp-*.dmg
 
   build-windows:
     name: Build and Package for Windows
@@ -33,12 +32,11 @@ jobs:
           node-version: '16.x'
       - run: npm install
       - run: npm run compile
-      - run: npm run build:prod
-      - run: npm run package:windows
-      - uses: actions/upload-artifact@v1
+      - run: npm run make
+      - uses: actions/upload-artifact@v3
         with:
           name: MoseAmp.zip
-          path: dist/MoseAmp.zip
+          path: out/make/zip/**/*.zip
 
   release:
     name: Release

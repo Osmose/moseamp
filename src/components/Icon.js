@@ -1,6 +1,7 @@
 import React from 'react';
 
 import FILE_TYPES from 'moseamp/filetypes';
+import { staticPath } from 'moseamp/utils';
 
 class Icon extends React.Component {
   render() {
@@ -10,8 +11,8 @@ class Icon extends React.Component {
     if (staticIcon?.type === 'image') {
       return (
         <img
-          src={`img/${staticIcon.id}_${size}.png`}
-          srcSet={`img/${staticIcon.id}_${size * 2}.png 2x`}
+          src={staticPath(`img/${staticIcon.id}_${size}.png`)}
+          srcSet={staticPath(`img/${staticIcon.id}_${size * 2}.png 2x`)}
           className={`image-icon ${className || ''}`}
           ref={innerRef}
           {...restProps}

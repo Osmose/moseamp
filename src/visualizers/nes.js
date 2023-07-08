@@ -3,11 +3,11 @@ import tmp from 'tmp';
 import fs from 'fs';
 import wav from 'wav';
 
-import { asyncExec } from 'moseamp/utils';
+import { asyncExec, fromAppPath } from 'moseamp/utils';
 import { DEFAULT_RENDERER_SETTINGS, ORIENTATION, FFMPEG_PRESETS } from 'moseamp/constants';
 
-import { loadPlugins, MusicPlayer } from 'musicplayer_node';
-loadPlugins(path.resolve(__dirname, 'musicplayer_data'));
+const { loadPlugins, MusicPlayer } = __non_webpack_require__(fromAppPath('musicplayer_node'));
+loadPlugins(fromAppPath('musicplayer_data'));
 
 const NES_SLICE_UNITS = 200;
 const LOG2_440 = 8.7813597135246596040696824762152;

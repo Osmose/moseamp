@@ -2,6 +2,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import m3u8 from 'm3u-file-parser';
+import { ipcRenderer } from 'electron';
 
 import { getTypeForExt } from 'moseamp/filetypes';
 
@@ -106,4 +107,18 @@ export async function getEntriesForPath(currentPath) {
   entries.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
   return entries;
+}
+
+const appPath = ipcRenderer.sendSync('get-app-path');
+
+export function fromAppPath(...args) {
+  return path.resolve(appPath, '.webpack/renderer', ...args);
+}
+
+export function staticPath(...args) {
+  if (process.env.NODE_ENV === 'production') {
+    return `file://${fromAppPath(...args)}`;
+  }
+
+  return args.join('/');
 }
