@@ -19,7 +19,7 @@ jobs:
       - run: npm run make
       - uses: actions/upload-artifact@v3
         with:
-          name: MoseAmp.dmg
+          name: MoseAmpMac
           path: out/make/MoseAmp-*.dmg
 
   build-windows:
@@ -35,7 +35,7 @@ jobs:
       - run: npm run make
       - uses: actions/upload-artifact@v3
         with:
-          name: MoseAmp.zip
+          name: MoseAmpZip
           path: out/make/zip/**/MoseAmp-*.zip
 
   release:
@@ -43,12 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-macos, build-windows]
     steps:
-      - uses: actions/download-artifact@v1
-        with:
-          name: MoseAmp.dmg
-      - uses: actions/download-artifact@v1
-        with:
-          name: MoseAmp.zip
+      - uses: actions/download-artifact@v3
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -57,5 +54,5 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            *.dmg
-            *.zip
+            MoseAmpMac/**/*.dmg
+            MoseAmpZip/**/*.zip
