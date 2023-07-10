@@ -12,6 +12,10 @@ const {
 } = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const Store = require('electron-store');
+const { setupTitlebar, attachTitlebarToWindow } = require('custom-electron-titlebar/main');
+const path = require('path');
+
+setupTitlebar();
 
 const store = new Store();
 let browserWindow = null;
@@ -38,6 +42,7 @@ function createWindow() {
       contextIsolation: false,
       enableRemoteModule: true,
       nodeIntegrationInWorker: true,
+      preload: path.resolve(app.getAppPath(), '.webpack/main/preload.js'),
     },
   });
   browserWindow.once('ready-to-show', () => {
@@ -51,6 +56,8 @@ function createWindow() {
 
   // Monitor window for size/position changes and save them
   mainWindowState.manage(browserWindow);
+
+  attachTitlebarToWindow(browserWindow);
 }
 
 const template = [

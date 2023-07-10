@@ -4,7 +4,7 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { ipcRenderer } from 'electron';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { getMode, MODE_FILEBROWSER, MODE_VISUALIZER, setMode, MODE_RENDERER } from 'moseamp/ducks/app';
 import {

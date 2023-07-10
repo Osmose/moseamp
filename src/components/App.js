@@ -2,7 +2,6 @@ import autobind from 'autobind-decorator';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ipcRenderer } from 'electron';
-import { Titlebar as CustomTitleBar, Color as TitleBarColor } from 'custom-electron-titlebar';
 import { ThemeProvider } from 'styled-components';
 
 import FileBrowser from 'moseamp/components/FileBrowser';
@@ -89,7 +88,6 @@ class App extends React.Component {
     return (
       <ThemeProvider theme={theme}>
         <div className="app">
-          <TitleBar />
           <div className="main-container">
             <Sidebar />
             {mode === MODE_FILEBROWSER && <FileBrowser />}
@@ -99,43 +97,6 @@ class App extends React.Component {
           <Player />
         </div>
       </ThemeProvider>
-    );
-  }
-}
-
-class TitleBar extends React.Component {
-  render() {
-    if (process.platform === 'darwin') {
-      return <MacTitleBar />;
-    }
-
-    return <WindowsTitleBar />;
-  }
-}
-
-class WindowsTitleBar extends React.Component {
-  componentDidMount() {
-    this.titlebar = new CustomTitleBar({
-      backgroundColor: TitleBarColor.fromHex('#404040'),
-      overflow: 'hidden',
-    });
-  }
-
-  componentWillUnmount() {
-    this.titlebar.dispose();
-  }
-
-  render() {
-    return null;
-  }
-}
-
-class MacTitleBar extends React.Component {
-  render() {
-    return (
-      <div className="title-bar">
-        <div className="title">MoseAmp</div>
-      </div>
     );
   }
 }

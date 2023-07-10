@@ -50,6 +50,10 @@ body {
   overflow: hidden;
 }
 
+.cet-container {
+  overflow: hidden !important;
+}
+
 #modals {
   position: absolute;
   top: 0;

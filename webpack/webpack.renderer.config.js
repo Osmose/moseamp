@@ -3,7 +3,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 function fromRoot(...args) {
-  return path.resolve(__dirname, '..', ...args);
+  return path.posix.join(path.resolve(__dirname, '..').replace(/\\/g, '/'), ...args);
 }
 
 module.exports = {
@@ -26,6 +26,7 @@ module.exports = {
           from: fromRoot('native_build/Release/musicplayer_node.node'),
           to: fromRoot('.webpack/renderer/musicplayer_node.node'),
         },
+        { from: fromRoot('src/preload.js'), to: fromRoot('.webpack/main/preload.js') },
       ],
     }),
   ],
