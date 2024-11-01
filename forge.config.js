@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 module.exports = {
   packagerConfig: {
@@ -60,4 +61,16 @@ module.exports = {
       },
     },
   ],
+  hooks: {
+    async postMake(forgeConfig, makeResults) {
+      if (process.env.CI) {
+        for (const result of makeResults) {
+          for (const artifact of result.artifacts) {
+            const { dir, ext } = path.parse(artifact);
+            fs.renameSync(artifact, path.join(dir, `MoseAmp${ext}`));
+          }
+        }
+      }
+    },
+  },
 };
